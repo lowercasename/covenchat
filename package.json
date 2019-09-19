@@ -1,0 +1,33 @@
+{
+  "name": "covenchat",
+  "version": "0.0.1",
+  "description": "A chat app and spellcasting dashboard for witches",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend": "cd frontend && npm start && cd -",
+    "backend": "nodemon backend/index.js",
+    "start": "npm run backend & npm run frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lowercasename/covenchat.git"
+  },
+  "author": "Raphael Kabo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lowercasename/covenchat/issues"
+  },
+  "homepage": "https://github.com/lowercasename/covenchat#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.7.1",
+    "pusher": "^2.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.2"
+  }
+}

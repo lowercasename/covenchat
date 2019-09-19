@@ -1,0 +1,134 @@
+@import-normalize;
+@import url('https://fonts.googleapis.com/css?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Cousine&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+:root {
+  --background-color: #283149;
+  --foreground-color: #404b69;
+  /* --highlight-color: #0aa590; */
+  --highlight-color: #11dfc3;
+  --text-color: #fcfcfc;
+}
+
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Righteous", sans-serif;
+  color: var(--highlight-color);
+  text-transform: uppercase;
+}
+
+.App {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.mainRow {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+
+.sideNav {
+  width: 80px;
+  height: 100%;
+  padding-top: 10px;
+  background: var(--background-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  /* box-shadow: 0 0 20px rgba(0,0,0,0.4); */
+  z-index: 1000;
+  border-right: 2px solid #252a39;
+}
+
+.navLogo {
+  height: 60px;
+  width: 60px;
+  background: #c6ecda;
+  border-radius: 50%;
+  padding: 5px;
+  border: 3px solid #0e9d8d;
+  transition: all 150ms ease-in;
+  cursor: pointer;
+}
+
+.navIcon {
+    color: var(--background-color);
+    height: 60px;
+    width: 60px;
+    background: #c6ecda;
+    border: 3px solid #0e9d8d;
+    transition: all 150ms ease-in;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    border-radius: 50%;
+    margin-top: 1rem;
+}
+
+.navLogo:hover, .navIcon:hover {
+  background: #3fffa5;
+}
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.statusBar {
+  background: var(--foreground-color);
+  border-top: 2px solid #252a39;
+  height: 40px;
+  padding: 10px;
+  font-weight: 300;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.statusBar .statusItem {
+    padding: 0 10px;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+}
+
+.statusBar .statusItem:not(:last-child) {
+    border-right: 1px solid rgb(252,252,252,0.2);
+}
