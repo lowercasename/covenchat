@@ -19,10 +19,20 @@ db.once('open', function() {
 });
 Geolocation = require('./models/geolocation');
 Message = require('./models/message');
+Room = require('./models/room');
 
 // ROUTER
 const router = require('./router');
 app.use(router);
+
+// var globalCoven = new Room({
+//   name: 'Global Coven',
+//   description: '🌙🔮 All are welcome and none are refused entry to the Global Coven! 🔮🌙',
+//   lastUpdated: new Date(),
+//   public: true
+// })
+
+// globalCoven.save().then(result => console.log(result))
 
 // SERVER
 const port = process.env.PORT;

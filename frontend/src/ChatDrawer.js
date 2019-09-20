@@ -5,12 +5,26 @@ import './ChatDrawer.css';
 
 class MessageList extends Component {
     render() {
+        function displayTimestamp(timestamp) {
+            function addZero(i) {
+                if (i < 10) {
+                    i = "0" + i;
+                }
+                return i;
+            }
+
+            var dateObject = new Date(timestamp);
+            return addZero(dateObject.getHours()) + ":" + addZero(dateObject.getMinutes());
+        }
         return (
             <div className="chatWindow" id="chatWindow">
                 <ul className="messageList">
                     {this.props.messages.map(message => {
                         return (
                             <li key={message._id} className={message.type}>
+                                <span className="messageTimestamp">
+                                    {displayTimestamp(message.timestamp)}
+                                </span>
                                 <span className="messageAuthor">
                                     {message.userID}
                                 </span>
@@ -26,26 +40,133 @@ class MessageList extends Component {
     }
 }
 
+const Modal = ({ handleClose, show, children }) => {
+    var showHideClassName = show ? "modal display-block" : "modal display-none";
+  
+    return (
+      <div className={showHideClassName}>
+        <section className="modal-main">
+            <button className="modalClose" onClick={handleClose}><FontAwesomeIcon icon="times" /></button>
+            {children}
+        </section>
+      </div>
+    );
+};
+
+class RoomList extends Component {
+    constructor() {
+        super()
+        this.state = {
+            modalVisible: false
+        }
+        this.createRoom = this.createRoom.bind(this)
+    }
+
+    createRoom() {
+
+    }
+
+    showModal = () => {
+        this.setState({ modalVisible: true });
+    };
+
+    hideModal = () => {
+        this.setState({ modalVisible: false });
+    };
+
+    render() {
+        return (
+            <nav class="roomList">
+                <header>
+                    <h2><FontAwesomeIcon icon="moon"/> Your Covens </h2>
+                    <button
+                        onClick={this.showModal}
+                        className="small"
+                    >
+                        <FontAwesomeIcon icon="plus"/>
+                    </button>
+                    <Modal show={this.state.modalVisible} handleClose={this.hideModal}>
+                        <h1>New Coven</h1>
+                        <form>
+                            <input className="full-width" name="roomName" placeholder="Coven name"></input>
+                            <textarea className="full-width" name="roomDescription" placeholder="Coven description and rules"></textarea>
+                            <div class="radioBoxContainer">
+                                <label>
+                                    <input type="radio" name="privacyRadio" checked />
+                                    <div class="radioBox">
+                                        <span>
+                                            <strong>Public</strong><br/>
+                                            <small>Anyone can join a public Coven.</small>
+                                        </span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="privacyRadio" />
+                                    <div class="radioBox">
+                                        <span>
+                                            <strong>Private</strong><br/>
+                                            <small>An invite code is needed to join a private Coven.</small>
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                            <button type="submit" className="full-width">Create Coven</button>
+                        </form>
+                    </Modal>
+                </header>
+                <ul>
+                    {this.props.joinedRooms.map(room => {
+                        return (
+                            <li key={room._id}>
+                                {room.name}
+                            </li>
+                        )
+                    })}
+                </ul>
+                <h2><FontAwesomeIcon icon="moon"/> Public Covens</h2>
+                <ul>
+                    {this.props.publicRooms.map(room => {
+                        return (
+                            <li key={room._id}>
+                                {room.name}
+                            </li>
+                        )
+                    })}
+                </ul>
+            </nav>
+        )
+    }
+}
+
 class ChatDrawer extends Component {
     constructor() {
         super()
         this.state = {
             messages: [],
             message: '',
-            room: 'global'
+            room: 'global',
+            modalVisible: false,
+            currentRoom: {name:'Global Coven', _id:'5d84f64bdce5ba3ff960d399'},
+            joinedRooms: [],
+            publicRooms: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.createRoom = this.createRoom.bind(this)
     }
 
     componentDidMount() {
-        fetch('/api/chat/room/fetch/' + this.state.room)
-            .then(res => res.json())
-            .then(payload => {
-                this.setState({ messages: payload });
-                this.scrollToBottom();
-            });
+        fetch('/api/chat/room/fetch/' + this.state.currentRoom._id)
+        .then(res => res.json())
+        .then(payload => {
+            this.setState({ messages: payload });
+            this.scrollToBottom();
+        });
+
+        fetch('/api/chat/room/fetch-all/')
+        .then(res => res.json())
+        .then(payload => {
+            this.setState({ joinedRooms: payload });
+        });
 
         var pusher = new Pusher('7155c345db324b8f1ba5', {
             cluster: 'eu',
@@ -72,51 +193,59 @@ class ChatDrawer extends Component {
     handleSubmit(e) {
         e.preventDefault()
         var messageContent = this.state.message.trim();
-        if (messageContent != '' && messageContent != '/me'){
-            this.props.sendMessage(messageContent)
+        if (messageContent != '' && messageContent != '/me') {
+            this.sendMessage(messageContent)
             this.setState({
                 message: ''
             })
         }
     }
 
-    createRoom() {
-        
-    }
-  
-
     handleChange(e) {
         this.setState({
-          message: e.target.value
+            message: e.target.value
         })
-      }
+    }
+
+    sendMessage(text) {
+        fetch('/api/chat/message/new', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: text,
+                userID: 'lowercasename',
+                room: this.state.currentRoom._id
+            })
+        })
+    }
 
     render() {
-        var style = this.props.isVisible ? {right: '0px'} : {right: '-400px'};
+        var style = this.props.isVisible ? {right: '0px'} : {right: '-600px'};
         return (
             <aside className="chatDrawer" style={style}>
-                <div class="roomTitle">
-                    Chatting in @global
-                    <button
-                        onClick={this.createRoom}
+                <RoomList
+                    joinedRooms={this.state.joinedRooms}
+                    publicRooms={this.state.publicRooms}
+                />
+                <main class="chatInterface">
+                    <MessageList messages={this.state.messages} />
+                    <form
+                        className="chatForm"
+                        onSubmit={this.handleSubmit}
                     >
-                        New
-                    </button>
-                </div>
-                <MessageList messages={this.state.messages} />
-                <form
-                    className="chatForm"
-                    onSubmit={this.handleSubmit}
-                >
-                    <input
-                        id="message"
-                        autocomplete="off"
-                        placeholder="Message @global"
-                        onChange={this.handleChange}
-                        value={this.state.message}
-                    />
-                    <button><FontAwesomeIcon icon="chevron-right" /></button>
-                </form>
+                        <input
+                            id="message"
+                            autocomplete="off"
+                            placeholder={"Message " + this.state.currentRoom.name}
+                            onChange={this.handleChange}
+                            value={this.state.message}
+                        />
+                        <button><FontAwesomeIcon icon="chevron-right"/></button>
+                    </form>
+                </main>
             </aside>
         );
     }

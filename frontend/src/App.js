@@ -3,20 +3,21 @@ import './App.css';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands } from '@fortawesome/free-solid-svg-icons';
 import { faComments } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import StatusBar from './StatusBar';
 import ChatDrawer from './ChatDrawer';
 
-library.add(faComments, faChevronRight)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands)
 
 class App extends Component {
     constructor() {
         super();
         this.state = {
-            chatVisible: true
+            chatVisible: true,
+
         }
         this.toggleChat = this.toggleChat.bind(this);
     }
@@ -25,21 +26,6 @@ class App extends Component {
         // fetch('/api/users')
         //   .then(res => res.json())
         //   .then(users => this.setState({ users }));
-    }
-
-    sendMessage(text) {
-        fetch('/api/chat/message/new', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                content: text,
-                userID: 'foo',
-                room: 'global'
-            })
-        })
     }
 
     toggleChat() {
@@ -61,6 +47,11 @@ class App extends Component {
                     >
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
+                    <div
+                        className="navIcon"
+                    >
+                        <FontAwesomeIcon icon="praying-hands" />
+                    </div>
                 </nav>
                 <main className="content">
                     <div id="map"></div>
@@ -70,7 +61,6 @@ class App extends Component {
                     <StatusBar />
                 </main>
                 <ChatDrawer
-                    sendMessage={this.sendMessage}
                     isVisible={this.state.chatVisible}
                 />
             </div>

@@ -75,6 +75,13 @@ router.post('/api/chat/message/new', function(req,res) {
 	})
 });
 
+router.get('/api/chat/room/fetch-all', function(req,res) {
+	var rooms = Room.find()
+	.then(rooms => {
+		res.json(rooms);
+	})
+});
+
 router.get('/api/chat/room/fetch/:room', function(req,res) {
 	var messages = Message.find({
 		room: req.params.room

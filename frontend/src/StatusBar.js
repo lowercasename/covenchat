@@ -9,7 +9,10 @@ class StatusBar extends Component {
     componentDidMount() {
         fetch('https://mercuryretrogradeapi.com/')
           .then(res => res.json())
-          .then(mercuryRetrograde => this.setState({ mercuryRetrograde }));
+          .then(result => {
+            console.log(result);
+            this.setState({ mercuryRetrograde: result.is_retrograde })
+          });
     }
 
     getMoonPhase(today) {
@@ -117,13 +120,13 @@ class StatusBar extends Component {
     getFestival(today) {
         var festivals = [
             { name: 'Imbolc', date: new Date(today.getFullYear(), 1, 2) },
-            { name: 'Ostara', date: new Date(today.getFullYear(), 2, 19) },
+            { name: 'Ostara', date: new Date(today.getFullYear(), 2, 21) },
             { name: 'Beltane', date: new Date(today.getFullYear(), 4, 1) },
-            { name: 'Litha', date: new Date(today.getFullYear(), 5, 19) },
+            { name: 'Litha', date: new Date(today.getFullYear(), 5, 21) },
             { name: 'Lughnasadh', date: new Date(today.getFullYear(), 7, 1) },
             { name: 'Mabon', date: new Date(today.getFullYear(), 8, 21) },
-            { name: 'Samhain', date: new Date(today.getFullYear(), 10, 1) },
-            { name: 'Yule', date: new Date(today.getFullYear(), 11, 20) }
+            { name: 'Samhain', date: new Date(today.getFullYear(), 9, 31) },
+            { name: 'Yule', date: new Date(today.getFullYear(), 11, 21) }
         ];
 
         var nextFestival = festivals.filter(function(f) {
@@ -138,7 +141,7 @@ class StatusBar extends Component {
     render() {
         var today = new Date();
         let mercuryMessage;
-        if (this.state.mercuryRetrograde) {
+        if (this.state.mercuryRetrograde == false) {
             mercuryMessage = "☿ Mercury not retrograde";
         } else {
             mercuryMessage = "☿ Mercury is retrograde";
