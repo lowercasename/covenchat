@@ -7,9 +7,13 @@
     "@fortawesome/free-regular-svg-icons": "^5.11.1",
     "@fortawesome/free-solid-svg-icons": "^5.11.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
+    "directory-tree": "^2.2.4",
+    "js-cookie": "^2.2.1",
     "pusher-js": "^5.0.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-popper-tooltip": "^2.8.3",
+    "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1"
   },
   "scripts": {

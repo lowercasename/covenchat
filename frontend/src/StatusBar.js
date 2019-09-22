@@ -89,7 +89,7 @@ class StatusBar extends Component {
 
         var month = today.getMonth()+1;
         var day = today.getDate();
-      
+
         if((month == 1 && day <= 19) || (month == 12 && day >=22)) {
           return zodiacSigns.capricorn;
         } else if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) {
@@ -129,12 +129,18 @@ class StatusBar extends Component {
             { name: 'Yule', date: new Date(today.getFullYear(), 11, 21) }
         ];
 
-        var nextFestival = festivals.filter(function(f) {
-            return f.date - today > 0;
-        }).slice(0,1);
-        var one_day=1000*60*60*24;
-        var daysUntil = Math.ceil((nextFestival[0].date.getTime()-today.getTime())/(one_day));
-        var message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', { month: 'long' }) + ")";
+        var festivalIsToday = festivals.find(e => e.date.getMonth() === today.getMonth() && e.date.getDate() === today.getDate());
+
+        if (festivalIsToday) {
+            var message = "Happy " + festivalIsToday.name + "! " + " (" + festivalIsToday.date.getDate() + " " + festivalIsToday.date.toLocaleString('default', { month: 'long' }) + ")";
+        } else {
+            var nextFestival = festivals.filter(function(f) {
+                return f.date - today > 0;
+            }).slice(0,1);
+            var one_day=1000*60*60*24;
+            var daysUntil = Math.ceil((nextFestival[0].date.getTime()-today.getTime())/(one_day));
+            var message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', { month: 'long' }) + ")";
+        }
         return message;
     }
 

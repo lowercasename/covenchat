@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 const Pusher = require('pusher');
+const parser = require('./parser');
+const jwt = require('jsonwebtoken');
+const secret = process.env.SECRET;
+const authorizeUser = require('./authorizer');
 
 // WEBSOCKETS
 const pusher = new Pusher({
@@ -11,14 +16,106 @@ const pusher = new Pusher({
 	useTLS: true
 });
 
-router.get('/api/users', function(req, res, next) {
-	res.json([{
-		id: 1,
-		username: "Acid Burn"
-	}, {
-		id: 2,
-		username: "Crash Override"
-	}]);
+// router.get('/api/user/verify', function(req, res) {
+// 	console.log("Verifying user!");
+// 	console.log(req.user)
+// 	if(req.user) {
+// 		return res.status(200).json({
+// 			user: req.user,
+// 			isAuthenticated: true
+// 		});
+// 	} else {
+// 		return res.status(401).json({
+// 			error: 'User is not authenticated',
+// 			isAuthenticated: false
+// 		});
+// 	}
+// });
+
+router.post('/api/user/authenticate', function(req, res) {
+	console.log("Authenticating user!");
+	const { email, password } = req.body;
+	User.findOne({ email }, function(err, user) {
+		if (err) {
+			console.error(err);
+			res.status(500)
+			.json({
+				error: 'Internal error! Please try again'
+			});
+		} else if (!user) {
+			console.error('Incorrect email or password');
+			res.status(401)
+			.json({
+				error: 'Incorrect email or password'
+			});
+		} else {
+			user.isCorrectPassword(password, function(err, same) {
+				if (err) {
+					console.error('Internal error! Please try again');
+					res.status(500)
+					.json({
+						error: 'Internal error! Please try again'
+					});
+				} else if (!same) {
+					console.error('Incorrect email or password (but user exists)');
+					res.status(401)
+					.json({
+						error: 'Incorrect email or password'
+					});
+				} else {
+					console.log("Creating cookie!")
+					// Issue token
+					const payload = { user };
+					const token = jwt.sign(payload, secret, {
+						expiresIn: '1h'
+					});
+					res.cookie('token', token, { httpOnly: true })
+					.sendStatus(200);
+				}
+			});
+		}
+	});
+});
+
+router.get('/api/user/verify', authorizeUser, function(req, res) {
+	res.json({
+		user: req.user
+	});
+});
+
+router.post('/api/user/logout', authorizeUser, function(req, res) {
+	res.clearCookie('token').sendStatus(200);
+});
+
+
+router.post('/api/user/register', async function(req, res) {
+	const { username, email, password } = req.body;
+	usernameTaken = User.findOne({
+		username: username
+	})
+	emailExists = User.findOne({
+		email: email
+	})
+	if (await usernameTaken) {
+		res.status(500)
+		.json({message: "Sorry, this username is taken."});
+	} else if (await emailExists) {
+		res.status(500)
+		.json({message: "An account with this email already exists. Is it yours?"});
+	} else {
+		const user = new User({ username, email, password });
+		user.save()
+		.then(response => {
+			console.log("Successfully registered!")
+			res.status(200)
+			.json({success: true})
+		})
+		.catch(error => {
+			console.log(err)
+			res.status(500)
+			.json({message: "Error registering new user! Please try again."});
+		});
+	}
 });
 
 router.post('/pusher/auth', function(req, res) {
@@ -53,25 +150,27 @@ router.post('/api/geolocation/update', function(req,res) {
 	})
 });
 
-router.post('/api/chat/message/new', function(req,res) {
-	if (req.body.content.startsWith('/me ')) {
-		var messageType = 'action'
-		var messageContent = req.body.content.replace('/me ','');
-	} else {
-		var messageType = 'message';
-		var messageContent = req.body.content;
-	}
-
+router.post('/api/chat/message/new', async function(req,res) {
+	console.log("Saving message: ",req.body.content)
+	var parsedMessage = parser(req.body.content);
+	if (!parsedMessage.isValid)
+	return false;
 	var message = new Message({
-		userID: req.body.userID,
+		user: req.body.userID,
 		timestamp: new Date(),
-		type: messageType,
+		type: parsedMessage.type,
 		room: req.body.room,
-		content: messageContent
-	})
+		content: parsedMessage.content,
+		tarot: parsedMessage.tarot,
+		runes: parsedMessage.runes
+	});
 	message.save()
 	.then(message => {
-		pusher.trigger('messages', 'message-sent', message, req.body.socketId)
+		var savedMessage = Message.findById(message._id)
+		.populate('user')
+		.then(retrievedMessage => {
+			pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
+		})
 	})
 });
 
@@ -86,8 +185,8 @@ router.get('/api/chat/room/fetch/:room', function(req,res) {
 	var messages = Message.find({
 		room: req.params.room
 	})
+	.populate('user')
 	.then(messages => {
-		console.log(messages)
 		res.json(messages);
 	})
 });

@@ -26,11 +26,39 @@ class MessageList extends Component {
                                     {displayTimestamp(message.timestamp)}
                                 </span>
                                 <span className="messageAuthor">
-                                    {message.userID}
+                                    {message.user.username}
                                 </span>
                                 <span className="messageContent">
                                     {message.content}
                                 </span>
+                                { message.type === "tarot" && (
+                                    <div className="spread">
+                                        {message.tarot.map(card => {
+                                            return (
+                                                <img
+                                                    className="tarotCard"
+                                                    src={card.image}
+                                                    alt={card.name}
+                                                    title={card.name}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                                { message.type === "runes" && (
+                                    <div className="spread">
+                                        {message.runes.map(rune => {
+                                            return (
+                                                <img
+                                                    className="runestone"
+                                                    src={rune.image}
+                                                    alt={rune.name}
+                                                    title={rune.name}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                )}
                             </li>
                         )
                     })}
@@ -42,7 +70,7 @@ class MessageList extends Component {
 
 const Modal = ({ handleClose, show, children }) => {
     var showHideClassName = show ? "modal display-block" : "modal display-none";
-  
+
     return (
       <div className={showHideClassName}>
         <section className="modal-main">
@@ -76,7 +104,7 @@ class RoomList extends Component {
 
     render() {
         return (
-            <nav class="roomList">
+            <nav className="roomList">
                 <header>
                     <h2><FontAwesomeIcon icon="moon"/> Your Covens </h2>
                     <button
@@ -90,10 +118,10 @@ class RoomList extends Component {
                         <form>
                             <input className="full-width" name="roomName" placeholder="Coven name"></input>
                             <textarea className="full-width" name="roomDescription" placeholder="Coven description and rules"></textarea>
-                            <div class="radioBoxContainer">
+                            <div className="radioBoxContainer">
                                 <label>
-                                    <input type="radio" name="privacyRadio" checked />
-                                    <div class="radioBox">
+                                    <input type="radio" name="privacyRadio" defaultChecked />
+                                    <div className="radioBox">
                                         <span>
                                             <strong>Public</strong><br/>
                                             <small>Anyone can join a public Coven.</small>
@@ -102,7 +130,7 @@ class RoomList extends Component {
                                 </label>
                                 <label>
                                     <input type="radio" name="privacyRadio" />
-                                    <div class="radioBox">
+                                    <div className="radioBox">
                                         <span>
                                             <strong>Private</strong><br/>
                                             <small>An invite code is needed to join a private Coven.</small>
@@ -216,10 +244,11 @@ class ChatDrawer extends Component {
             },
             body: JSON.stringify({
                 content: text,
-                userID: 'lowercasename',
+                userID: this.props.user._id,
                 room: this.state.currentRoom._id
             })
         })
+        .catch(err => console.error(err))
     }
 
     render() {
@@ -230,7 +259,7 @@ class ChatDrawer extends Component {
                     joinedRooms={this.state.joinedRooms}
                     publicRooms={this.state.publicRooms}
                 />
-                <main class="chatInterface">
+                <main className="chatInterface">
                     <MessageList messages={this.state.messages} />
                     <form
                         className="chatForm"
@@ -238,7 +267,7 @@ class ChatDrawer extends Component {
                     >
                         <input
                             id="message"
-                            autocomplete="off"
+                            autoComplete="off"
                             placeholder={"Message " + this.state.currentRoom.name}
                             onChange={this.handleChange}
                             value={this.state.message}
