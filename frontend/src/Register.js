@@ -49,9 +49,9 @@ export default class Register extends Component {
             }} />;
         }
         return (
-            <form onSubmit={this.onSubmit}>
-                <h1>Register</h1>
-                <p>{this.state.message}</p>
+            <form onSubmit={this.onSubmit} className="publicForm">
+                <h1>Create an account</h1>
+                {this.state.message && <div className="formMessage">{this.state.message}</div>}
                 <input
                     type="email"
                     name="email"

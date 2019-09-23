@@ -6,8 +6,9 @@ export default class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            email : '',
-            password: ''
+            username : '',
+            password: '',
+            message: this.props.location.state
         };
     }
     handleInputChange = (event) => {
@@ -25,36 +26,36 @@ export default class Login extends Component {
                 'Content-Type': 'application/json'
             }
         })
+        .then(res => res.json())
         .then(res => {
-            if (res.status === 200) {
-                this.props.history.push('/dashboard');
+            if (res.message) {
+                this.setState({message: res.message})
             } else {
-                const error = new Error(res.error);
-                throw error;
+                this.props.history.push('/dashboard');
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Error logging in! Please try again');
+            this.setState({ message: 'Error logging in! Please try again.' });
         });
     }
     render() {
         return (
-            <form onSubmit={this.onSubmit}>
-                <h1>Log in</h1>
-                <p>{this.props.location.state}</p>
+            <form onSubmit={this.onSubmit} className="publicForm">
+                <h1>Let's chat!</h1>
+                {this.state.message && <div className="formMessage">{this.state.message}</div>}
                 <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter email"
-                    value={this.state.email}
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={this.state.username}
                     onChange={this.handleInputChange}
                     required
                 />
                 <input
                     type="password"
                     name="password"
-                    placeholder="Enter password"
+                    placeholder="Password"
                     value={this.state.password}
                     onChange={this.handleInputChange}
                     required

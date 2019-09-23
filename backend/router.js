@@ -34,19 +34,19 @@ const pusher = new Pusher({
 
 router.post('/api/user/authenticate', function(req, res) {
 	console.log("Authenticating user!");
-	const { email, password } = req.body;
-	User.findOne({ email }, function(err, user) {
+	const { username, password } = req.body;
+	User.findOne({ username }, function(err, user) {
 		if (err) {
 			console.error(err);
 			res.status(500)
 			.json({
-				error: 'Internal error! Please try again'
+				message: 'Internal error! Please try again.'
 			});
 		} else if (!user) {
-			console.error('Incorrect email or password');
+			console.error('Incorrect username or password');
 			res.status(401)
 			.json({
-				error: 'Incorrect email or password'
+				message: 'Incorrect username or password.'
 			});
 		} else {
 			user.isCorrectPassword(password, function(err, same) {
@@ -54,23 +54,24 @@ router.post('/api/user/authenticate', function(req, res) {
 					console.error('Internal error! Please try again');
 					res.status(500)
 					.json({
-						error: 'Internal error! Please try again'
+						message: 'Internal error! Please try again.'
 					});
 				} else if (!same) {
-					console.error('Incorrect email or password (but user exists)');
+					console.error('Incorrect username or password (but user exists)');
 					res.status(401)
 					.json({
-						error: 'Incorrect email or password'
+						message: 'Incorrect username or password.'
 					});
 				} else {
 					console.log("Creating cookie!")
 					// Issue token
 					const payload = { user };
 					const token = jwt.sign(payload, secret, {
-						expiresIn: '1h'
+						expiresIn: '1d'
 					});
 					res.cookie('token', token, { httpOnly: true })
-					.sendStatus(200);
+					.status(200)
+					.json({success: true})
 				}
 			});
 		}
@@ -202,5 +203,13 @@ router.post('/api/chat/room/create', function(req,res) {
 		pusher.trigger('rooms', 'room-created', message, req.body.socketId)
 	})
 });
+
+router.get('/*', function(req,res) {
+	res.sendFile(path.join(__dirname, '/var/www/coven.chat/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  })
+})
 
 module.exports = router;

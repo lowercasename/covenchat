@@ -116,7 +116,7 @@
 
 .messageAuthor {
     font-weight: 700;
-    padding-right: 8px;
+    padding-right: 5px;
     /* color: var(--green); */
     user-select: text;
 }

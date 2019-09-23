@@ -50,7 +50,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // DATABASE
-mongoose.connect('mongodb://localhost/covenchat', {useNewUrlParser: true, useUnifiedTopology: true});
+const configDatabase = require('./database.js');
+mongoose.connect(configDatabase.url, {useNewUrlParser: true, useUnifiedTopology: true});
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {

@@ -61,7 +61,7 @@ class Dashboard extends Component {
         return (
             <div className="App">
                 <nav className="sideNav">
-                    <img src="magic-ball.svg" className="navLogo" />
+                    <img src="magic-ball-alt.svg" className="navLogo" />
                     <div className="navIcon" onClick={this.toggleChat}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
