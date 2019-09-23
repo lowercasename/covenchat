@@ -17,8 +17,10 @@ body {
 
 :root {
   --black: #252a39;
-  --dark-purple: #283149;
-  --purple: #404b69;
+  /* --dark-purple: #283149; */
+  /* --purple: #404b69; */
+  --dark-purple: #441151;
+  --purple: #67316d;
   --green: #35c7b3;
   --bright-green: #00ffc8;
   --white: #fcfcfc;
@@ -117,6 +119,10 @@ button.small {
     margin-right: 10px;
 }
 
+.topNav a {
+  text-decoration: none;
+}
+
 .topNavLink {
     color: var(--white);
     text-decoration: none;
@@ -190,11 +196,11 @@ button.small {
 .navLogo {
   height: 60px;
   width: 60px;
-  background: #c6ecda;
+  /* background: #c6ecda;
   border-radius: 50%;
   padding: 5px;
   border: 3px solid var(--green);
-  transition: all 150ms ease-in;
+  transition: all 150ms ease-in; */
   cursor: pointer;
 }
 
@@ -214,7 +220,16 @@ button.small {
     margin-top: 1rem;
 }
 
-.navLogo:hover, .navIcon:hover {
+.navIcon.active {
+  position: relative;
+  border-radius: 50% 0 0 50%;
+  border-right: 0;
+  left: 5px;
+  width: 70px;
+  padding-right: 13px;
+}
+
+.navIcon:hover {
   background: var(--bright-green);
 }
 
@@ -231,7 +246,7 @@ button.small {
 }
 
 .statusBar {
-  background: var(--purple);
+  background: var(--dark-purple);
   border-top: 2px solid var(--black);
   height: 40px;
   padding: 10px;
@@ -359,8 +374,35 @@ button.small {
 .publicForm > input {
     width: 100%;
     margin-bottom: 1rem;
-    border: 1px solid var(--green);
+    border: none;
+    background: rgba(0,0,0,0.25);
+    transition: 150ms;
 }
+
+.publicForm > input:focus {
+  background: rgba(0,0,0,0.35);
+}
+
+.publicForm > input[type="submit"] {
+  cursor: pointer;
+  background: var(--green);
+  color: var(--dark-purple);
+}
+
+.publicForm > input[type="submit"]:hover {
+  background: var(--bright-green);
+  color: var(--dark-purple);
+}
+
+.publicForm label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
 
 .formMessage {
     width: 100%;

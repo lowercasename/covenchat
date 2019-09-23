@@ -7,17 +7,18 @@ import ChatDrawer from './ChatDrawer';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { faComments } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle)
 
 class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
             chatVisible: true,
+            mapVisible: false,
             user: this.props.user
         }
         this.toggleChat = this.toggleChat.bind(this);
@@ -33,9 +34,9 @@ class Dashboard extends Component {
 
     toggleChat() {
         if (this.state.chatVisible) {
-            this.setState({chatVisible: false})
+            this.setState({chatVisible: false, mapVisible: true})
         } else {
-            this.setState({chatVisible: true})
+            this.setState({chatVisible: true, mapVisible: false})
         }
     }
 
@@ -58,6 +59,7 @@ class Dashboard extends Component {
     }
 
     render() {
+        let mapStyle = this.state.mapVisible ? {display:'flex'} : {display: 'none'};
         return (
             <div className="App">
                 <nav className="sideNav">
@@ -73,13 +75,13 @@ class Dashboard extends Component {
                     </div>
                 </nav>
                 <main className="content">
-                    <div id="map"></div>
+                    <div id="map" style={mapStyle}><h1>Map</h1></div>
+                    <ChatDrawer
+                        isVisible={this.state.chatVisible}
+                        user={this.state.user}
+                    />
                     <StatusBar />
                 </main>
-                <ChatDrawer
-                    isVisible={this.state.chatVisible}
-                    user={this.state.user}
-                />
             </div>
         );
     }

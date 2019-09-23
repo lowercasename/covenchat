@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import 'simplebar';
+import 'simplebar/dist/simplebar.css';
 import Pusher from 'pusher-js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './ChatDrawer.css';
@@ -17,7 +19,7 @@ class MessageList extends Component {
             return addZero(dateObject.getHours()) + ":" + addZero(dateObject.getMinutes());
         }
         return (
-            <div className="chatWindow" id="chatWindow">
+            <div className="chatWindow" id="chatWindow" data-simplebar>
                 <ul className="messageList">
                     {this.props.messages.map(message => {
                         return (
@@ -166,15 +168,61 @@ class RoomList extends Component {
     }
 }
 
+class UserBadge extends Component {
+    constructor() {
+        super();
+    }
+    render() {
+        const lessThanOneHourAgo = (date) => {
+            const oneHour = 1000 * 60 * 60;
+            const anHourAgo = Date.now() - oneHour;
+            return date > anHourAgo;
+        }
+        let gatsbysGreenLight = lessThanOneHourAgo(new Date(this.props.member.user.lastOnline).getTime()) ? <FontAwesomeIcon className="userActive" icon="circle"/> : <FontAwesomeIcon className="userInactive" icon="circle"/>;
+        return (
+            <li key={this.props.member.user._id}>
+                {gatsbysGreenLight} {this.props.member.user.username}
+            </li>
+        )
+    }
+}
+
+class UserList extends Component {
+    constructor() {
+        super();
+    }
+    render() {
+        return (
+            <section className="userList">
+                <header>
+                    <h2>Members</h2>
+                </header>
+                <ul>
+                    {this.props.members.map(member => {
+                        return (
+                            <UserBadge member={member}/>
+                        )
+                    })}
+                </ul>
+            </section>
+        )
+    }
+}
+
 class ChatDrawer extends Component {
     constructor() {
         super()
         this.state = {
             messages: [],
             message: '',
-            room: 'global',
             modalVisible: false,
-            currentRoom: {name:'Global Coven', _id:'5d84f64bdce5ba3ff960d399'},
+            currentRoom: {
+                name: '',
+                description: '',
+                welcomeMessage: '',
+                members: [],
+                public: ''
+            },
             joinedRooms: [],
             publicRooms: []
         }
@@ -183,10 +231,11 @@ class ChatDrawer extends Component {
     }
 
     componentDidMount() {
-        fetch('/api/chat/room/fetch/' + this.state.currentRoom._id)
+        fetch('/api/chat/room/fetch/5d88ebddbbecc739b51c1bca')
         .then(res => res.json())
         .then(payload => {
-            this.setState({ messages: payload });
+            console.log(payload)
+            this.setState({ messages: payload.messages, currentRoom: payload.room });
             this.scrollToBottom();
         });
 
@@ -214,8 +263,7 @@ class ChatDrawer extends Component {
     }
 
     scrollToBottom() {
-        var messages = document.getElementById('chatWindow');
-        messages.scrollTop = messages.scrollHeight;
+        var messages = document.querySelector('#chatWindow .simplebar-content-wrapper'); messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
     }
 
     handleSubmit(e) {
@@ -252,14 +300,14 @@ class ChatDrawer extends Component {
     }
 
     render() {
-        var style = this.props.isVisible ? {right: '0px'} : {right: '-600px'};
+        var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
         return (
-            <aside className="chatDrawer" style={style}>
+            <main className="chatDrawer" style={style}>
                 <RoomList
                     joinedRooms={this.state.joinedRooms}
                     publicRooms={this.state.publicRooms}
                 />
-                <main className="chatInterface">
+                <section className="chatInterface">
                     <MessageList messages={this.state.messages} />
                     <form
                         className="chatForm"
@@ -274,8 +322,12 @@ class ChatDrawer extends Component {
                         />
                         <button><FontAwesomeIcon icon="chevron-right"/></button>
                     </form>
-                </main>
-            </aside>
+                    
+                </section>
+                <UserList
+                    members={this.state.currentRoom.members}
+                />
+            </main>
         );
     }
 }

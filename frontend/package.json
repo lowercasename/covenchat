@@ -15,7 +15,8 @@
     "react-popper-tooltip": "^2.8.3",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",
-    "serve": "^11.1.0"
+    "serve": "^11.1.0",
+    "simplebar": "^4.2.3"
   },
   "scripts": {
     "start": "react-scripts start",

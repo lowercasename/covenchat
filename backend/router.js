@@ -16,22 +16,6 @@ const pusher = new Pusher({
 	useTLS: true
 });
 
-// router.get('/api/user/verify', function(req, res) {
-// 	console.log("Verifying user!");
-// 	console.log(req.user)
-// 	if(req.user) {
-// 		return res.status(200).json({
-// 			user: req.user,
-// 			isAuthenticated: true
-// 		});
-// 	} else {
-// 		return res.status(401).json({
-// 			error: 'User is not authenticated',
-// 			isAuthenticated: false
-// 		});
-// 	}
-// });
-
 router.post('/api/user/authenticate', function(req, res) {
 	console.log("Authenticating user!");
 	const { username, password } = req.body;
@@ -108,8 +92,19 @@ router.post('/api/user/register', async function(req, res) {
 		user.save()
 		.then(response => {
 			console.log("Successfully registered!")
-			res.status(200)
-			.json({success: true})
+			Room.findOne({
+				name: 'Global Coven'
+			})
+			.then(globalCoven => {
+				globalCoven.members.push({user: user._id, role: 'member'});
+				globalCoven.save()
+				.then(response => {
+					console.log("Added user to Global Coven!")
+					res.status(200)
+					.json({success: true})
+				})
+			})
+
 		})
 		.catch(error => {
 			console.log(err)
@@ -151,7 +146,7 @@ router.post('/api/geolocation/update', function(req,res) {
 	})
 });
 
-router.post('/api/chat/message/new', async function(req,res) {
+router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	console.log("Saving message: ",req.body.content)
 	var parsedMessage = parser(req.body.content);
 	if (!parsedMessage.isValid)
@@ -175,24 +170,30 @@ router.post('/api/chat/message/new', async function(req,res) {
 	})
 });
 
-router.get('/api/chat/room/fetch-all', function(req,res) {
+router.get('/api/chat/room/fetch-all', authorizeUser, function(req,res) {
 	var rooms = Room.find()
 	.then(rooms => {
 		res.json(rooms);
 	})
 });
 
-router.get('/api/chat/room/fetch/:room', function(req,res) {
-	var messages = Message.find({
+router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) {
+	let messages = await Message.find({
 		room: req.params.room
 	})
-	.populate('user')
-	.then(messages => {
-		res.json(messages);
+	.populate('user');
+	let room = await Room.findOne({
+		_id: req.params.room
 	})
+	.populate('members.user');
+	res.status(200)
+	.json({
+		messages: messages,
+		room: room
+	});
 });
 
-router.post('/api/chat/room/create', function(req,res) {
+router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	var room = new Room({
 		name: req.body.name,
 		lastUpdated: new Date(),
@@ -203,13 +204,5 @@ router.post('/api/chat/room/create', function(req,res) {
 		pusher.trigger('rooms', 'room-created', message, req.body.socketId)
 	})
 });
-
-// router.get('/*', function(req,res) {
-// 	res.sendFile(path.join(__dirname, '/var/www/coven.chat/index.html'), function(err) {
-//     if (err) {
-//       res.status(500).send(err);
-//     }
-//   })
-// })
 
 module.exports = router;

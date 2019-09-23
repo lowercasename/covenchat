@@ -16,7 +16,16 @@ const authorizeUser = function(req, res, next) {
                 res.status(401).send('Unauthorized: Invalid token');
             } else {
                 req.user = decoded.user;
-                next();
+                // FIX THIS TO MAKE THE DB HIT LESS FREQUENT
+                User.findById(req.user._id)
+                .then(user => {
+                    console.log("Updating user last online")
+                    user.lastOnline = new Date();
+                    user.save()
+                    .then(response => {
+                        next();
+                    })
+                })
             }
         });
     }
