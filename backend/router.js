@@ -204,12 +204,12 @@ router.post('/api/chat/room/create', function(req,res) {
 	})
 });
 
-router.get('/*', function(req,res) {
-	res.sendFile(path.join(__dirname, '/var/www/coven.chat/index.html'), function(err) {
-    if (err) {
-      res.status(500).send(err);
-    }
-  })
-})
+// router.get('/*', function(req,res) {
+// 	res.sendFile(path.join(__dirname, '/var/www/coven.chat/index.html'), function(err) {
+//     if (err) {
+//       res.status(500).send(err);
+//     }
+//   })
+// })
 
 module.exports = router;
