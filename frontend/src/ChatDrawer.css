@@ -7,8 +7,8 @@
 
 .roomList {
     width: 200px;
-    border-right: 2px solid var(--dark-purple);
-    padding: 10px 5px 10px 10px;
+    border-right: 1px solid rgba(0,0,0,0.5);
+    padding: 10px 10px 10px 10px;
 }
 
 .roomList header, .userList header {
@@ -27,19 +27,30 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.roomList li:hover,
+.userList li:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+.roomList li.active {
+    color: var(--dark-purple);
+    background: rgba(255,255,255,0.8);
 }
 
 .userList {
     width: 200px;
-    border-left: 2px solid var(--dark-purple);
-    padding: 10px 10px 10px 5px;
+    border-left: 1px solid rgba(0,0,0,0.5);
+    padding: 10px 10px 10px 10px;
 }
 
 .chatInterface {
     display: flex;
     flex-direction: column;
     flex: 1;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
 }
 
 .chatWindow {
@@ -126,7 +137,8 @@
 }
 
 .messageList .action .messageContent,
-.messageList .tarot .messageContent {
+.messageList .tarot .messageContent,
+.messageList .runes .messageContent {
     font-style: italic;
 }
 
@@ -156,7 +168,7 @@
     /* border-radius: 6px; */
 }
 
-.userActive, .userInactive {
+.userActive, .userInactive, .userBusy {
     font-size: 0.5rem;
     position: relative;
     top: -2px;
@@ -168,4 +180,8 @@
 
 .userInactive {
     color: rgb(161, 161, 161);
+}
+
+.userBusy {
+    color: rgb(201, 12, 12);
 }

@@ -21,7 +21,7 @@ const PublicLayout = ({ children }) => (
         <nav className="topNav">
             <div>
                 <img src="magic-ball-alt.svg" className="topNavLogo" />
-                <NavLink to="/" exact activeClassName="active"><h1 className="navHeading">Covenchat</h1></NavLink>
+                <NavLink to="/welcome" exact activeClassName="active"><h1 className="navHeading">CovenChat</h1></NavLink>
             </div>
             <div>
                 <NavLink to="/login" exact className="topNavLink" activeClassName="active">Login</NavLink>
@@ -42,7 +42,7 @@ class LandingPage extends Component {
     render() {
         return (
             <div>
-                Welcome to Covenchat 🔮
+                Welcome to CovenChat 🔮
             </div>
         );
     }
@@ -92,10 +92,10 @@ class App extends Component {
         return (
             <Router>
                 <Switch>
-                    <PublicRoute exact path="/" layout={PublicLayout} component={LandingPage} />
+                    <PublicRoute exact path="/welcome" layout={PublicLayout} component={LandingPage} />
                     <PublicRoute path="/login" layout={PublicLayout} component={Login} />
                     <PublicRoute path="/register" layout={PublicLayout} component={Register} />
-                    <Route path="/dashboard" component={withAuth(Dashboard)}/>
+                    <Route exact path="/" component={withAuth(Dashboard)}/>
                     <PublicRoute layout={PublicLayout} component={NotFound}/>
                 </Switch>
             </Router>

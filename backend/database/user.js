@@ -11,8 +11,12 @@ var userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     lastOnline: {type: Date, default: new Date()},
+    status: { type: String, default: 'active' },
     geolocation: geolocationSchema,
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    memory: {
+        lastRoom: { type: String, default: 'global-coven' }
+    }
 });
 
 userSchema.methods.isCorrectPassword = function(password, callback){

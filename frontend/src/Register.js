@@ -52,11 +52,12 @@ export default class Register extends Component {
             <form onSubmit={this.onSubmit} className="publicForm">
                 <h1>Create an account</h1>
                 {this.state.message && <div className="formMessage">{this.state.message}</div>}
-                <label htmlFor="email">Email</label>                
+                <label htmlFor="email">Email</label>
                 <input
                     type="email"
                     name="email"
                     placeholder="badasswitch@example.com"
+                    className="full-width"
                     value={this.state.email}
                     onChange={this.handleInputChange}
                     required
@@ -66,6 +67,7 @@ export default class Register extends Component {
                     type="text"
                     name="username"
                     placeholder="Make it spooky"
+                    className="full-width"
                     value={this.state.username}
                     onChange={this.handleInputChange}
                     required
@@ -75,11 +77,16 @@ export default class Register extends Component {
                     type="password"
                     name="password"
                     placeholder="Something memorable"
+                    className="full-width"
                     value={this.state.password}
                     onChange={this.handleInputChange}
                     required
                 />
-                <input type="submit" value="Submit"/>
+                <input
+                    type="submit"
+                    value="Create my account"
+                    className="full-width"
+                />
             </form>
         );
     }

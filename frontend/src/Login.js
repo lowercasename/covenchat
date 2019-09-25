@@ -31,7 +31,7 @@ export default class Login extends Component {
             if (res.message) {
                 this.setState({message: res.message})
             } else {
-                this.props.history.push('/dashboard');
+                this.props.history.push('/');
             }
         })
         .catch(err => {
@@ -51,6 +51,7 @@ export default class Login extends Component {
                     value={this.state.username}
                     onChange={this.handleInputChange}
                     required
+                    className="full-width"
                 />
                 <label htmlFor="password">Password</label>
                 <input
@@ -59,8 +60,13 @@ export default class Login extends Component {
                     value={this.state.password}
                     onChange={this.handleInputChange}
                     required
+                    className="full-width"
                 />
-                <input type="submit" value="Submit"/>
+                <input
+                    type="submit"
+                    value="Submit"
+                    className="full-width"
+                />
             </form>
         );
     }

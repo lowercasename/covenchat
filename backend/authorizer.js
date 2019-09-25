@@ -8,21 +8,22 @@ const authorizeUser = function(req, res, next) {
         req.headers['x-access-token'] ||
         req.cookies.token;
     if (!token) {
+        console.log("No token provided")
         res.status(401).send('Unauthorized: No token provided');
     } else {
         jwt.verify(token, secret, function(err, decoded) {
             if (err) {
+                console.log("Invalid token")
                 console.error(err)
                 res.status(401).send('Unauthorized: Invalid token');
             } else {
-                req.user = decoded.user;
                 // FIX THIS TO MAKE THE DB HIT LESS FREQUENT
-                User.findById(req.user._id)
+                User.findById(decoded.user._id)
                 .then(user => {
-                    console.log("Updating user last online")
                     user.lastOnline = new Date();
                     user.save()
                     .then(response => {
+                        req.user = user;
                         next();
                     })
                 })

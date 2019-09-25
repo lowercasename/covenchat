@@ -12,9 +12,13 @@
     "pusher-js": "^5.0.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-notification-alert": "0.0.12",
     "react-popper-tooltip": "^2.8.3",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",
+    "react-slugify": "^1.2.0",
+    "react-textarea-autosize": "^7.1.0",
+    "reactstrap": "^8.0.1",
     "serve": "^11.1.0",
     "simplebar": "^4.2.3"
   },

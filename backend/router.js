@@ -17,7 +17,6 @@ const pusher = new Pusher({
 });
 
 router.post('/api/user/authenticate', function(req, res) {
-	console.log("Authenticating user!");
 	const { username, password } = req.body;
 	User.findOne({ username }, function(err, user) {
 		if (err) {
@@ -47,7 +46,6 @@ router.post('/api/user/authenticate', function(req, res) {
 						message: 'Incorrect username or password.'
 					});
 				} else {
-					console.log("Creating cookie!")
 					// Issue token
 					const payload = { user };
 					const token = jwt.sign(payload, secret, {
@@ -63,9 +61,18 @@ router.post('/api/user/authenticate', function(req, res) {
 });
 
 router.get('/api/user/verify', authorizeUser, function(req, res) {
-	res.json({
+	res.status(200).json({
 		user: req.user
 	});
+});
+
+router.get('/api/user/fetch/:userID', authorizeUser, function(req, res) {
+	User.findById(req.params.userID)
+	.then(user => {
+		res.status(200).json({
+			user: user
+		});
+	})
 });
 
 router.post('/api/user/logout', authorizeUser, function(req, res) {
@@ -91,7 +98,6 @@ router.post('/api/user/register', async function(req, res) {
 		const user = new User({ username, email, password });
 		user.save()
 		.then(response => {
-			console.log("Successfully registered!")
 			Room.findOne({
 				name: 'Global Coven'
 			})
@@ -99,7 +105,6 @@ router.post('/api/user/register', async function(req, res) {
 				globalCoven.members.push({user: user._id, role: 'member'});
 				globalCoven.save()
 				.then(response => {
-					console.log("Added user to Global Coven!")
 					res.status(200)
 					.json({success: true})
 				})
@@ -139,7 +144,6 @@ router.post('/api/geolocation/update', function(req,res) {
 		}
 	)
 	.then(response => {
-		console.log(payload)
 		if (req.body.state === "online"){
 			pusher.trigger('geolocations', 'geolocation-updated', payload, req.body.socketId)
 		}
@@ -147,7 +151,6 @@ router.post('/api/geolocation/update', function(req,res) {
 });
 
 router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
-	console.log("Saving message: ",req.body.content)
 	var parsedMessage = parser(req.body.content);
 	if (!parsedMessage.isValid)
 	return false;
@@ -170,22 +173,37 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	})
 });
 
-router.get('/api/chat/room/fetch-all', authorizeUser, function(req,res) {
-	var rooms = Room.find()
+router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
+	var rooms = Room.find({
+		public: true,
+		members: {
+			$not: {
+				$elemMatch: {user: req.user._id}
+			}
+		}
+	})
+	.then(rooms => {
+		res.json(rooms);
+	})
+});
+
+router.get('/api/chat/room/fetch-joined', authorizeUser, function(req,res) {
+	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}}).sort('name')
 	.then(rooms => {
 		res.json(rooms);
 	})
 });
 
 router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) {
+	let room = await Room.findOne({
+		slug: req.params.room
+	})
+	.populate('members.user')
+	.populate('visitors');
 	let messages = await Message.find({
-		room: req.params.room
+		room: room._id
 	})
 	.populate('user');
-	let room = await Room.findOne({
-		_id: req.params.room
-	})
-	.populate('members.user');
 	res.status(200)
 	.json({
 		messages: messages,
@@ -194,15 +212,80 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 });
 
 router.post('/api/chat/room/create', authorizeUser, function(req,res) {
+	const { roomSlug, roomName, roomDescription, roomPrivacy } = req.body;
 	var room = new Room({
-		name: req.body.name,
-		lastUpdated: new Date(),
-		public: (req.body.public == true ? true : false)
+		slug: roomSlug,
+		name: roomName,
+		description: roomDescription,
+		public: (roomPrivacy == 'public' ? true : false),
+		members: [{user: req.user._id, role: 'administrator'}]
 	})
 	room.save()
 	.then(room => {
-		pusher.trigger('rooms', 'room-created', message, req.body.socketId)
+		User.update({_id: req.user._id}, {'memory.lastRoom': roomSlug})
+		.then(response => {
+			pusher.trigger('general', 'room-created', room);
+			res.sendStatus(200);
+		})
 	})
+});
+
+router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(room => {
+		// Check if this user is a member or just visiting
+		if (room.members.some(m => m.user.equals(req.user._id))) {
+			pusher.trigger('general', 'member-entered-room', {room: room, user: req.user}, req.body.socketId);
+			res.sendStatus(200);
+		} else {
+			// Check if user is already in the visitors array
+			if (!room.visitors.some(v => v.equals(req.user._id))) {
+				room.visitors.push(req.user._id)
+				room.save()
+				.then(room => {
+					User.update({_id: req.user._id}, {'memory.lastRoom': room.slug})
+					.then(response => {
+						pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
+						res.sendStatus(200);
+					});
+				})
+			} else {
+				console.log(req.user.username + " is already a visitor in this room")
+				pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
+				res.sendStatus(200);
+			}
+		}
+	});
+});
+
+router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(room => {
+		// Check if this user is a member or just visiting
+		if (room.members.some(m => m.user.equals(req.user._id))) {
+			pusher.trigger('general', 'member-left-room', {room: room, user: req.user}, req.body.socketId);
+			res.sendStatus(200);
+		} else {
+			// Check if user is in the visitors array
+			if (room.visitors.some(v => v.equals(req.user._id))) {
+				room.visitors = room.visitors.filter(v => !v.equals(req.user._id))
+				room.save()
+				.then(room => {
+					pusher.trigger('general', 'visitor-left-room', {room: room, user: req.user}, req.body.socketId);
+					res.sendStatus(200);
+				})
+			} else {
+				console.log(req.user.username + " wasn't a visitor in this room (apparently)");
+				pusher.trigger('general', 'visitor-left-room', {room: room, user: req.user}, req.body.socketId);
+				res.sendStatus(200);
+				// Do nothing?
+			}
+		}
+	});
 });
 
 module.exports = router;

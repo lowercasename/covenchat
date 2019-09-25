@@ -1,7 +1,8 @@
 @import-normalize;
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap');
-@import url('https://fonts.googleapis.com/css?family=Righteous|Yeseva+One&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap');
 
 * {
   margin: 0;
@@ -16,11 +17,11 @@ body {
 }
 
 :root {
-  --black: #252a39;
+  --black: #2d0f31;
   /* --dark-purple: #283149; */
   /* --purple: #404b69; */
-  --dark-purple: #441151;
-  --purple: #67316d;
+  --dark-purple: #372042;
+  --purple: #3e2948;
   --green: #35c7b3;
   --bright-green: #00ffc8;
   --white: #fcfcfc;
@@ -50,51 +51,67 @@ h2, h3, h4, h5, h6  {
   font-size: 0.9rem;
 }
 
-input, textarea {
+input,
+textarea {
   font-family: 'Roboto', sans-serif;
-  border: 2px solid var(--green);
+  border: none;
   border-radius: 6px;
   font-size: 1rem;
   padding: 10px;
-  background: var(--dark-purple);
+  background: rgba(0,0,0,0.25);
   color: var(--white);
   resize: none;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   transition: 150ms;
 }
 
-*:focus {
+input:focus,
+textarea:focus {
   outline: none;
   box-shadow: 0 0 0 3px #00ffc844;
+  background: rgba(0,0,0,0.35);
 }
 
-input.full-width, textarea.full-width, button.full-width {
+*.full-width {
   width: 100%;
 }
 
-button {
+button,
+input[type="button"],
+input[type="submit"] {
   font-family: 'Roboto', sans-serif;
   background: var(--green);
-  border: 2px solid var(--green);
+  border: none;
   color: var(--dark-purple);
   border-radius: 6px;
   padding: 10px;
   transition: 150ms;
   font-size: 1rem;
-  margin-bottom: 1rem;
   cursor: pointer;
+  margin-top: 0.5rem;
 }
 
-button:hover {
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover  {
   background: var(--bright-green);
   /* color: var(--green); */
 }
 
 button.small {
   padding: 2px 5px;
-  margin-bottom: 0;
+  margin: 0;
   font-size: 0.8rem;
   border: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.6;
 }
 
 .topNav {
@@ -154,7 +171,7 @@ button.small {
 
 .navHeading {
     font-family: 'Righteous', sans-serif;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     letter-spacing: -0.5px;
     color: var(--white);
     font-size: 35px;
@@ -190,7 +207,7 @@ button.small {
   align-items: center;
   /* box-shadow: 0 0 20px rgba(0,0,0,0.4); */
   z-index: 1000;
-  border-right: 2px solid var(--black);
+  border-right: 1px solid rgba(0,0,0,0.5);
 }
 
 .navLogo {
@@ -246,8 +263,9 @@ button.small {
 }
 
 .statusBar {
+    font-family: 'Share Tech Mono', monospace;
   background: var(--dark-purple);
-  border-top: 2px solid var(--black);
+  border-top: 1px solid rgba(0,0,0,0.5);
   height: 40px;
   padding: 10px;
   font-weight: 300;
@@ -258,7 +276,7 @@ button.small {
 
 .statusBar .statusItem {
     padding: 0 10px;
-    opacity: 0.8;
+    opacity: 0.6;
     display: flex;
     align-items: center;
 }
@@ -315,7 +333,7 @@ button.small {
   display: none;
 }
 .modal input[type=radio]:checked + .radioBox {
-  background-color: var(--green);
+  background: var(--green);
   color: var(--dark-purple);
 }
 .modal .radioBoxContainer {
@@ -327,12 +345,15 @@ button.small {
 
 .modal .radioBoxContainer label {
   width: 49%;
+  margin-bottom: 0;
+  text-transform: none;
+  font-weight: initial;
+  opacity: 1;
 }
 .modal .radioBox {
   height: 100px;
   border-radius: 6px;
-  border: 2px solid var(--green);
-  background-color: var(--dark-purple);
+  background-color: rgba(0,0,0,0.25);
   font-size: 1.25rem;
   transition: all 250ms ease;
   display: inline-block;
@@ -359,7 +380,7 @@ button.small {
 
 .publicForm {
     max-width: 480px;
-    background: var(--purple);
+    background: rgba(255,255,255,0.07);
     border-radius: 6px;
     padding: 10px;
     margin: 0 auto;
@@ -371,7 +392,7 @@ button.small {
     font-weight: 300;
 }
 
-.publicForm > input {
+/* input {
     width: 100%;
     margin-bottom: 1rem;
     border: none;
@@ -379,39 +400,39 @@ button.small {
     transition: 150ms;
 }
 
-.publicForm > input:focus {
+input:focus {
   background: rgba(0,0,0,0.35);
-}
+} */
 
-.publicForm > input[type="submit"] {
+/* input[type="submit"] {
   cursor: pointer;
   background: var(--green);
   color: var(--dark-purple);
 }
 
-.publicForm > input[type="submit"]:hover {
+input[type="submit"]:hover {
   background: var(--bright-green);
   color: var(--dark-purple);
-}
-
-.publicForm label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  font-weight: 700;
-  opacity: 0.6;
-}
+} */
 
 
 .formMessage {
     width: 100%;
     font-size: 0.9rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-align: center;
     background: var(--green);
     border: var(--dark-purple);
     color: var(--dark-purple);
     padding: 10px;
     border-radius: 6px;
+}
+
+.roomSlug {
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
 }

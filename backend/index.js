@@ -5,11 +5,14 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+var morgan = require('morgan')
 const app = express();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
 const cookieParser = require('cookie-parser');
+
+app.use(morgan('tiny'))
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
