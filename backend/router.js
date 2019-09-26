@@ -173,6 +173,7 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	.then(message => {
 		var savedMessage = Message.findById(message._id)
 		.populate('user')
+		.populate('room')
 		.then(retrievedMessage => {
 			pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
 		})

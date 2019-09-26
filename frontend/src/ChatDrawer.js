@@ -512,10 +512,12 @@ class ChatDrawer extends Component {
             var channel = pusher.subscribe('messages');
             var generalChannel = pusher.subscribe('general');
             channel.bind('message-sent', data => {
-                this.setState({
-                    messages: [...this.state.messages, data]
-                });
-                scrollToBottom();
+                if (this.state.currentRoomSlug === data.room.slug) {
+                    this.setState({
+                        messages: [...this.state.messages, data]
+                    });
+                    scrollToBottom();
+                }
             });
             generalChannel.bind('room-created', data => {
                 fetch('/api/chat/room/fetch/' + data.slug)
