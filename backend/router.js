@@ -305,8 +305,8 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
 			if (room.visitors.some(v => v.equals(req.user._id))) {
 				room.visitors = room.visitors.filter(v => !v.equals(req.user._id));
 			}
-			// Add user to members array
-			room.members.push({user: req.user._id, role: 'member'});
+			// Add user to members array (making them an admin if there's no other members in the room)
+			room.members.push({user: req.user._id, role: (room.members.length == 0 ? 'administrator' : 'member')});
 			room.save()
 			.then(room => {
 				var message = new Message({
