@@ -247,6 +247,7 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 				.then(room => {
 					User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
 					.then(response => {
+						console.log(response)
 						pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
 						res.sendStatus(200);
 					});
