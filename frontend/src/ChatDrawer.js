@@ -387,7 +387,6 @@ class ChatDrawer extends Component {
     }
 
     componentDidMount() {
-        console.log(this.state.user)
         fetch('/api/chat/room/fetch/' + (this.state.user.memory ? this.state.user.memory.lastRoom : 'global-coven'))
         .then(res => res.json())
         .then(payload => {

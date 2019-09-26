@@ -195,7 +195,6 @@ router.get('/api/chat/room/fetch-joined', authorizeUser, function(req,res) {
 });
 
 router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) {
-	console.log(req.params.room)
 	let room = await Room.findOne({
 		slug: req.params.room
 	})
