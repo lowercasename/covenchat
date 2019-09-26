@@ -105,6 +105,12 @@ button.small {
   border: 0;
 }
 
+button[disabled] {
+    background: #c6c6c6;
+    color: #6f6f6f;
+    cursor: default;
+}
+
 label {
   display: block;
   margin-bottom: 0.25rem;
@@ -263,7 +269,7 @@ label {
 }
 
 .statusBar {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Roboto Condensed', sans-serif;
   background: var(--dark-purple);
   border-top: 1px solid rgba(0,0,0,0.5);
   height: 40px;

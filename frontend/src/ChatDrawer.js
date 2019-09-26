@@ -102,7 +102,8 @@ class RoomList extends Component {
             roomSlug: '',
             roomDescription: '',
             roomPrivacy: 'public',
-            formMessage: ''
+            formMessage: '',
+            submitDisabled: false
         }
         this.handleSubmit = this.handleSubmit.bind(this);
 
@@ -139,6 +140,25 @@ class RoomList extends Component {
         this.setState({
             roomPrivacy: event.target.value
         });
+    }
+
+    handleKeyUp = (event) => {
+        fetch('/api/chat/room/fetch-all')
+        .then(res => res.json())
+        .then(res => {
+            if (res.some(r => r.slug === this.state.roomSlug)) {
+                this.setState({
+                    message: 'A Coven with this name already exists.',
+                    submitDisabled: true
+                })
+                console.log(this.state.submitDisabled)
+            } else {
+                this.setState({
+                    message: '',
+                    submitDisabled: false
+                })
+            }
+        })
     }
 
     handleSubmit = (event) => {
@@ -360,30 +380,62 @@ class UserBadge extends Component {
 class UserList extends Component {
     constructor() {
         super();
+        this.state = {
+            modalVisible: false
+        }
     }
+
+    showRoomSettingsModal = () => {
+        this.setState({modalVisible: true})
+    }
+
+    hideRoomSettingsModal = () => {
+        this.setState({modalVisible: false})
+    }
+
     render() {
+        var isAdministrator = (this.props.members.some(m => m.user.username === this.props.user.username && m.role === "administrator"));
         return (
             <section className="userList">
-                <header>
-                    <h2>Members</h2>
-                </header>
-                <ul>
-                    {this.props.members.map(member => {
-                        return (
-                            <UserBadge member={member} role={member.role} key={member.user._id}/>
-                        )
-                    })}
-                </ul>
-                <header>
-                    <h2>Visitors</h2>
-                </header>
-                <ul>
-                    {this.props.visitors.map(visitor => {
-                        return (
-                            <UserBadge member={visitor} key={visitor._id}/>
-                        )
-                    })}
-                </ul>
+                <div className="userListInner">
+                    <header>
+                        <h2>Members</h2>
+                    </header>
+                    <ul>
+                        {this.props.members.map(member => {
+                            return (
+                                <UserBadge member={member} role={member.role} key={member.user._id}/>
+                            )
+                        })}
+                    </ul>
+                    <header>
+                        <h2>Visitors</h2>
+                    </header>
+                    <ul>
+                        {this.props.visitors.map(visitor => {
+                            return (
+                                <UserBadge member={visitor} key={visitor._id}/>
+                            )
+                        })}
+                    </ul>
+                    {isAdministrator &&
+                        <nav
+                            className="manageCovenNav"
+                        >
+                            <button
+                                type="button"
+                                className="full-width"
+                                onClick={this.showRoomSettingsModal}
+                            >
+                                <FontAwesomeIcon icon="cog"/> Manage Coven
+                            </button>
+                            <Modal show={this.state.modalVisible} handleClose={this.hideRoomSettingsModal}>
+                                <h1>Manage {this.props.currentRoomName}</h1>
+
+                            </Modal>
+                        </nav>
+                    }
+                </div>
             </section>
         )
     }
@@ -729,6 +781,7 @@ class ChatDrawer extends Component {
 
     render() {
         var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
+        var isAMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoomSlug));
         return (
             <main className="chatDrawer" style={style}>
                 <RoomList
@@ -743,22 +796,24 @@ class ChatDrawer extends Component {
                 />
                 <section className="chatInterface">
                     <MessageList messages={this.state.messages} />
-                    <form
-                        className="chatForm"
-                        onSubmit={this.handleSubmit}
-                    >
-                        <input
-                            id="message"
-                            autoComplete="off"
-                            placeholder={"Message " + this.state.currentRoomName}
-                            onChange={this.handleChange}
-                            value={this.state.message}
-                        />
-                        <button><FontAwesomeIcon icon="chevron-right"/></button>
-                    </form>
-
+                    {isAMember &&
+                        <form
+                            className="chatForm"
+                            onSubmit={this.handleSubmit}
+                        >
+                            <input
+                                id="message"
+                                autoComplete="off"
+                                placeholder={"Message " + this.state.currentRoomName}
+                                onChange={this.handleChange}
+                                value={this.state.message}
+                            />
+                            <button><FontAwesomeIcon icon="chevron-right"/></button>
+                        </form>
+                    }
                 </section>
                 <UserList
+                    user={this.state.user}
                     members={this.state.currentRoomMembers}
                     visitors={this.state.currentRoomVisitors}
                 />

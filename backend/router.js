@@ -9,9 +9,9 @@ const authorizeUser = require('./authorizer');
 
 // WEBSOCKETS
 const pusher = new Pusher({
-	appId: '864592',
-	key: '7155c345db324b8f1ba5',
-	secret: '53db929c783b5ee700ee',
+	appId: process.env.PUSHER_APP_ID,
+	key: process.env.PUSHER_APP_KEY,
+	secret: process.env.PUSHER_APP_SECRET,
 	cluster: 'eu',
 	useTLS: true
 });
@@ -170,6 +170,13 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 		.then(retrievedMessage => {
 			pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
 		})
+	})
+});
+
+router.get('/api/chat/room/fetch-all', authorizeUser, function(req,res) {
+	var rooms = Room.find()
+	.then(rooms => {
+		res.json(rooms);
 	})
 });
 

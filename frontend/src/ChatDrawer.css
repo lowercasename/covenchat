@@ -51,6 +51,18 @@
     width: 200px;
     border-left: 1px solid rgba(0,0,0,0.5);
     padding: 10px 10px 10px 10px;
+    position: relative;
+}
+
+.userListInner {
+    overflow-y: scroll;
+    height: calc(100vh - 110px);
+}
+
+.manageCovenNav {
+    position: absolute;
+    bottom: 10px;
+    width: 180px;
 }
 
 .chatInterface {
