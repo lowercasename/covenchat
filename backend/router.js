@@ -231,11 +231,11 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 });
 
 router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
-	User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}});
 	Room.findOne({
 		slug: req.params.room
 	})
 	.then(room => {
+		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}});
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
 			pusher.trigger('general', 'member-entered-room', {room: room, user: req.user}, req.body.socketId);
