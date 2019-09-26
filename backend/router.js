@@ -222,7 +222,7 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	})
 	room.save()
 	.then(room => {
-		User.update({_id: req.user._id}, {'memory.lastRoom': roomSlug})
+		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
 		.then(response => {
 			pusher.trigger('general', 'room-created', room);
 			res.sendStatus(200);
@@ -245,7 +245,7 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 				room.visitors.push(req.user._id)
 				room.save()
 				.then(room => {
-					User.update({_id: req.user._id}, {'memory.lastRoom': room.slug})
+					User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
 					.then(response => {
 						pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
 						res.sendStatus(200);
