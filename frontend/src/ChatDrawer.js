@@ -512,6 +512,8 @@ class ChatDrawer extends Component {
             var channel = pusher.subscribe('messages');
             var generalChannel = pusher.subscribe('general');
             channel.bind('message-sent', data => {
+                console.log(this.state.currentRoomSlug)
+                console.log(data.room.slug)
                 if (this.state.currentRoomSlug === data.room.slug) {
                     this.setState({
                         messages: [...this.state.messages, data]
@@ -605,6 +607,19 @@ class ChatDrawer extends Component {
             this.setState({
                 message: ''
             })
+        }
+    }
+
+    onEnterPress = (e) => {
+        if(e.keyCode == 13 && e.shiftKey == false) {
+            e.preventDefault();
+            var messageContent = this.state.message.trim();
+            if (messageContent != '' && messageContent != '/me') {
+                this.sendMessage(messageContent)
+                this.setState({
+                    message: ''
+                })
+            }
         }
     }
 
@@ -807,12 +822,15 @@ class ChatDrawer extends Component {
                             className="chatForm"
                             onSubmit={this.handleSubmit}
                         >
-                            <input
+                            <Textarea
                                 id="message"
                                 autoComplete="off"
                                 placeholder={"Message " + this.state.currentRoomName}
                                 onChange={this.handleChange}
+                                onKeyDown={this.onEnterPress}
                                 value={this.state.message}
+                                minRows={1}
+                                maxRows={10}
                             />
                             <button><FontAwesomeIcon icon="chevron-right"/></button>
                         </form>
