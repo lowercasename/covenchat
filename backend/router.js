@@ -231,6 +231,7 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 });
 
 router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
+	User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}});
 	Room.findOne({
 		slug: req.params.room
 	})
@@ -245,12 +246,8 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 				room.visitors.push(req.user._id)
 				room.save()
 				.then(room => {
-					User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
-					.then(response => {
-						console.log(response)
-						pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
-						res.sendStatus(200);
-					});
+					pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
+					res.sendStatus(200);
 				})
 			} else {
 				console.log(req.user.username + " is already a visitor in this room")
