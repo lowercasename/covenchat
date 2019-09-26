@@ -500,6 +500,7 @@ class ChatDrawer extends Component {
                 this.setState({ publicRooms: payload });
         });
         fetch('/api/pusher/getkey')
+        .then(res => res.json())
         .then(res => {
             var pusher = new Pusher(res.key, {
                 cluster: 'eu',
