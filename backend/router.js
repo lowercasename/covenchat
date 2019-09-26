@@ -60,6 +60,12 @@ router.post('/api/user/authenticate', function(req, res) {
 	});
 });
 
+router.get('/api/pusher/getkey', authorizeUser, function(req, res) {
+	res.status(200).json({
+		key: process.env.PUSHER_APP_KEY
+	});
+});
+
 router.get('/api/user/verify', authorizeUser, function(req, res) {
 	res.status(200).json({
 		user: req.user

@@ -499,96 +499,99 @@ class ChatDrawer extends Component {
             .then(payload => {
                 this.setState({ publicRooms: payload });
         });
-
-        var pusher = new Pusher('7155c345db324b8f1ba5', {
-            cluster: 'eu',
-            forceTLS: true
-        });
-        pusher.connection.bind('connected', () => {
-            this.setState({socketId: pusher.connection.socket_id});
-        });
-        var channel = pusher.subscribe('messages');
-        var generalChannel = pusher.subscribe('general');
-        channel.bind('message-sent', data => {
-            this.setState({
-                messages: [...this.state.messages, data]
+        fetch('/api/pusher/getkey')
+        .then(res => {
+            var pusher = new Pusher(res.key, {
+                cluster: 'eu',
+                forceTLS: true
             });
-            scrollToBottom();
-        });
-        generalChannel.bind('room-created', data => {
-            fetch('/api/chat/room/fetch/' + data.slug)
-            .then(res => res.json())
-            .then(payload => {
-                var joinedRooms = [...this.state.joinedRooms, payload.room]
-                joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+            pusher.connection.bind('connected', () => {
+                this.setState({socketId: pusher.connection.socket_id});
+            });
+            var channel = pusher.subscribe('messages');
+            var generalChannel = pusher.subscribe('general');
+            channel.bind('message-sent', data => {
                 this.setState({
-                    joinedRooms: joinedRooms,
-                    messages: payload.messages,
-                    currentRoomID: payload.room._id,
-                    currentRoomSlug: payload.room.slug,
-                    currentRoomName: payload.room.name,
-                    currentRoomDescription: payload.room.description,
-                    currentRoomMessage: payload.room.welcomeMessage,
-                    currentRoomMembers: payload.room.members,
-                    currentRoomVisitors: payload.room.visitors,
-                    currentRoomPrivacy: payload.room.public
+                    messages: [...this.state.messages, data]
                 });
                 scrollToBottom();
             });
-        });
-        generalChannel.bind('visitor-entered-room', data => {
-            if (this.state.currentRoomSlug === data.room.slug) {
-                if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
+            generalChannel.bind('room-created', data => {
+                fetch('/api/chat/room/fetch/' + data.slug)
+                .then(res => res.json())
+                .then(payload => {
+                    var joinedRooms = [...this.state.joinedRooms, payload.room]
+                    joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+                    this.setState({
+                        joinedRooms: joinedRooms,
+                        messages: payload.messages,
+                        currentRoomID: payload.room._id,
+                        currentRoomSlug: payload.room.slug,
+                        currentRoomName: payload.room.name,
+                        currentRoomDescription: payload.room.description,
+                        currentRoomMessage: payload.room.welcomeMessage,
+                        currentRoomMembers: payload.room.members,
+                        currentRoomVisitors: payload.room.visitors,
+                        currentRoomPrivacy: payload.room.public
+                    });
+                    scrollToBottom();
+                });
+            });
+            generalChannel.bind('visitor-entered-room', data => {
+                if (this.state.currentRoomSlug === data.room.slug) {
+                    if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
+                        var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+                        currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+                        this.setState({currentRoomVisitors: currentRoomVisitors})
+                    }
+                }
+            });
+            generalChannel.bind('visitor-left-room', data => {
+                if (this.state.currentRoomSlug === data.room.slug) {
+                    this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
+                }
+            });
+            generalChannel.bind('user-joined-room', data => {
+                if (this.state.currentRoomSlug === data.room.slug) {
+                    // Add user to members array
+                    var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+                    currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                    // Remove member from visitors array
+                    var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
+                    console.log(currentRoomVisitors)
+                    // // Add room to joined rooms array
+                    // var joinedRooms = [...this.state.joinedRooms, data.room];
+                    // joinedRooms.sort((a, b) => a.name.localeCompare( b.name ));
+                    // // Remove room from public rooms array
+                    // var publicRooms = this.state.publicRooms.filter(r => r._id.toString() != data.room._id.toString());
+                    this.setState({
+                        currentRoomVisitors: currentRoomVisitors,
+                        currentRoomMembers: currentRoomMembers
+                    })
+
+                }
+            });
+            generalChannel.bind('user-left-room', data => {
+                if (this.state.currentRoomSlug === data.room.slug) {
+                    // Add user to visitors array
                     var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
                     currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                    this.setState({currentRoomVisitors: currentRoomVisitors})
+                    // Remove user from members array
+                    var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
+                    // // Add room to public rooms array
+                    // var publicRooms = [...this.state.publicRooms, data.room];
+                    // publicRooms.sort((a, b) => a.name.localeCompare( b.name ));
+                    // // Remove room from joined rooms array
+                    // var joinedRooms = this.state.joinedRooms.filter(r => r._id.toString() != data.room._id.toString());
+                    this.setState({
+                        currentRoomVisitors: currentRoomVisitors,
+                        currentRoomMembers: currentRoomMembers
+                    })
+
                 }
-            }
-        });
-        generalChannel.bind('visitor-left-room', data => {
-            if (this.state.currentRoomSlug === data.room.slug) {
-                this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
-            }
-        });
-        generalChannel.bind('user-joined-room', data => {
-            if (this.state.currentRoomSlug === data.room.slug) {
-                // Add user to members array
-                var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
-                currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
-                // Remove member from visitors array
-                var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
-                console.log(currentRoomVisitors)
-                // // Add room to joined rooms array
-                // var joinedRooms = [...this.state.joinedRooms, data.room];
-                // joinedRooms.sort((a, b) => a.name.localeCompare( b.name ));
-                // // Remove room from public rooms array
-                // var publicRooms = this.state.publicRooms.filter(r => r._id.toString() != data.room._id.toString());
-                this.setState({
-                    currentRoomVisitors: currentRoomVisitors,
-                    currentRoomMembers: currentRoomMembers
-                })
+            });
+        })
 
-            }
-        });
-        generalChannel.bind('user-left-room', data => {
-            if (this.state.currentRoomSlug === data.room.slug) {
-                // Add user to visitors array
-                var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                // Remove user from members array
-                var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
-                // // Add room to public rooms array
-                // var publicRooms = [...this.state.publicRooms, data.room];
-                // publicRooms.sort((a, b) => a.name.localeCompare( b.name ));
-                // // Remove room from joined rooms array
-                // var joinedRooms = this.state.joinedRooms.filter(r => r._id.toString() != data.room._id.toString());
-                this.setState({
-                    currentRoomVisitors: currentRoomVisitors,
-                    currentRoomMembers: currentRoomMembers
-                })
-
-            }
-        });
     }
 
     handleSubmit(e) {
