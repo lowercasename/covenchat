@@ -260,7 +260,7 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 	});
 });
 
-router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
+router.post('/api/chat/room/exit/:room', authorizeUser, function(req,res) {
 	Room.findOne({
 		slug: req.params.room
 	})
@@ -285,6 +285,76 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 				// Do nothing?
 			}
 		}
+	});
+});
+
+router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(room => {
+		// Check if this user is already a member
+		if (room.members.some(m => m.user.equals(req.user._id))) {
+			console.log(req.user.username + " is already a member of " + room.name);
+			res.sendStatus(200);
+		} else {
+			// Remove user from visitors array, if in array
+			if (room.visitors.some(v => v.equals(req.user._id))) {
+				room.visitors = room.visitors.filter(v => !v.equals(req.user._id));
+			}
+			// Add user to members array
+			room.members.push({user: req.user._id, role: 'member'});
+			room.save()
+			.then(room => {
+				var message = new Message({
+					user: req.user._id,
+                    timestamp: new Date(),
+                    type: 'alert',
+                    room: room._id,
+                    content: 'has joined ' + room.name,
+				})
+				message.save()
+				.then(response => {
+					pusher.trigger('general', 'user-joined-room', {room: room, user: req.user}, req.body.socketId);
+					res.sendStatus(200);
+				})
+			});
+		}
+	});
+});
+
+router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(room => {
+		// Remove user from members array, if in array
+		if (room.members.some(v => v.user.equals(req.user._id))) {
+			room.members = room.members.filter(v => !v.user.equals(req.user._id));
+		}
+		// Check if this user is already a visitor
+		if (room.visitors.some(m => m.equals(req.user._id))) {
+			console.log(req.user.username + " is already a visitor in " + room.name);
+			res.sendStatus(200);
+		} else {
+			// Add user to visitors array
+			room.visitors.push(req.user._id);
+		}
+		room.save()
+		.then(room => {
+			var message = new Message({
+				user: req.user._id,
+				timestamp: new Date(),
+				type: 'alert',
+				room: room._id,
+				content: 'has left ' + room.name,
+			})
+			message.save()
+			.then(response => {
+				pusher.trigger('general', 'user-left-room', {room: room, user: req.user}, req.body.socketId);
+				res.sendStatus(200);
+			})
+		});
 	});
 });
 

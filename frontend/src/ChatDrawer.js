@@ -92,9 +92,11 @@ const Modal = ({ handleClose, show, children }) => {
 };
 
 class RoomList extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
+            joinedRooms: this.props.joinedRooms,
+            publicRooms: this.props.publicRooms,
             modalVisible: false,
             roomName: '',
             roomSlug: '',
@@ -163,7 +165,7 @@ class RoomList extends Component {
                         roomPrivacy: 'public',
                         formMessage: ''
                     });
-                    this.refs.creatingRoomAlert.notificationAlert({
+                    this.refs.roomsAlert.notificationAlert({
                         place: 'tr',
                         message: 'Creating your new Coven, sit tight...',
                         type: 'dark',
@@ -178,6 +180,7 @@ class RoomList extends Component {
         }
     }
 
+
     showModal = () => {
         this.setState({ modalVisible: true });
     };
@@ -189,7 +192,7 @@ class RoomList extends Component {
     render() {
         return (
             <nav className="roomList">
-                <NotificationAlert ref="creatingRoomAlert" />
+                <NotificationAlert ref="roomsAlert" />
                 <header>
                     <h2><FontAwesomeIcon icon="moon"/> Your Covens </h2>
                     <button
@@ -255,10 +258,22 @@ class RoomList extends Component {
                         return (
                             <li
                                 key={room._id}
-                                onClick={() => {this.props.switchRoom(room.slug)}}
                                 className={(room._id === this.props.currentRoom ? "active" : "")}
                             >
-                                {room.name}
+                                <div
+                                    onClick={() => {this.props.switchRoom(room.slug)}}
+                                >
+                                    {room.name}
+                                </div>
+                                {room._id === this.props.currentRoom &&
+                                <button
+                                    onClick={(e) => {this.props.leaveRoom(room, e)}}
+                                    className="small"
+                                    disabled={this.props.leaveDisabled}
+                                >
+                                    <FontAwesomeIcon icon="minus"/>
+                                </button>
+                            }
                             </li>
                         )
                     })}
@@ -271,10 +286,22 @@ class RoomList extends Component {
                         return (
                             <li
                                 key={room._id}
-                                onClick={() => {this.props.switchRoom(room.slug)}}
                                 className={(room._id === this.props.currentRoom ? "active" : "")}
                             >
-                                {room.name}
+                                <div
+                                    onClick={() => {this.props.switchRoom(room.slug)}}
+                                >
+                                    {room.name}
+                                </div>
+                                {room._id === this.props.currentRoom &&
+                                    <button
+                                        onClick={(e) => {this.props.joinRoom(room, e)}}
+                                        className="small"
+                                        disabled={this.props.joinDisabled}
+                                    >
+                                        <FontAwesomeIcon icon="plus"/>
+                                    </button>
+                                }
                             </li>
                         )
                     })}
@@ -324,7 +351,7 @@ class UserBadge extends Component {
         }
         return (
             <li key={user._id} style={{color: userColor}}>
-                <FontAwesomeIcon className={lessThanOneDayAgo(new Date(user.lastOnline).getTime()) ? userStatus : "userInactive" } icon="circle"/> {user.username}
+                <span><FontAwesomeIcon className={lessThanOneDayAgo(new Date(user.lastOnline).getTime()) ? userStatus : "userInactive" } icon="circle"/> {user.username}</span>
             </li>
         )
     }
@@ -380,7 +407,9 @@ class ChatDrawer extends Component {
             currentRoomVisitors: [],
             currentRoomPrivacy: '',
             joinedRooms: [],
-            publicRooms: []
+            publicRooms: [],
+            joinDisabled: false,
+            leaveDisabled: false
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -391,8 +420,8 @@ class ChatDrawer extends Component {
         .then(res => res.json())
         .then(payload => {
             console.log("Starting up, showing room")
-            var currentRoomMembers = payload.room.members.sort();
-            var currentRoomVisitors = payload.room.visitors.sort();
+            var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+            var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
             this.setState({
                 messages: payload.messages,
                 currentRoomID: payload.room._id,
@@ -438,7 +467,10 @@ class ChatDrawer extends Component {
             fetch('/api/chat/room/fetch/' + data.slug)
             .then(res => res.json())
             .then(payload => {
+                var joinedRooms = [...this.state.joinedRooms, payload.room]
+                joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
                 this.setState({
+                    joinedRooms: joinedRooms,
                     messages: payload.messages,
                     currentRoomID: payload.room._id,
                     currentRoomSlug: payload.room.slug,
@@ -456,7 +488,7 @@ class ChatDrawer extends Component {
             if (this.state.currentRoomSlug === data.room.slug) {
                 if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
                     var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                    currentRoomVisitors.sort();
+                    currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
                     this.setState({currentRoomVisitors: currentRoomVisitors})
                 }
             }
@@ -464,6 +496,45 @@ class ChatDrawer extends Component {
         generalChannel.bind('visitor-left-room', data => {
             if (this.state.currentRoomSlug === data.room.slug) {
                 this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
+            }
+        });
+        generalChannel.bind('user-joined-room', data => {
+            if (this.state.currentRoomSlug === data.room.slug) {
+                // Add user to members array
+                var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+                currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                // Remove member from visitors array
+                var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
+                console.log(currentRoomVisitors)
+                // // Add room to joined rooms array
+                // var joinedRooms = [...this.state.joinedRooms, data.room];
+                // joinedRooms.sort((a, b) => a.name.localeCompare( b.name ));
+                // // Remove room from public rooms array
+                // var publicRooms = this.state.publicRooms.filter(r => r._id.toString() != data.room._id.toString());
+                this.setState({
+                    currentRoomVisitors: currentRoomVisitors,
+                    currentRoomMembers: currentRoomMembers
+                })
+
+            }
+        });
+        generalChannel.bind('user-left-room', data => {
+            if (this.state.currentRoomSlug === data.room.slug) {
+                // Add user to visitors array
+                var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+                currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+                // Remove user from members array
+                var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
+                // // Add room to public rooms array
+                // var publicRooms = [...this.state.publicRooms, data.room];
+                // publicRooms.sort((a, b) => a.name.localeCompare( b.name ));
+                // // Remove room from joined rooms array
+                // var joinedRooms = this.state.joinedRooms.filter(r => r._id.toString() != data.room._id.toString());
+                this.setState({
+                    currentRoomVisitors: currentRoomVisitors,
+                    currentRoomMembers: currentRoomMembers
+                })
+
             }
         });
     }
@@ -503,7 +574,7 @@ class ChatDrawer extends Component {
 
     switchRoom(roomSlug) {
         console.log("Switching room")
-        fetch('/api/chat/room/leave/' + this.state.currentRoomSlug, {method: "POST", body: {socketId: this.state.socketId}})
+        fetch('/api/chat/room/exit/' + this.state.currentRoomSlug, {method: "POST", body: {socketId: this.state.socketId}})
         .then(res => {
             if (res.status === 200) {
                 console.log("Left room: " + this.state.currentRoomSlug)
@@ -514,8 +585,8 @@ class ChatDrawer extends Component {
                         fetch('/api/chat/room/fetch/' + roomSlug)
                             .then(res => res.json())
                             .then(payload => {
-                                var currentRoomMembers = payload.room.members.sort();
-                                var currentRoomVisitors = payload.room.visitors.sort();
+                                var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                                var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
                                 this.setState({
                                     messages: payload.messages,
                                     currentRoomID: payload.room._id,
@@ -534,8 +605,125 @@ class ChatDrawer extends Component {
                     }
                 });
             } else {
-                console.log("Failed to leave room")
+                console.log("Failed to exit room")
             }
+        });
+    }
+
+    joinRoom = (room, e) => {
+        if (this.state.joinDisabled) {
+            return;
+        }
+        this.setState({joinDisabled: true});
+        e.stopPropagation();
+        console.log("Joining room!")
+        fetch('/api/chat/room/join/' + room.slug, {
+            method: 'POST',
+        })
+        .then(res => {
+            if (res.status === 200) {
+                // this.refs.roomsAlert.notificationAlert({
+                //     place: 'tr',
+                //     message: 'Joining ' + room.name + '...',
+                //     type: 'dark',
+                //     autoDismiss: 8
+                // });
+                fetch('/api/chat/room/fetch/' + room.slug)
+                .then(res => res.json())
+                .then(payload => {
+                    var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                    var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
+                    this.setState({
+                        messages: payload.messages,
+                        currentRoomID: payload.room._id,
+                        currentRoomSlug: payload.room.slug,
+                        currentRoomName: payload.room.name,
+                        currentRoomDescription: payload.room.description,
+                        currentRoomMessage: payload.room.welcomeMessage,
+                        currentRoomMembers: currentRoomMembers,
+                        currentRoomVisitors: currentRoomVisitors,
+                        currentRoomPrivacy: payload.room.public
+                    });
+                    scrollToBottom();
+                    this.setState({leaveDisabled: false, joinDisabled: false});
+                });
+                fetch('/api/chat/room/fetch-joined/')
+                    .then(res => res.json())
+                    .then(payload => {
+                        console.log(payload)
+                        this.setState({ joinedRooms: payload });
+                });
+
+                fetch('/api/chat/room/fetch-public/')
+                    .then(res => res.json())
+                    .then(payload => {
+                        console.log(payload)
+                        this.setState({ publicRooms: payload });
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            this.setState({ alertBox: 'Error joining room! Please try again.' });
+        });
+    }
+
+    leaveRoom = (room, e) => {
+        console.log(this.state.leaveDisabled)
+        if (this.state.leaveDisabled) {
+            return;
+        }
+        this.setState({leaveDisabled: true});
+        e.stopPropagation();
+        console.log("Leaving room!")
+        fetch('/api/chat/room/leave/' + room.slug, {
+            method: 'POST',
+        })
+        .then(res => {
+            if (res.status === 200) {
+                // this.refs.roomsAlert.notificationAlert({
+                //     place: 'tr',
+                //     message: 'Leaving ' + room.name + '...',
+                //     type: 'dark',
+                //     autoDismiss: 8
+                // });
+                fetch('/api/chat/room/fetch/' + room.slug)
+                .then(res => res.json())
+                .then(payload => {
+                    var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                    var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
+                    this.setState({
+                        messages: payload.messages,
+                        currentRoomID: payload.room._id,
+                        currentRoomSlug: payload.room.slug,
+                        currentRoomName: payload.room.name,
+                        currentRoomDescription: payload.room.description,
+                        currentRoomMessage: payload.room.welcomeMessage,
+                        currentRoomMembers: currentRoomMembers,
+                        currentRoomVisitors: currentRoomVisitors,
+                        currentRoomPrivacy: payload.room.public
+                    });
+                    scrollToBottom();
+                    this.setState({leaveDisabled: false, joinDisabled: false});
+                });
+                fetch('/api/chat/room/fetch-joined/')
+                    .then(res => res.json())
+                    .then(payload => {
+                        console.log(payload)
+                        this.setState({ joinedRooms: payload });
+                });
+
+                fetch('/api/chat/room/fetch-public/')
+                    .then(res => res.json())
+                    .then(payload => {
+                        console.log(payload)
+                        this.setState({ publicRooms: payload });
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            this.setState({ alertBox: 'Error leaving room! Please try again.' });
         });
     }
 
@@ -544,8 +732,12 @@ class ChatDrawer extends Component {
         return (
             <main className="chatDrawer" style={style}>
                 <RoomList
+                    joinDisabled={this.state.joinDisabled}
+                    leaveDisabled={this.state.leaveDisabled}
                     currentRoom={this.state.currentRoomID}
                     switchRoom={this.switchRoom.bind(this)}
+                    joinRoom={this.joinRoom.bind(this)}
+                    leaveRoom={this.leaveRoom.bind(this)}
                     joinedRooms={this.state.joinedRooms}
                     publicRooms={this.state.publicRooms}
                 />

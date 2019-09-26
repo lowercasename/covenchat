@@ -71,6 +71,7 @@ app.use(router);
 
 // var globalCoven = new Room({
 //   name: 'Global Coven',
+//   slug: 'global-coven',
 //   description: '🌙🔮 All are welcome and none are refused entry to the Global Coven! 🔮🌙',
 //   lastUpdated: new Date(),
 //   public: true
