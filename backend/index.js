@@ -12,7 +12,7 @@ const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
 const cookieParser = require('cookie-parser');
 
-app.use(morgan('tiny'))
+if (process.env.NODE_ENV != "production") app.use(morgan('tiny'));
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
