@@ -9,6 +9,7 @@
     width: 200px;
     border-right: 1px solid rgba(0,0,0,0.5);
     padding: 10px 10px 10px 10px;
+    position: relative;
 }
 
 .roomList header, .userList header {
@@ -54,12 +55,14 @@
     position: relative;
 }
 
-.userListInner {
+.userListInner,
+.roomListInner {
     overflow-y: scroll;
     height: calc(100vh - 110px);
 }
 
-.manageCovenNav {
+.manageCovenNav,
+.roomActionsNav {
     position: absolute;
     bottom: 10px;
     width: 180px;
@@ -91,7 +94,7 @@
     background: none;
     color: var(--white);
     border: 0;
-    padding: 5px;
+    padding: 0;
     font-size: 1rem;
     flex-grow: 1;
     margin: 0;

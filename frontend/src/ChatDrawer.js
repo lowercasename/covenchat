@@ -54,11 +54,11 @@ class MessageList extends Component {
                             <span>
                                 {dateObject.getDate() + " " + dateObject.toLocaleString('default', { month: 'long' }) + " " + dateObject.getFullYear()}
                             </span>
-                            
+
                         </li>
                     )
                 }
-               
+
             }
         }
         return (
@@ -81,7 +81,7 @@ class MessageList extends Component {
                                                 {message.user.username}
                                             </span>
                                         </span>
-                                    
+
                                         <span className="messageContent">
                                             {message.content}
                                         </span>
@@ -104,7 +104,7 @@ class MessageList extends Component {
                                                                 alt={card.name}
                                                             />
                                                         </Tooltip>
-                                                        
+
                                                     )
                                                 })}
                                             </div>
@@ -378,7 +378,6 @@ class RoomList extends Component {
                                 }
                                 </li>
                             </Tooltip>
-                            
                         )
                     })}
                 </ul>
@@ -418,6 +417,28 @@ class RoomList extends Component {
                         )
                     })}
                 </ul>
+                <nav
+                    className="roomActionsNav"
+                >
+                    {!this.props.currentRoomMembers.some(m => m.user.username === this.props.user.username) &&
+                        <button
+                            onClick={(e) => {this.props.joinRoom(this.props.currentRoomSlug, e)}}
+                            className="full-width"
+                            disabled={this.props.joinDisabled}
+                        >
+                            <FontAwesomeIcon icon="door-closed"/> Join Coven
+                        </button>
+                    }
+                    {this.props.currentRoomMembers.some(m => m.user.username === this.props.user.username) &&
+                        <button
+                            onClick={(e) => {this.props.leaveRoom(this.props.currentRoomSlug, e)}}
+                            className="full-width"
+                            disabled={this.props.leaveDisabled}
+                        >
+                            <FontAwesomeIcon icon="door-open"/> Leave Coven
+                        </button>
+                    }
+                </nav>
             </nav>
         )
     }
@@ -803,7 +824,7 @@ class ChatDrawer extends Component {
         this.setState({joinDisabled: true});
         e.stopPropagation();
         console.log("Joining room!")
-        fetch('/api/chat/room/join/' + room.slug, {
+        fetch('/api/chat/room/join/' + room, {
             method: 'POST',
         })
         .then(res => {
@@ -814,7 +835,7 @@ class ChatDrawer extends Component {
                 //     type: 'dark',
                 //     autoDismiss: 8
                 // });
-                fetch('/api/chat/room/fetch/' + room.slug)
+                fetch('/api/chat/room/fetch/' + room)
                 .then(res => res.json())
                 .then(payload => {
                     var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
@@ -862,7 +883,7 @@ class ChatDrawer extends Component {
         this.setState({leaveDisabled: true});
         e.stopPropagation();
         console.log("Leaving room!")
-        fetch('/api/chat/room/leave/' + room.slug, {
+        fetch('/api/chat/room/leave/' + room, {
             method: 'POST',
         })
         .then(res => {
@@ -873,7 +894,7 @@ class ChatDrawer extends Component {
                 //     type: 'dark',
                 //     autoDismiss: 8
                 // });
-                fetch('/api/chat/room/fetch/' + room.slug)
+                fetch('/api/chat/room/fetch/' + room)
                 .then(res => res.json())
                 .then(payload => {
                     var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
@@ -919,9 +940,12 @@ class ChatDrawer extends Component {
         return (
             <main className="chatDrawer" style={style}>
                 <RoomList
+                    user={this.state.user}
                     joinDisabled={this.state.joinDisabled}
                     leaveDisabled={this.state.leaveDisabled}
-                    currentRoom={this.state.currentRoomID}
+                    currentRoomID={this.state.currentRoomID}
+                    currentRoomSlug={this.state.currentRoomSlug}
+                    currentRoomMembers={this.state.currentRoomMembers}
                     switchRoom={this.switchRoom.bind(this)}
                     joinRoom={this.joinRoom.bind(this)}
                     leaveRoom={this.leaveRoom.bind(this)}
@@ -938,7 +962,7 @@ class ChatDrawer extends Component {
                             <Textarea
                                 id="message"
                                 autoComplete="off"
-                                placeholder={"Message " + this.state.currentRoomName}
+                                // placeholder={"Message " + this.state.currentRoomName}
                                 onChange={this.handleChange}
                                 onKeyDown={this.onEnterPress}
                                 value={this.state.message}
