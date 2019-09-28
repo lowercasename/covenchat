@@ -113,20 +113,57 @@
     padding: 10px 5px 0px 5px;
 }
 
-.messageList li {
+.messageList .messageContainer {
     list-style-type: none;
     margin: 0;
-    padding: 0;
-    margin-bottom: 5px;
-    /* display: flex;   */
+    padding: 2px 0;
+    border-radius: 6px;
+    transition: 300ms;
+}
+.messageList .messageContainer .message,
+.messageList .messageContainer .tarot,
+.messageList .messageContainer .runes,
+.messageList .messageContainer .action {
     text-indent: -43px;
     margin-left: 45px;
     user-select: text;
 }
 
+.dateMessage {
+    list-style-type: none;
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+    text-indent: 0 !important;
+    margin: 1rem 0 !important;
+    opacity: 0.7;
+    font-weight: 700;
+    color: var(--green)
+}
+
+.dateMessage > span{
+    position: relative;
+    display: inline-block;
+}
+.dateMessage > span:before, .dateMessage > span:after{
+    content: '';
+    position: absolute;
+    top: 50%;
+    border-bottom: 1px solid;
+    width: 9999px; /* A hack! A palpable hack! */
+    margin: 0 10px;
+    opacity: 0.5;
+}
+.dateMessage > span:before{
+    right: 100%;
+}
+.dateMessage > span:after{
+    left: 100%;
+}
+
 .messageTimestamp {
-    font-family: 'Roboto Condensed', sans-serif;
-    opacity: 0.3;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    opacity: 0.4;
     padding-right: 8px;
     user-select: text;
 }
@@ -134,12 +171,24 @@
 .messageAuthor {
     font-weight: 700;
     padding-right: 5px;
-    /* color: var(--green); */
     user-select: text;
 }
 
+.message .hidden {
+    opacity: 0;
+    transition: 300ms;
+}
+
+.message .hidden:hover {
+    opacity: 1;
+}
+
+.messageContainer:hover {
+    background: #37204233;
+}
+
 .messageContent {
-    opacity: 0.9;
+    opacity: 1;
     user-select: text;
 }
 
@@ -154,32 +203,45 @@
 .messageList .alert {
     text-align: center;
     opacity: 0.7;
+    color: var(--green)
 }
 
 .spread {
     display: flex;
-    /* width: 330px; */
     justify-content: flex-start;
     flex-wrap: wrap;
     margin-bottom: 10px;
+}
+
+.spread .tarotContainer {
+    margin-right: 10px;
+    margin-top: 10px;
+    width: 100px;
+    height: 170px;
+}
+
+.spread .runeContainer {
+    margin-right: 10px;
+    margin-top: 10px;
+    width: 50px;
+    height: 67px;
 }
 
 .tarotCard {
     width: 100px;
     height: 170px;
     box-shadow: 2px 2px 3px rgba(0,0,0,0.5);
-    margin-right: 10px;
-    margin-top: 10px;
     border-radius: 6px;
+    position: relative;
+    left: 40px;
 }
 
 .runestone {
     width: 50px;
     height: 67px;
     filter: drop-shadow(4px 4px 3px rgba(0,0,0,0.5));
-    margin-right: 10px;
-    margin-top: 10px;
-    /* border-radius: 6px; */
+    position: relative;
+    left: 40px;
 }
 
 .userActive, .userInactive, .userBusy {

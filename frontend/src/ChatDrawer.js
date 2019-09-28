@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
+import { Tooltip } from 'react-tippy';
+import 'react-tippy/dist/tippy.css'
 import Textarea from 'react-textarea-autosize';
 import NotificationAlert from 'react-notification-alert';
 import "react-notification-alert/dist/animate.css";
@@ -25,51 +27,113 @@ class MessageList extends Component {
             var dateObject = new Date(timestamp);
             return addZero(dateObject.getHours()) + ":" + addZero(dateObject.getMinutes());
         }
+        function sameDay(d1, d2) {
+            var dateObject1 = new Date(d1);
+            var dateObject2 = new Date(d2);
+            return dateObject1.getFullYear() === dateObject2.getFullYear() &&
+                dateObject1.getMonth() === dateObject2.getMonth() &&
+                dateObject1.getDate() === dateObject2.getDate();
+        }
+        function isToday(timestamp) {
+            var dateObject = new Date(timestamp);
+            var today = new Date();
+            return dateObject.getFullYear() === today.getFullYear() &&
+                dateObject.getMonth() === today.getMonth() &&
+                dateObject.getDate() === today.getDate();
+        }
+        function dayMessage(d1, d2) {
+            if (!sameDay(d1, d2)) {
+                var dateObject = new Date(d1);
+                if (isToday(dateObject)) {
+                    return (
+                        <li className="dateMessage"><span>Today</span></li>
+                    )
+                } else {
+                    return (
+                        <li className="dateMessage">
+                            <span>
+                                {dateObject.getDate() + " " + dateObject.toLocaleString('default', { month: 'long' }) + " " + dateObject.getFullYear()}
+                            </span>
+                            
+                        </li>
+                    )
+                }
+               
+            }
+        }
         return (
             <div className="chatWindow" id="chatWindow" data-simplebar>
                 <ul className="messageList">
-                    {this.props.messages.map(message => {
+                    {this.props.messages.map((message, i, arr) => {
+                        let lastTimestamp = arr[i-1] ? arr[i-1].timestamp : false;
+                        let lastAuthor = arr[i-1] ? arr[i-1].user.username : false;
+                        let lastType = arr[i-1] ? arr[i-1].type : false;
                         return (
-                            <li key={message._id} className={message.type}>
-                                <span className="messageTimestamp">
-                                    {displayTimestamp(message.timestamp)}
-                                </span>
-                                <span className="messageAuthor">
-                                    {message.user.username}
-                                </span>
-                                <span className="messageContent">
-                                    {message.content}
-                                </span>
-                                { message.type === "tarot" && (
-                                    <div className="spread">
-                                        {message.tarot.map((card, index) => {
-                                            return (
-                                                <img
-                                                    key={message._id + "_image_" + index}
-                                                    className="tarotCard"
-                                                    src={card.image}
-                                                    alt={card.name}
-                                                    title={card.name}
-                                                />
-                                            )
-                                        })}
+                            <>
+                                {dayMessage(message.timestamp, lastTimestamp)}
+                                <li key={message._id} className="messageContainer">
+                                    <div key={message._id} className={message.type}>
+                                        <span className={["messageMetadata", (message.user.username === lastAuthor) && (lastType === "message") ? "hidden" : ""].join(' ')}>
+                                            <span className="messageTimestamp">
+                                                {displayTimestamp(message.timestamp)}
+                                            </span>
+                                            <span className="messageAuthor">
+                                                {message.user.username}
+                                            </span>
+                                        </span>
+                                    
+                                        <span className="messageContent">
+                                            {message.content}
+                                        </span>
+                                        { message.type === "tarot" && (
+                                            <div className="spread">
+                                                {message.tarot.map((card, index) => {
+                                                    return (
+                                                        <Tooltip
+                                                            title={"<strong>" + card.name + "</strong><br><hr>" + (card.keywords ? card.keywords : "")}
+                                                            position="bottom"
+                                                            trigger="mouseenter"
+                                                            theme="left"
+                                                            delay={300}
+                                                            className="tarotContainer"
+                                                        >
+                                                            <img
+                                                                key={message._id + "_image_" + index}
+                                                                className="tarotCard"
+                                                                src={card.image}
+                                                                alt={card.name}
+                                                            />
+                                                        </Tooltip>
+                                                        
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                        { message.type === "runes" && (
+                                            <div className="spread">
+                                                {message.runes.map(rune => {
+                                                    return (
+                                                        <Tooltip
+                                                            title={"<strong>" + rune.name + "</strong><br><hr>" + (rune.meaning ? rune.meaning : "")}
+                                                            position="bottom"
+                                                            trigger="mouseenter"
+                                                            theme="left"
+                                                            delay={300}
+                                                            className="runeContainer"
+                                                        >
+                                                            <img
+                                                                className="runestone"
+                                                                src={rune.image}
+                                                                alt={rune.name}
+                                                            />
+                                                        </Tooltip>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                                { message.type === "runes" && (
-                                    <div className="spread">
-                                        {message.runes.map(rune => {
-                                            return (
-                                                <img
-                                                    className="runestone"
-                                                    src={rune.image}
-                                                    alt={rune.name}
-                                                    title={rune.name}
-                                                />
-                                            )
-                                        })}
-                                    </div>
-                                )}
-                            </li>
+                                </li>
+                            </>
                         )
                     })}
                 </ul>
@@ -190,6 +254,19 @@ class RoomList extends Component {
     };
 
     render() {
+        function unreadIndicator(number) {
+            if (number === 0) {
+                return false;
+            } else if (number > 50) {
+                return (
+                    <span className="badge">50+</span>
+                )
+            } else {
+                return (
+                    <span className="badge">{number}</span>
+                )
+            }
+        }
         return (
             <nav className="roomList">
                 <NotificationAlert ref="roomsAlert" />
@@ -256,25 +333,32 @@ class RoomList extends Component {
                 <ul>
                     {this.props.joinedRooms.map(room => {
                         return (
-                            <li
-                                key={room._id}
-                                className={(room._id === this.props.currentRoom ? "active" : "")}
+                            <Tooltip
+                                title={room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
+                                position="right"
+                                trigger="mouseenter"
+                                theme="left"
+                                delay={300}
                             >
-                                <div
+                                <li
+                                    key={room._id}
+                                    className={(room._id === this.props.currentRoom ? "active" : "")}
                                     onClick={() => {this.props.switchRoom(room.slug)}}
                                 >
                                     {room.name}
-                                </div>
-                                {room._id === this.props.currentRoom &&
-                                <button
-                                    onClick={(e) => {this.props.leaveRoom(room, e)}}
-                                    className="small"
-                                    disabled={this.props.leaveDisabled}
-                                >
-                                    <FontAwesomeIcon icon="minus"/>
-                                </button>
-                            }
-                            </li>
+                                    {unreadIndicator(room.unreadMessages)}
+                                    {room._id === this.props.currentRoom &&
+                                    <button
+                                        onClick={(e) => {this.props.leaveRoom(room, e)}}
+                                        className="small"
+                                        disabled={this.props.leaveDisabled}
+                                    >
+                                        <FontAwesomeIcon icon="minus"/>
+                                    </button>
+                                }
+                                </li>
+                            </Tooltip>
+                            
                         )
                     })}
                 </ul>
@@ -284,25 +368,33 @@ class RoomList extends Component {
                 <ul>
                     {this.props.publicRooms.map(room => {
                         return (
-                            <li
-                                key={room._id}
-                                className={(room._id === this.props.currentRoom ? "active" : "")}
+                            <Tooltip
+                                title={room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
+                                position="right"
+                                trigger="mouseenter"
+                                theme="left"
+                                delay={300}
                             >
-                                <div
-                                    onClick={() => {this.props.switchRoom(room.slug)}}
+                                <li
+                                    key={room._id}
+                                    className={(room._id === this.props.currentRoom ? "active" : "")}
                                 >
-                                    {room.name}
-                                </div>
-                                {room._id === this.props.currentRoom &&
-                                    <button
-                                        onClick={(e) => {this.props.joinRoom(room, e)}}
-                                        className="small"
-                                        disabled={this.props.joinDisabled}
+                                    <div
+                                        onClick={() => {this.props.switchRoom(room.slug)}}
                                     >
-                                        <FontAwesomeIcon icon="plus"/>
-                                    </button>
-                                }
-                            </li>
+                                        {room.name}
+                                    </div>
+                                    {room._id === this.props.currentRoom &&
+                                        <button
+                                            onClick={(e) => {this.props.joinRoom(room, e)}}
+                                            className="small"
+                                            disabled={this.props.joinDisabled}
+                                        >
+                                            <FontAwesomeIcon icon="plus"/>
+                                        </button>
+                                    }
+                                </li>
+                            </Tooltip>
                         )
                     })}
                 </ul>
@@ -458,10 +550,26 @@ class ChatDrawer extends Component {
         var channel = pusher.subscribe('messages');
         var generalChannel = pusher.subscribe('general');
         channel.bind('message-sent', data => {
-            this.setState({
-                messages: [...this.state.messages, data]
-            });
-            scrollToBottom();
+            if (this.state.currentRoomSlug === data.room.slug) {
+                this.setState({
+                    messages: [...this.state.messages, data]
+                });
+                scrollToBottom();
+            } else {
+                console.log("Message in another room")
+                if (this.state.joinedRooms.some(r => r.slug === data.room.slug)) {
+                    console.log("It's a room you're a member of!")
+                    var joinedRooms = [...this.state.joinedRooms];
+                    joinedRooms.forEach(r => {
+                        if (r.slug === data.room.slug) {
+                            r.unreadMessages++;
+                        }
+                    })
+                    this.setState({
+                        joinedRooms: joinedRooms
+                    })
+                }
+            }
         });
         generalChannel.bind('room-created', data => {
             fetch('/api/chat/room/fetch/' + data.slug)
@@ -535,6 +643,19 @@ class ChatDrawer extends Component {
                     currentRoomMembers: currentRoomMembers
                 })
 
+            }
+        });
+        generalChannel.bind('messages-read', data => {
+            if (this.state.currentRoomSlug === data.room) {
+                var joinedRooms = [...this.state.joinedRooms];
+                joinedRooms.forEach(r => {
+                    if (r.slug === data.room) {
+                        r.unreadMessages = 0;
+                    }
+                })
+                this.setState({
+                    joinedRooms: joinedRooms
+                })
             }
         });
     }
@@ -742,7 +863,9 @@ class ChatDrawer extends Component {
                     publicRooms={this.state.publicRooms}
                 />
                 <section className="chatInterface">
-                    <MessageList messages={this.state.messages} />
+                    <MessageList
+                        messages={this.state.messages}
+                    />
                     <form
                         className="chatForm"
                         onSubmit={this.handleSubmit}

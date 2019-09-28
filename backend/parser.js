@@ -11,6 +11,7 @@ function drawTarot(number = 1) {
             i--;
             continue;
         }
+        console.log(card)
         tarotArray.push(card);
     }
     return tarotArray;

@@ -1,124 +1,148 @@
 {
-   "elderFuthark":[
+   "elderFuthark": [
       {
-         "slug":"fehu",
-         "name":"Fehu",
-         "image":"/runes/fehu.png"
+         "slug": "fehu",
+         "name": "Fehu",
+         "meaning": "Cattle",
+         "image": "/runes/fehu.png"
       },
       {
-         "slug":"uruz",
-         "name":"Uruz",
-         "image":"/runes/uruz.png"
+         "slug": "uruz",
+         "name": "Uruz",
+         "meaning": "Aurochs",
+         "image": "/runes/uruz.png"
       },
       {
-         "slug":"thurisaz",
-         "name":"Thurisaz",
-         "image":"/runes/thurisaz.png"
+         "slug": "thurisaz",
+         "name": "Thurisaz",
+         "meaning": "Hawthorn",
+         "image": "/runes/thurisaz.png"
       },
       {
-         "slug":"ansuz",
-         "name":"Ansuz",
-         "image":"/runes/ansuz.png"
+         "slug": "ansuz",
+         "name": "Ansuz",
+         "meaning": "The god Odin",
+         "image": "/runes/ansuz.png"
       },
       {
-         "slug":"raido",
-         "name":"Raido",
-         "image":"/runes/raido.png"
+         "slug": "raido",
+         "name": "Raido",
+         "meaning": "Ride, wheel",
+         "image": "/runes/raido.png"
       },
       {
-         "slug":"kenaz",
-         "name":"Kenaz",
-         "image":"/runes/kenaz.png"
+         "slug": "kenaz",
+         "name": "Kenaz",
+         "meaning": "Hearth, torch",
+         "image": "/runes/kenaz.png"
       },
       {
-         "slug":"gebo",
-         "name":"Gebo",
-         "image":"/runes/gebo.png"
+         "slug": "gebo",
+         "name": "Gebo",
+         "meaning": "Gift",
+         "image": "/runes/gebo.png"
       },
       {
-         "slug":"wunjo",
-         "name":"Wunjo",
-         "image":"/runes/wunjo.png"
+         "slug": "wunjo",
+         "name": "Wunjo",
+         "meaning": "Joy",
+         "image": "/runes/wunjo.png"
       },
       {
-         "slug":"hagalaz",
-         "name":"Hagalaz",
-         "image":"/runes/hagalaz.png"
+         "slug": "hagalaz",
+         "name": "Hagalaz",
+         "meaning": "Hail",
+         "image": "/runes/hagalaz.png"
       },
       {
-         "slug":"naudiz",
-         "name":"Naudiz",
-         "image":"/runes/naudiz.png"
+         "slug": "naudiz",
+         "name": "Naudiz",
+         "meaning": "Need",
+         "image": "/runes/naudiz.png"
       },
       {
-         "slug":"isaz",
-         "name":"Isaz",
-         "image":"/runes/isaz.png"
+         "slug": "isaz",
+         "name": "Isaz",
+         "meaning": "Ice",
+         "image": "/runes/isaz.png"
       },
       {
-         "slug":"jera",
-         "name":"Jera",
-         "image":"/runes/jera.png"
+         "slug": "jera",
+         "name": "Jera",
+         "meaning": "Harvest, year",
+         "image": "/runes/jera.png"
       },
       {
-         "slug":"eihwaz",
-         "name":"Eihwaz",
-         "image":"/runes/eihwaz.png"
+         "slug": "eihwaz",
+         "name": "Eihwaz",
+         "meaning": "Yew tree",
+         "image": "/runes/eihwaz.png"
       },
       {
-         "slug":"perthro",
-         "name":"Perthro",
-         "image":"/runes/perthro.png"
+         "slug": "perthro",
+         "name": "Perthro",
+         "meaning": "Games",
+         "image": "/runes/perthro.png"
       },
       {
-         "slug":"algiz",
-         "name":"Algiz",
-         "image":"/runes/algiz.png"
+         "slug": "algiz",
+         "name": "Algiz",
+         "meaning": "Elk-sedge",
+         "image": "/runes/algiz.png"
       },
       {
-         "slug":"sowilo",
-         "name":"Sowilo",
-         "image":"/runes/sowilo.png"
+         "slug": "sowilo",
+         "name": "Sowilo",
+         "meaning": "Sun",
+         "image": "/runes/sowilo.png"
       },
       {
-         "slug":"teiwaz",
-         "name":"Teiwaz",
-         "image":"/runes/teiwaz.png"
+         "slug": "teiwaz",
+         "name": "Teiwaz",
+         "meaning": "The god Týr",
+         "image": "/runes/teiwaz.png"
       },
       {
-         "slug":"berkana",
-         "name":"Berkana",
-         "image":"/runes/berkana.png"
+         "slug": "berkana",
+         "name": "Berkana",
+         "meaning": "Poplar tree",
+         "image": "/runes/berkana.png"
       },
       {
-         "slug":"ehwaz",
-         "name":"Ehwaz",
-         "image":"/runes/ehwaz.png"
+         "slug": "ehwaz",
+         "name": "Ehwaz",
+         "meaning": "Horse",
+         "image": "/runes/ehwaz.png"
       },
       {
-         "slug":"mannaz",
-         "name":"Mannaz",
-         "image":"/runes/mannaz.png"
+         "slug": "mannaz",
+         "name": "Mannaz",
+         "meaning": "Man",
+         "image": "/runes/mannaz.png"
       },
       {
-         "slug":"laguz",
-         "name":"Laguz",
-         "image":"/runes/laguz.png"
+         "slug": "laguz",
+         "name": "Laguz",
+         "meaning": "Water",
+         "image": "/runes/laguz.png"
       },
       {
-         "slug":"ingwaz",
-         "name":"Ingwaz",
-         "image":"/runes/ingwaz.png"
+         "slug": "ingwaz",
+         "name": "Ingwaz",
+         "meaning": "The god Ing",
+         "image": "/runes/ingwaz.png"
       },
       {
-         "slug":"othala",
-         "name":"Othala",
-         "image":"/runes/othala.png"
+         "slug": "othala",
+         "name": "Othala",
+         "meaning": "Home",
+         "image": "/runes/othala.png"
       },
       {
-         "slug":"dagaz",
-         "name":"Dagaz",
-         "image":"/runes/dagaz.png"
+         "slug": "dagaz",
+         "name": "Dagaz",
+         "meaning": "Dawn",
+         "image": "/runes/dagaz.png"
       }
    ]
 }

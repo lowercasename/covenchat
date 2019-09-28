@@ -68,7 +68,7 @@ class Dashboard extends Component {
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
                     <div className="navIcon" >
-                        <FontAwesomeIcon icon="praying-hands" />
+                        <img src="candle.svg" style={{width:"30px"}}></img>
                     </div>
                     <div className="navIcon" onClick={this.logOut} >
                         <FontAwesomeIcon icon="sign-out-alt" />

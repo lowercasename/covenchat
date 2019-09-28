@@ -18,6 +18,7 @@
     "react-scripts": "3.1.1",
     "react-slugify": "^1.2.0",
     "react-textarea-autosize": "^7.1.0",
+    "react-tippy": "^1.2.3",
     "reactstrap": "^8.0.1",
     "serve": "^11.1.0",
     "simplebar": "^4.2.3"

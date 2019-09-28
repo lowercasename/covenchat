@@ -3,13 +3,15 @@ const mongoose = require('mongoose');
 var tarotSchema = new mongoose.Schema({
     slug: String,
     name: String,
-    image: String
+    image: String,
+    keywords: String
 })
 
 var runeSchema = new mongoose.Schema({
     slug: String,
     name: String,
-    image: String
+    image: String,
+    meaning: String
 })
 
 var messageSchema = new mongoose.Schema({
@@ -19,7 +21,8 @@ var messageSchema = new mongoose.Schema({
     room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room'},
     content: String,
     tarot: [tarotSchema],
-    runes: [runeSchema]
+    runes: [runeSchema],
+    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 
 module.exports = mongoose.model('Message', messageSchema);
