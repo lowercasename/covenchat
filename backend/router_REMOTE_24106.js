@@ -161,14 +161,13 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	if (!parsedMessage.isValid)
 	return false;
 	var message = new Message({
-		user: req.user._id,
+		user: req.body.userID,
 		timestamp: new Date(),
 		type: parsedMessage.type,
 		room: req.body.room,
 		content: parsedMessage.content,
 		tarot: parsedMessage.tarot,
-		runes: parsedMessage.runes,
-		readBy: [req.user._id]
+		runes: parsedMessage.runes
 	});
 	message.save()
 	.then(message => {
@@ -178,23 +177,6 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 		.then(retrievedMessage => {
 			pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
 		})
-	})
-});
-
-router.post('/api/chat/message/read/:messageID', authorizeUser, async function(req,res) {
-	Message.findById(req.params.messageID)
-	.then(message => {
-		// Check if user is already marked as having read the message
-		if (!message.readBy.some(u => u.equals(req.user._id))){
-			message.readBy.push(req.user._id)
-			message.save()
-			.then(response => {
-				pusher.trigger('messages', 'message-read', {user: req.user, message: message});
-				res.sendStatus(200);
-			})
-		} else {
-			res.sendStatus(400);
-		}
 	})
 });
 
@@ -219,25 +201,10 @@ router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
 	})
 });
 
-router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res) {
+router.get('/api/chat/room/fetch-joined', authorizeUser, function(req,res) {
 	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}}).sort('name')
-	.then(async rooms => {
-		async function getUnreadMessages (rooms) {
-			const promiseArray = rooms.map(async room => {
-				const unreadMessages = await Message.find({
-					room: room._id,
-					readBy: { $ne: req.user._id }
-				})
-				.then(unreadMessages => {
-					return unreadMessages.length;
-				})
-				return {...room._doc, unreadMessages: unreadMessages};
-			});
-			const finalArray = await Promise.all(promiseArray);
-			return finalArray;
-		}
-		let roomsWithUnreadIndicators = await getUnreadMessages(rooms);
-		res.json(roomsWithUnreadIndicators);
+	.then(rooms => {
+		res.json(rooms);
 	})
 });
 
@@ -251,19 +218,10 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 		room: room._id
 	})
 	.populate('user');
-	// Mark all messages in room as read (simple hack for now)
-	Message.update({
-		room: room._id,
-		readBy: { $ne: req.user._id }
-	},
-	{ $push: { readBy: req.user._id } }, {multi: true})
-	.then(response => {
-		pusher.trigger('general', 'messages-read', {user: req.user, room: req.params.room})
-		res.status(200)
-		.json({
-			messages: messages,
-			room: room
-		});
+	res.status(200)
+	.json({
+		messages: messages,
+		room: room
 	});
 });
 

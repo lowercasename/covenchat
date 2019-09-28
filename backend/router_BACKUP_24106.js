@@ -181,6 +181,7 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	})
 });
 
+<<<<<<< HEAD
 router.post('/api/chat/message/read/:messageID', authorizeUser, async function(req,res) {
 	Message.findById(req.params.messageID)
 	.then(message => {
@@ -196,13 +197,14 @@ router.post('/api/chat/message/read/:messageID', authorizeUser, async function(r
 			res.sendStatus(400);
 		}
 	})
-});
 
+=======
 router.get('/api/chat/room/fetch-all', authorizeUser, function(req,res) {
 	var rooms = Room.find()
 	.then(rooms => {
 		res.json(rooms);
 	})
+>>>>>>> 4f95874703bfbb3da500bf334a9072b19a4e9dce
 });
 
 router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {

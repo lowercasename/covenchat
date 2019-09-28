@@ -103,6 +103,12 @@ button.small {
   border: 0;
 }
 
+button[disabled] {
+    background: #c6c6c6;
+    color: #6f6f6f;
+    cursor: default;
+}
+
 label {
   display: block;
   margin-bottom: 0.25rem;

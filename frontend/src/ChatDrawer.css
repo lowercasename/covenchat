@@ -51,6 +51,18 @@
     width: 200px;
     border-left: 1px solid rgba(0,0,0,0.5);
     padding: 10px 10px 10px 10px;
+    position: relative;
+}
+
+.userListInner {
+    overflow-y: scroll;
+    height: calc(100vh - 110px);
+}
+
+.manageCovenNav {
+    position: absolute;
+    bottom: 10px;
+    width: 180px;
 }
 
 .chatInterface {
@@ -69,14 +81,13 @@
 .chatForm {
     padding: 5px;
     display: flex;
-    align-items: center;
-    height: 40px;
+    align-items: flex-start;
     background: rgba(255,255,255,0.2);
     border-radius: 20px;
     margin: 10px;
 }
 
-.chatForm input {
+.chatForm textarea {
     background: none;
     color: var(--white);
     border: 0;
@@ -98,6 +109,8 @@
     width: 30px;
     cursor: pointer;
     margin: 0;
+    height: 29px;
+    padding: 0;
 }
 
 .chatForm button:hover {

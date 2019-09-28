@@ -9,9 +9,9 @@ const authorizeUser = require('./authorizer');
 
 // WEBSOCKETS
 const pusher = new Pusher({
-	appId: process.env.PUSHER_APP_ID,
-	key: process.env.PUSHER_APP_KEY,
-	secret: process.env.PUSHER_APP_SECRET,
+	appId: '864592',
+	key: '7155c345db324b8f1ba5',
+	secret: '53db929c783b5ee700ee',
 	cluster: 'eu',
 	useTLS: true
 });
@@ -57,12 +57,6 @@ router.post('/api/user/authenticate', function(req, res) {
 				}
 			});
 		}
-	});
-});
-
-router.get('/api/pusher/getkey', authorizeUser, function(req, res) {
-	res.status(200).json({
-		key: process.env.PUSHER_APP_KEY
 	});
 });
 
@@ -196,13 +190,7 @@ router.post('/api/chat/message/read/:messageID', authorizeUser, async function(r
 			res.sendStatus(400);
 		}
 	})
-});
 
-router.get('/api/chat/room/fetch-all', authorizeUser, function(req,res) {
-	var rooms = Room.find()
-	.then(rooms => {
-		res.json(rooms);
-	})
 });
 
 router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
@@ -278,7 +266,7 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	})
 	room.save()
 	.then(room => {
-		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
+		User.update({_id: req.user._id}, {'memory.lastRoom': roomSlug})
 		.then(response => {
 			pusher.trigger('general', 'room-created', room);
 			res.sendStatus(200);
@@ -291,12 +279,6 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 		slug: req.params.room
 	})
 	.then(room => {
-		console.log(req.user._id)
-		console.log(room.slug)
-		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
-		.then(res => {
-			console.log(res);
-		})
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
 			pusher.trigger('general', 'member-entered-room', {room: room, user: req.user}, req.body.socketId);
@@ -307,8 +289,11 @@ router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
 				room.visitors.push(req.user._id)
 				room.save()
 				.then(room => {
-					pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
-					res.sendStatus(200);
+					User.update({_id: req.user._id}, {'memory.lastRoom': room.slug})
+					.then(response => {
+						pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
+						res.sendStatus(200);
+					});
 				})
 			} else {
 				console.log(req.user.username + " is already a visitor in this room")
@@ -361,8 +346,8 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
 			if (room.visitors.some(v => v.equals(req.user._id))) {
 				room.visitors = room.visitors.filter(v => !v.equals(req.user._id));
 			}
-			// Add user to members array (making them an admin if there's no other members in the room)
-			room.members.push({user: req.user._id, role: (room.members.length == 0 ? 'administrator' : 'member')});
+			// Add user to members array
+			room.members.push({user: req.user._id, role: 'member'});
 			room.save()
 			.then(room => {
 				var message = new Message({
