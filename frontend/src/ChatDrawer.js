@@ -419,9 +419,10 @@ class ChatDrawer extends Component {
         pusher.connection.bind('connected', () => {
             this.setState({socketId: pusher.connection.socket_id});
         });
-        var channel = pusher.subscribe('messages');
+        var messagesChannel = pusher.subscribe('messages');
         var generalChannel = pusher.subscribe('general');
-        channel.bind('message-sent', data => {
+        messagesChannel.bind('message-sent', data => {
+            console.log("Received message push",data)
             if (this.state.currentRoom.slug === data.room.slug) {
                 this.setState({
                     messages: [...this.state.messages, data]
