@@ -275,7 +275,7 @@ label {
 
 .statusBar .statusItem {
     padding: 0 10px;
-    opacity: 0.6;
+    opacity: 0.7;
     display: flex;
     align-items: center;
 }
@@ -297,7 +297,6 @@ label {
 .modal-main {
   position: fixed;
   background: var(--purple);
-  /* color: #111; */
   width: 600px;
   padding: 15px;
   height: auto;
@@ -306,6 +305,8 @@ label {
   transform: translate(-50%,-50%);
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.9);
+  max-height: calc(100vh - 210px);
+  overflow-y: auto;
 }
 
 .modalClose {
@@ -322,6 +323,22 @@ label {
 .modalClose:hover {
   color: var(--green);
   background: var(--purple);
+}
+
+.welcomeMessageClose {
+  background: none;
+  border: 0;
+  color: var(--white);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 150ms;
+  margin: 0;
+  padding: 0;
+  height: 1px;
+}
+.welcomeMessageClose:hover {
+  color: var(--green);
+  background: none;
 }
 
 .modal-main h1 {
@@ -449,10 +466,14 @@ input[type="submit"]:hover {
 }
 
 .badge {
-  font-family: 'Fira Sans Condensed', sans-serif;
   font-size: 0.8rem;
   color: var(--dark-purple);
   background: var(--white);
   border-radius: 10px;
   padding: 0 3px;
+}
+
+.green-toast {
+    background: var(--green) !important;
+    color: var(--dark-purple) !important;
 }

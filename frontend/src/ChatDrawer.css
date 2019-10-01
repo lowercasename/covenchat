@@ -58,14 +58,13 @@
 .userListInner,
 .roomListInner {
     overflow-y: scroll;
-    height: calc(100vh - 110px);
 }
 
-.manageCovenNav,
-.roomActionsNav {
+.roomControls {
     position: absolute;
     bottom: 10px;
     width: 180px;
+    background: var(--purple);
 }
 
 .chatInterface {
@@ -73,6 +72,20 @@
     flex-direction: column;
     flex: 1;
     background: rgba(255,255,255,0.03);
+    width: 100%;
+    max-width:960px;
+}
+
+.welcomeMessage {
+    position: fixed;
+    overflow-y: scroll;
+    background: #805a93;
+    z-index: 100;
+    max-height: 60px;
+    padding: 10px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    border-bottom: 1px solid var(--black);
+    display: flex;
 }
 
 .chatWindow {
@@ -94,7 +107,7 @@
     background: none;
     color: var(--white);
     border: 0;
-    padding: 0;
+    padding: 5px;
     font-size: 1rem;
     flex-grow: 1;
     margin: 0;
@@ -177,11 +190,23 @@
     left: 100%;
 }
 
+/* Silly hack to make sure that a message after a date marker always
+has its date displayed, even when the author is the same as that of
+the previous day's message */
+.dateMessage + .messageContainer .messageMetadata {
+    opacity: 1 !important;
+}
+
 .messageTimestamp {
     font-family: 'Fira Sans Condensed', sans-serif;
     opacity: 0.4;
     padding-right: 8px;
     user-select: text;
+}
+
+.alert .messageTimestamp {
+    position: absolute;
+    left: 7px;
 }
 
 .messageAuthor {
@@ -190,14 +215,14 @@
     user-select: text;
 }
 
-.message .hidden {
+/* .message .hidden {
     opacity: 0;
     transition: 300ms;
 }
 
 .message .hidden:hover {
     opacity: 1;
-}
+} */
 
 .messageContainer:hover {
     background: #37204233;

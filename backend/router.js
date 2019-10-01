@@ -81,6 +81,19 @@ router.get('/api/user/fetch/:userID', authorizeUser, function(req, res) {
 	})
 });
 
+router.get('/api/user/fetch-by-username/:username', authorizeUser, function(req, res) {
+	User.find({username: req.params.username})
+	.then(user => {
+		if (user === undefined || user.length == 0) {
+			res.sendStatus(404);
+		} else {
+			res.status(200).json({
+				user: user
+			});
+		}
+	})
+});
+
 router.post('/api/user/logout', authorizeUser, function(req, res) {
 	res.clearCookie('token').sendStatus(200);
 });
@@ -242,8 +255,15 @@ router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res)
 });
 
 router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) {
+	let targetSlug = 'global-coven';
+	let showWelcomeMessage = true;
+	let roomSlugs = await Room.find({},{ slug: 1 });
+	let arrayOfSlugs = roomSlugs.map(s => s.slug);
+	if (arrayOfSlugs.includes(req.params.room)) {
+		targetSlug = req.params.room;
+	}
 	let room = await Room.findOne({
-		slug: req.params.room
+		slug: targetSlug
 	})
 	.populate('members.user')
 	.populate('visitors');
@@ -251,6 +271,11 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 		room: room._id
 	})
 	.populate('user');
+
+	// Work out if we should be showing this user a welcome message
+	if (room.members.some(m => m.user.equals(req.user._id) && m.showWelcomeMessage == false)) {
+		showWelcomeMessage = false;
+	}
 	// Mark all messages in room as read (simple hack for now)
 	Message.update({
 		room: room._id,
@@ -258,11 +283,12 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	},
 	{ $push: { readBy: req.user._id } }, {multi: true})
 	.then(response => {
-		pusher.trigger('general', 'messages-read', {user: req.user, room: req.params.room})
+		pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug})
 		res.status(200)
 		.json({
 			messages: messages,
-			room: room
+			room: room,
+			showWelcomeMessage: showWelcomeMessage
 		});
 	});
 });
@@ -280,23 +306,86 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	.then(room => {
 		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
 		.then(response => {
-			pusher.trigger('general', 'room-created', room);
+			pusher.trigger('general', 'room-created', {room: room, user: req.user});
 			res.sendStatus(200);
 		})
 	})
 });
 
-router.post('/api/chat/room/enter/:room', authorizeUser, function(req,res) {
+router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
+	const { roomID, roomSlug, roomName, roomDescription, roomWelcomeMessage, roomAdmins, roomMembers } = req.body;
+	Room.findById(roomID)
+	.then(room => {
+		let oldSlug = room.slug;
+		let adminsIDs = roomAdmins.map(a => a.id)
+		let membersIDs = roomMembers.map(a => a.id)
+		room.members.forEach(async (member) => {
+			var oldRole, newRole;
+			oldRole = member.role;
+			member.role = "member";
+
+			if (adminsIDs.includes(member.user.toString())) {
+				member.role = "administrator";
+				newRole = "administrator";
+			} else {
+				newRole = false;
+			}
+			if (oldRole == "member" && newRole == "administrator") {
+				var newAdmin = await User.findById(member.user);
+				var message = new Message({
+					user: req.user._id,
+                    timestamp: new Date(),
+                    type: 'alert',
+                    room: room._id,
+                    content: 'has given administrator privileges to ' + newAdmin.username,
+				})
+				message.save();
+			}
+			if (oldRole == "administrator" && newRole == false) {
+				var newMember = await User.findById(member.user);
+				var message = new Message({
+					user: req.user._id,
+                    timestamp: new Date(),
+                    type: 'alert',
+                    room: room._id,
+                    content: 'has removed administrator privileges from ' + newMember.username,
+				})
+				message.save();
+			}
+		});
+		// Show all users updated welcome message
+		if (room.welcomeMessage != roomWelcomeMessage) {
+			room.members.map(u => u.showWelcomeMessage = true);
+		}
+		room.slug = roomSlug;
+		room.name = roomName;
+		room.description = roomDescription;
+		room.welcomeMessage = roomWelcomeMessage;
+		room.save();
+		var message = new Message({
+			user: req.user._id,
+			timestamp: new Date(),
+			type: 'alert',
+			room: room._id,
+			content: 'has edited the Coven settings',
+		})
+		message.save()
+		.then(response => {
+			User.update({"memory.lastRoom": oldSlug}, { $set: { "memory.lastRoom": roomSlug }})
+			.then(response => {
+				pusher.trigger('general', 'room-edited', room, req.body.socketId);
+				res.sendStatus(200);
+			})
+		})
+	})
+});
+
+router.post('/api/chat/room/enter/:room', authorizeUser, async function(req,res) {
 	Room.findOne({
 		slug: req.params.room
 	})
 	.then(room => {
-		console.log(req.user._id)
-		console.log(room.slug)
-		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
-		.then(res => {
-			console.log(res);
-		})
+		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': req.params.room}});
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
 			pusher.trigger('general', 'member-entered-room', {room: room, user: req.user}, req.body.socketId);
@@ -370,7 +459,7 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
                     timestamp: new Date(),
                     type: 'alert',
                     room: room._id,
-                    content: 'has joined ' + room.name,
+                    content: 'has joined',
 				})
 				message.save()
 				.then(response => {
@@ -396,8 +485,12 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 			console.log(req.user.username + " is already a visitor in " + room.name);
 			res.sendStatus(200);
 		} else {
-			// Add user to visitors array
-			room.visitors.push(req.user._id);
+			// Only add user to visitors array if it's a public room
+			console.log(room.public)
+			if (room.public == true){
+				// Add user to visitors array
+				room.visitors.push(req.user._id);
+			}
 		}
 		room.save()
 		.then(room => {
@@ -406,7 +499,7 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 				timestamp: new Date(),
 				type: 'alert',
 				room: room._id,
-				content: 'has left ' + room.name,
+				content: 'has left',
 			})
 			message.save()
 			.then(response => {
@@ -415,6 +508,48 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 			})
 		});
 	});
+});
+
+router.post('/api/chat/room/hidewelcomemessage/:room', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(room => {
+		room.members.map(m => {
+			if (m.user.equals(req.user._id)) {
+				m.showWelcomeMessage = false;
+			}
+		})
+		room.save()
+		.then(result => {
+			res.sendStatus(200);
+		})
+	})
+});
+
+router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,res) {
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(async (room) => {
+		let user = await User.findById(req.params.userID)
+		if (user) {
+			// Check if user is already in room
+			if (room.members.some(m => m.user.equals(req.params.userID))) {
+				res.sendStatus(500);
+			} else {
+				room.members.push({
+					user: req.params.userID,
+					role: 'member'
+				});
+				room.save()
+				.then(result => {
+					pusher.trigger('general', 'user-invited-to-room', {room: room, user: user}, req.body.socketId);
+					res.sendStatus(200);
+				})
+			}
+		}
+	})
 });
 
 module.exports = router;
