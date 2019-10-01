@@ -20,6 +20,8 @@ app.use(bodyParser.json())
 // app.use(require('express-session')({ secret: 'spoopy skellingtons', resave: false, saveUninitialized: false }));
 app.use(cookieParser());
 
+app.use(cors());
+
 // AUTHENTICATION
 
 passport.use(new LocalStrategy(

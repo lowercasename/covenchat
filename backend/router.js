@@ -339,6 +339,7 @@ router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
                     type: 'alert',
                     room: room._id,
                     content: 'has given administrator privileges to ' + newAdmin.username,
+					readBy: [req.user._id]
 				})
 				message.save();
 			}
@@ -350,6 +351,7 @@ router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
                     type: 'alert',
                     room: room._id,
                     content: 'has removed administrator privileges from ' + newMember.username,
+					readBy: [req.user._id]
 				})
 				message.save();
 			}
@@ -369,6 +371,7 @@ router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
 			type: 'alert',
 			room: room._id,
 			content: 'has edited the Coven settings',
+			readBy: [req.user._id]
 		})
 		message.save()
 		.then(response => {
@@ -462,6 +465,7 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
                     type: 'alert',
                     room: room._id,
                     content: 'has joined',
+					readBy: [req.user._id]
 				})
 				message.save()
 				.then(response => {
@@ -504,6 +508,7 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 				type: 'alert',
 				room: room._id,
 				content: 'has left',
+				readBy: [req.user._id]
 			})
 			message.save()
 			.then(response => {
