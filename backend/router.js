@@ -283,6 +283,7 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	},
 	{ $push: { readBy: req.user._id } }, {multi: true})
 	.then(response => {
+		console.log(response)
 		pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug})
 		res.status(200)
 		.json({
@@ -385,6 +386,7 @@ router.post('/api/chat/room/enter/:room', authorizeUser, async function(req,res)
 		slug: req.params.room
 	})
 	.then(room => {
+		console.log(req.params.room)
 		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': req.params.room}});
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
@@ -492,6 +494,8 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 				room.visitors.push(req.user._id);
 			}
 		}
+		// Reset leaving user's last saved room memory
+		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': 'global-coven'}});
 		room.save()
 		.then(room => {
 			var message = new Message({

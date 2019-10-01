@@ -506,6 +506,8 @@ class ChatDrawer extends Component {
                         currentRoomVisitors: currentRoomVisitors
                     })
                 }
+            }
+            if (this.state.currentRoom.slug === data.room.slug) {
                 // Remove user from members array
                 var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
                 this.setState({
