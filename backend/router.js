@@ -170,7 +170,6 @@ router.post('/api/geolocation/update', function(req,res) {
 });
 
 router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
-	console.log(req.body.content);
 	var parsedMessage = parser(req.body.content);
 	if (!parsedMessage.isValid) return false;
 	var message = new Message({
