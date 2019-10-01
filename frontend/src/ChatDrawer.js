@@ -412,149 +412,153 @@ class ChatDrawer extends Component {
                 this.setState({ publicRooms: payload });
         });
 
-        var pusher = new Pusher('7155c345db324b8f1ba5', {
-            cluster: 'eu',
-            forceTLS: true
-        });
-        pusher.connection.bind('connected', () => {
-            this.setState({socketId: pusher.connection.socket_id});
-        });
-        var messagesChannel = pusher.subscribe('messages');
-        var generalChannel = pusher.subscribe('general');
-        messagesChannel.bind('message-sent', data => {
-            console.log("Received message push",data)
-            if (this.state.currentRoom.slug === data.room.slug) {
-                this.setState({
-                    messages: [...this.state.messages, data]
-                });
-                scrollToBottom();
-            } else {
-                if (this.state.joinedRooms.some(r => r.slug === data.room.slug)) {
+        fetch('api/pusher/getkey')
+        .then(res => res.json())
+        .then(payload => {
+            var pusher = new Pusher(payload.key, {
+                cluster: 'eu',
+                forceTLS: true
+            });
+            pusher.connection.bind('connected', () => {
+                this.setState({socketId: pusher.connection.socket_id});
+            });
+            var messagesChannel = pusher.subscribe('messages');
+            var generalChannel = pusher.subscribe('general');
+            messagesChannel.bind('message-sent', data => {
+                console.log("Received message push",data)
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    this.setState({
+                        messages: [...this.state.messages, data]
+                    });
+                    scrollToBottom();
+                } else {
+                    if (this.state.joinedRooms.some(r => r.slug === data.room.slug)) {
+                        var joinedRooms = [...this.state.joinedRooms];
+                        joinedRooms.forEach(r => {
+                            if (r.slug === data.room.slug) {
+                                r.unreadMessages++;
+                            }
+                        })
+                        this.setState({
+                            joinedRooms: joinedRooms
+                        })
+                    }
+                }
+            });
+            generalChannel.bind('room-created', data => {
+                if (data.user.username === this.state.user.username) {
+                    fetch('/api/chat/room/fetch/' + data.room.slug)
+                    .then(res => res.json())
+                    .then(payload => {
+                        var joinedRooms = [...this.state.joinedRooms, payload.room]
+                        joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+                        this.setState({
+                            joinedRooms: joinedRooms,
+                            messages: payload.messages,
+                            currentRoom: payload.room,
+                            currentRoomMembers: payload.room.members,
+                            currentRoomVisitors: payload.room.visitors,
+                        });
+                        scrollToBottom();
+                    });
+                }
+            });
+            generalChannel.bind('room-edited', data => {
+                this.reloadRoomList();
+                if (data._id === this.state.currentRoom._id) {
+                    this.reloadRoom(data.slug)
+                }
+            });
+            generalChannel.bind('visitor-entered-room', data => {
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
+                        var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+                        currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+                        this.setState({currentRoomVisitors: currentRoomVisitors})
+                    }
+                }
+            });
+            generalChannel.bind('visitor-left-room', data => {
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
+                }
+            });
+            generalChannel.bind('user-joined-room', data => {
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    // Add user to members array
+                    if (!this.state.currentRoomMembers.some(v => v.user.username === data.user.username)) {
+                        var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+                        currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                        this.setState({
+                            currentRoomMembers: currentRoomMembers
+                        })
+                    }
+                    // Remove member from visitors array
+                    var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
+                    this.setState({
+                        currentRoomVisitors: currentRoomVisitors
+                    })
+                }
+            });
+            generalChannel.bind('user-left-room', data => {
+                if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public == true) {
+                    // Add user to visitors array
+                    if (!this.state.currentRoomVisitors.some(v => v.username === data.user.username)) {
+                        var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+                        currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+                        this.setState({
+                            currentRoomVisitors: currentRoomVisitors
+                        })
+                    }
+                }
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    // Remove user from members array
+                    var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
+                    this.setState({
+                        currentRoomMembers: currentRoomMembers
+                    })
+                }
+            });
+            generalChannel.bind('user-invited-to-room', data => {
+                if (this.state.user._id === data.user._id) {
+                    // Add room to user's rooms
+                    var joinedRooms = [...this.state.joinedRooms, data.room]
+                    joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+                    this.setState({
+                        joinedRooms: joinedRooms
+                    });
+                    toast("You have been invited to a private Coven: " + data.room.name + ".", {
+                        className: 'green-toast',
+                    });
+                }
+                if (this.state.currentRoom.slug === data.room.slug) {
+                    // Add user to members array
+                    if (!this.state.currentRoomMembers.some(m => m.user.username === data.user.username)) {
+                        var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+                        currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+                        this.setState({
+                            currentRoomMembers: currentRoomMembers
+                        })
+                    }
+                    toast('A new member has joined this Coven.', {
+                        className: 'green-toast',
+                    });
+                }
+            });
+
+            generalChannel.bind('messages-read', data => {
+                if (this.state.currentRoom.slug === data.room) {
                     var joinedRooms = [...this.state.joinedRooms];
                     joinedRooms.forEach(r => {
-                        if (r.slug === data.room.slug) {
-                            r.unreadMessages++;
+                        if (r.slug === data.room) {
+                            r.unreadMessages = 0;
                         }
                     })
                     this.setState({
                         joinedRooms: joinedRooms
                     })
                 }
-            }
-        });
-        generalChannel.bind('room-created', data => {
-            if (data.user.username === this.state.user.username) {
-                fetch('/api/chat/room/fetch/' + data.room.slug)
-                .then(res => res.json())
-                .then(payload => {
-                    var joinedRooms = [...this.state.joinedRooms, payload.room]
-                    joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
-                    this.setState({
-                        joinedRooms: joinedRooms,
-                        messages: payload.messages,
-                        currentRoom: payload.room,
-                        currentRoomMembers: payload.room.members,
-                        currentRoomVisitors: payload.room.visitors,
-                    });
-                    scrollToBottom();
-                });
-            }
-        });
-        generalChannel.bind('room-edited', data => {
-            this.reloadRoomList();
-            if (data._id === this.state.currentRoom._id) {
-                this.reloadRoom(data.slug)
-            }
-        });
-        generalChannel.bind('visitor-entered-room', data => {
-            if (this.state.currentRoom.slug === data.room.slug) {
-                if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
-                    var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                    currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                    this.setState({currentRoomVisitors: currentRoomVisitors})
-                }
-            }
-        });
-        generalChannel.bind('visitor-left-room', data => {
-            if (this.state.currentRoom.slug === data.room.slug) {
-                this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
-            }
-        });
-        generalChannel.bind('user-joined-room', data => {
-            if (this.state.currentRoom.slug === data.room.slug) {
-                // Add user to members array
-                if (!this.state.currentRoomMembers.some(v => v.user.username === data.user.username)) {
-                    var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
-                    currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
-                    this.setState({
-                        currentRoomMembers: currentRoomMembers
-                    })
-                }
-                // Remove member from visitors array
-                var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
-                this.setState({
-                    currentRoomVisitors: currentRoomVisitors
-                })
-            }
-        });
-        generalChannel.bind('user-left-room', data => {
-            if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public == true) {
-                // Add user to visitors array
-                if (!this.state.currentRoomVisitors.some(v => v.username === data.user.username)) {
-                    var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                    currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                    this.setState({
-                        currentRoomVisitors: currentRoomVisitors
-                    })
-                }
-            }
-            if (this.state.currentRoom.slug === data.room.slug) {
-                // Remove user from members array
-                var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
-                this.setState({
-                    currentRoomMembers: currentRoomMembers
-                })
-            }
-        });
-        generalChannel.bind('user-invited-to-room', data => {
-            if (this.state.user._id === data.user._id) {
-                // Add room to user's rooms
-                var joinedRooms = [...this.state.joinedRooms, data.room]
-                joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
-                this.setState({
-                    joinedRooms: joinedRooms
-                });
-                toast("You have been invited to a private Coven: " + data.room.name + ".", {
-                    className: 'green-toast',
-                });
-            }
-            if (this.state.currentRoom.slug === data.room.slug) {
-                // Add user to members array
-                if (!this.state.currentRoomMembers.some(m => m.user.username === data.user.username)) {
-                    var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
-                    currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
-                    this.setState({
-                        currentRoomMembers: currentRoomMembers
-                    })
-                }
-                toast('A new member has joined this Coven.', {
-                    className: 'green-toast',
-                });
-            }
-        });
-
-        generalChannel.bind('messages-read', data => {
-            if (this.state.currentRoom.slug === data.room) {
-                var joinedRooms = [...this.state.joinedRooms];
-                joinedRooms.forEach(r => {
-                    if (r.slug === data.room) {
-                        r.unreadMessages = 0;
-                    }
-                })
-                this.setState({
-                    joinedRooms: joinedRooms
-                })
-            }
+            });
         });
     }
 
