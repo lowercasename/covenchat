@@ -40,28 +40,28 @@ class StatusBar extends Component {
 
                 switch (b) {
                     case 0:
-                        return '🌑 New Moon';
+                        return <span><span class="hermetica-B027-moon_phase_new"/> New Moon</span>;
                         break;
                     case 1:
-                        return '🌒 Waxing Crescent Moon';
+                        return <span><span class="hermetica-B020-moon_phase_waxing_crescent"/> Waxing Crescent Moon</span>;
                         break;
                     case 2:
-                        return '🌓 First Quarter Moon';
+                        return <span><span class="hermetica-B021-moon_phase_waxing_half"/> First Quarter Moon</span>;
                         break;
                     case 3:
-                        return '🌔 Waxing Gibbous Moon';
+                        return <span><span class="hermetica-B022-moon_phase_waxing_gibbous"/> Waxing Gibbous Moon</span>;
                         break;
                     case 4:
-                        return '🌕 Full Moon';
+                        return <span><span class="hermetica-B023-moon_phase_full"/> Full Moon</span>;
                         break;
                     case 5:
-                        return '🌖 Waning Gibbous Moon';
+                        return <span><span class="hermetica-B024-moon_phase_waning_gibbous"/> Waning Gibbous Moon</span>;
                         break;
                     case 6:
-                        return '🌗 Last Quarter Moon';
+                        return <span><span class="hermetica-B025-moon_phase_waning_half"/> Last Quarter Moon</span>;
                         break;
                     case 7:
-                        return '🌘 Waning Crescent Moon';
+                        return <span><span class="hermetica-B026-moon_phase_waning_crescent"/> Waning Crescent Moon</span>;
                         break;
                 }
             }
@@ -73,18 +73,18 @@ class StatusBar extends Component {
     getZodiacSign(today) {
 
         var zodiacSigns = {
-          'capricorn':'♑ Capricorn',
-          'aquarius':'♒ Aquarius',
-          'pisces':'♓ Pisces',
-          'aries':'♈ Aries',
-          'taurus':'♉ Taurus',
-          'gemini':'♊ Gemini',
-          'cancer':'♋ Cancer',
-          'leo':'♌ Leo',
-          'virgo':'♍ Virgo',
-          'libra':'♎ Libra',
-          'scorpio':'♏ Scorpio',
-          'sagittarius':'♐ Saggitarius'
+          'capricorn':<span><span class="hermetica-A009-capricorn"/> Capricorn </span>,
+          'aquarius':<span><span class="hermetica-A010-aquarius"/> Aquarius </span>,
+          'pisces':<span><span class="hermetica-A011-pisces"/> Pisces </span>,
+          'aries':<span><span class="hermetica-A000-aries"/> Aries </span>,
+          'taurus':<span><span class="hermetica-A001-taurus"/> Taurus </span>,
+          'gemini':<span><span class="hermetica-A002-gemini"/> Gemini </span>,
+          'cancer':<span><span class="hermetica-A003-cancer"/> Cancer </span>,
+          'leo':<span><span class="hermetica-A004-leo"/> Leo </span>,
+          'virgo':<span><span class="hermetica-A005-virgo"/> Virgo </span>,
+          'libra':<span><span class="hermetica-A006-libra"/> Libra </span>,
+          'scorpio':<span><span class="hermetica-A007-scorpio"/> Scorpio </span>,
+          'sagittarius':<span><span class="hermetica-A008-sagittarius"/> Saggitarius </span>,
         }
 
         var month = today.getMonth()+1;
@@ -148,9 +148,9 @@ class StatusBar extends Component {
         var today = new Date();
         let mercuryMessage;
         if (this.state.mercuryRetrograde == false) {
-            mercuryMessage = "☿ Mercury not retrograde";
+            mercuryMessage = <span><span class='hermetica-B002-mercury'/> Mercury not retrograde</span>;
         } else {
-            mercuryMessage = "☿ Mercury is retrograde";
+            mercuryMessage = <span><span class='hermetica-B002-mercury'/> Mercury is retrograde</span>;
         }
         return (
             <aside className="statusBar">
@@ -158,10 +158,10 @@ class StatusBar extends Component {
                     {this.getMoonPhase(today)}
                 </span>
                 <span className="statusItem">
-                    {this.getZodiacSign(today)} season
+                    <span class="hermetica-F006-wheel_of_the_year"/>&nbsp;{this.getFestival(today)}
                 </span>
                 <span className="statusItem">
-                    <img src="/wheel.svg" style={{height: '1rem', paddingRight: '5px'}} /> {this.getFestival(today)}
+                    {this.getZodiacSign(today)}&nbsp;season
                 </span>
                 <span className="statusItem">
                     {mercuryMessage}

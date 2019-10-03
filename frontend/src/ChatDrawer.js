@@ -353,9 +353,6 @@ class ChatDrawer extends Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-
-        this.welcomeMessage = React.createRef();
-        this.chatInterface = React.createRef();
     }
 
     reloadRoom = (slug) => {
@@ -374,11 +371,6 @@ class ChatDrawer extends Component {
                     showWelcomeMessage: payload.showWelcomeMessage
                 });
                 scrollToBottom();
-                let chatWidth = this.chatInterface.current.offsetWidth;
-                if (this.state.showWelcomeMessage && this.welcomeMessage.current) {
-                    console.log("Width",this.chatInterface.current.offsetWidth)
-                    this.welcomeMessage.current.style.width = chatWidth + "px";
-                }
         });
     }
 
@@ -396,7 +388,6 @@ class ChatDrawer extends Component {
     }
 
     componentDidMount() {
-        window.addEventListener('resize', this.updateDimensions);
         console.log("lastroom:",this.state.user.memory.lastRoom)
         this.reloadRoom((this.state.user.memory ? this.state.user.memory.lastRoom : 'global-coven'))
 
@@ -561,18 +552,6 @@ class ChatDrawer extends Component {
         });
     }
 
-    updateDimensions = () => {
-        let chatWidth = this.chatInterface.current.offsetWidth;
-        if (this.state.showWelcomeMessage && this.welcomeMessage.current) {
-            console.log("Width",this.chatInterface.current.offsetWidth)
-            this.welcomeMessage.current.style.width = chatWidth + "px";
-        }
-    };
-
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.updateDimensions);
-    }
-
     handleSubmit(e) {
         e.preventDefault()
         var messageContent = this.state.message.trim();
@@ -730,9 +709,9 @@ class ChatDrawer extends Component {
                         user={this.state.user}
                     />
                 </RoomList>
-                <section className="chatInterface" ref={this.chatInterface}>
+                <section className="chatInterface">
                     {this.state.currentRoom.welcomeMessage && this.state.showWelcomeMessage &&
-                        <aside ref={this.welcomeMessage} class="welcomeMessage">
+                        <aside class="welcomeMessage">
                             <span style={{flex:1}}>{this.state.currentRoom.welcomeMessage}</span>
                             <button className="welcomeMessageClose" onClick={this.hideWelcomeMessage}>
                                 <FontAwesomeIcon icon="times" />

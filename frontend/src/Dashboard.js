@@ -1,19 +1,18 @@
 import React, { Component } from 'react';
 
-import './App.css';
-
 import StatusBar from './StatusBar';
 import ChatDrawer from './ChatDrawer';
+import Altar from './Altar';
 
 import { toast } from 'react-toastify';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint} from '@fortawesome/free-solid-svg-icons';
 import { faComments } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint)
 
 toast.configure()
 
@@ -21,11 +20,9 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            chatVisible: true,
-            mapVisible: false,
+            visibleModule: 'altar',
             user: this.props.user
         }
-        this.toggleChat = this.toggleChat.bind(this);
         this.logOut = this.logOut.bind(this);
     }
 
@@ -36,12 +33,10 @@ class Dashboard extends Component {
         //   .then(users => this.setState({ users }));
     }
 
-    toggleChat() {
-        if (this.state.chatVisible) {
-            this.setState({chatVisible: false, mapVisible: true})
-        } else {
-            this.setState({chatVisible: true, mapVisible: false})
-        }
+    toggleView(module) {
+        this.setState({
+            visibleModule: module
+        })
     }
 
     logOut() {
@@ -63,16 +58,16 @@ class Dashboard extends Component {
     }
 
     render() {
-        let mapStyle = this.state.mapVisible ? {display:'flex'} : {display: 'none'};
+        let mapStyle = this.state.visibleModule === "map" ? {display:'flex'} : {display: 'none'};
         return (
             <div className="App">
                 <nav className="sideNav">
-                    <img src="magic-ball-alt.svg" className="navLogo" />
-                    <div className="navIcon" onClick={this.toggleChat}>
+                    <img src="magic-ball-alt.svg" className="navLogo" onClick={() => this.toggleView('map')}/>
+                    <div className="navIcon" onClick={() => this.toggleView('chat')}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
-                    <div className="navIcon" >
-                        <img src="candle.svg" style={{width:"30px"}}></img>
+                    <div className="navIcon" onClick={() => this.toggleView('altar')}>
+                        <span className="hermetica-F032-pentacle" style={{fontSize:"40px"}}/>
                     </div>
                     <div className="navIcon" onClick={this.logOut} >
                         <FontAwesomeIcon icon="sign-out-alt" />
@@ -81,7 +76,11 @@ class Dashboard extends Component {
                 <main className="content">
                     <div id="map" style={mapStyle}><h1>Map</h1></div>
                     <ChatDrawer
-                        isVisible={this.state.chatVisible}
+                        isVisible={this.state.visibleModule === "chat" ? true : false}
+                        user={this.state.user}
+                    />
+                    <Altar
+                        isVisible={this.state.visibleModule === "altar" ? true : false}
                         user={this.state.user}
                     />
                     <StatusBar />

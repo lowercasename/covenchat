@@ -1,0 +1,2369 @@
+@font-face {
+  font-family: 'Hermetica';
+  src:  url('./fonts/Hermetica.eot');
+  src:  url('./fonts/Hermetica.eot?bmiu5m#iefix') format('embedded-opentype'),
+    url('./fonts/Hermetica.ttf?bmiu5m') format('truetype'),
+    url('./fonts/Hermetica.woff?bmiu5m') format('woff'),
+    url('./fonts/Hermetica.svg?bmiu5m#Hermetica') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="hermetica-"], [class*=" hermetica-"] {
+  font-family: 'Hermetica' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.hermetica-R000-scientology_symbol:before {
+  content: "\e900";
+}
+.hermetica-R001-scientology_cross:before {
+  content: "\e902";
+}
+.hermetica-R002-dianetics:before {
+  content: "\e903";
+}
+.hermetica-R003-infinite_dianetics:before {
+  content: "\e904";
+}
+.hermetica-R004-operating_thetan:before {
+  content: "\e905";
+}
+.hermetica-R005-church_of_spiritual_technology:before {
+  content: "\e906";
+}
+.hermetica-R006-raelian_star:before {
+  content: "\e907";
+}
+.hermetica-R007-raelian_star_alt:before {
+  content: "\e908";
+}
+.hermetica-Q000-dry_town:before {
+  content: "\e909";
+}
+.hermetica-Q001-arrested_on_site:before {
+  content: "\e90a";
+}
+.hermetica-Q002-police_active:before {
+  content: "\e90b";
+}
+.hermetica-Q003-crime_committed:before {
+  content: "\e90c";
+}
+.hermetica-Q004-dishonest_person:before {
+  content: "\e90d";
+}
+.hermetica-Q005-barking_dog:before {
+  content: "\e90e";
+}
+.hermetica-Q006-gentleman_lives_here:before {
+  content: "\e90f";
+}
+.hermetica-Q007-this_way:before {
+  content: "\e910";
+}
+.hermetica-Q008-dont_go_this_way:before {
+  content: "\e911";
+}
+.hermetica-Q009-handouts:before {
+  content: "\e912";
+}
+.hermetica-Q010-good_road:before {
+  content: "\e913";
+}
+.hermetica-Q011-owner_is_in:before {
+  content: "\e914";
+}
+.hermetica-Q012-owner_is_out:before {
+  content: "\e915";
+}
+.hermetica-Q013-dangerous_neighborhood:before {
+  content: "\e916";
+}
+.hermetica-Q014-jail:before {
+  content: "\e917";
+}
+.hermetica-Q015-man_with_gun:before {
+  content: "\e918";
+}
+.hermetica-Q016-this_is_the_place:before {
+  content: "\e919";
+}
+.hermetica-Q017-ill_tempered_man:before {
+  content: "\e91a";
+}
+.hermetica-Q018-a_beating_awaits:before {
+  content: "\e91b";
+}
+.hermetica-Q019-food_for_work:before {
+  content: "\e91c";
+}
+.hermetica-Q020-policeman:before {
+  content: "\e91d";
+}
+.hermetica-Q021-keep_quiet:before {
+  content: "\e91e";
+}
+.hermetica-Q022-hold_your_tongue:before {
+  content: "\e91f";
+}
+.hermetica-Q023-bad_water:before {
+  content: "\e920";
+}
+.hermetica-Q024-kind_old_lady:before {
+  content: "\e921";
+}
+.hermetica-P000-lemniscate:before {
+  content: "\e922";
+}
+.hermetica-P001-lemniscate_interlaced:before {
+  content: "\e923";
+}
+.hermetica-P002-international_prohibition_symbol:before {
+  content: "\e924";
+}
+.hermetica-P003-club:before {
+  content: "\e925";
+}
+.hermetica-P004-heart:before {
+  content: "\e926";
+}
+.hermetica-P005-spade:before {
+  content: "\e927";
+}
+.hermetica-P006-diamond:before {
+  content: "\e928";
+}
+.hermetica-P007-peace_sign:before {
+  content: "\e929";
+}
+.hermetica-P008-asterisk:before {
+  content: "\e92a";
+}
+.hermetica-P009-fleur_de_lis:before {
+  content: "\e901";
+}
+.hermetica-P010-hammer_and_sickle:before {
+  content: "\e92b";
+}
+.hermetica-P011-tudor_rose:before {
+  content: "\e92c";
+}
+.hermetica-P012-gordian_knot:before {
+  content: "\e92d";
+}
+.hermetica-P013-biohazard:before {
+  content: "\e92e";
+}
+.hermetica-P014-recycle:before {
+  content: "\e92f";
+}
+.hermetica-P015-quincunx:before {
+  content: "\e930";
+}
+.hermetica-P016-red_cross:before {
+  content: "\e931";
+}
+.hermetica-P017-currency:before {
+  content: "\e932";
+}
+.hermetica-P018-standby:before {
+  content: "\e933";
+}
+.hermetica-P019-wifi:before {
+  content: "\e934";
+}
+.hermetica-P020-bluetooth:before {
+  content: "\e935";
+}
+.hermetica-P021-intersex:before {
+  content: "\e936";
+}
+.hermetica-P022-transgender:before {
+  content: "\e937";
+}
+.hermetica-P023-international_symbol_of_access:before {
+  content: "\e938";
+}
+.hermetica-P024-love_symbol_no_2:before {
+  content: "\e939";
+}
+.hermetica-P025-owl_cave:before {
+  content: "\e93a";
+}
+.hermetica-P026-whirling_log:before {
+  content: "\e93b";
+}
+.hermetica-P027-zia:before {
+  content: "\e93c";
+}
+.hermetica-P028-healers_hand:before {
+  content: "\e93d";
+}
+.hermetica-P029-uname:before {
+  content: "\e93e";
+}
+.hermetica-P030-hunab_ku:before {
+  content: "\e93f";
+}
+.hermetica-P031-thunderbird:before {
+  content: "\e940";
+}
+.hermetica-P032-great_spirit:before {
+  content: "\e941";
+}
+.hermetica-P033-hope:before {
+  content: "\e942";
+}
+.hermetica-O000-square_and_compass:before {
+  content: "\ec03";
+}
+.hermetica-O001-triple_tau:before {
+  content: "\ec04";
+}
+.hermetica-O002-masonic_trowel:before {
+  content: "\ec05";
+}
+.hermetica-O003-mason_mark:before {
+  content: "\ec06";
+}
+.hermetica-O004-mason_mark_alt:before {
+  content: "\ec07";
+}
+.hermetica-O005-mason_mark_alt_2:before {
+  content: "\ec08";
+}
+.hermetica-O006-mason_mark_alt_3:before {
+  content: "\ec09";
+}
+.hermetica-O007-mason_mark_alt_4:before {
+  content: "\ec0a";
+}
+.hermetica-O008-mason_mark_alt_5:before {
+  content: "\ec0b";
+}
+.hermetica-O009-mason_mark_alt_6:before {
+  content: "\ec0c";
+}
+.hermetica-O010-mason_mark_alt_7:before {
+  content: "\ec0d";
+}
+.hermetica-P034-borromean_hexagram:before {
+  content: "\e943";
+}
+.hermetica-N000-processean_cross:before {
+  content: "\e944";
+}
+.hermetica-N001-psychick_cross:before {
+  content: "\e945";
+}
+.hermetica-N002-mormon_choose_the_right:before {
+  content: "\e946";
+}
+.hermetica-N003-ek_symbol:before {
+  content: "\e947";
+}
+.hermetica-N004-hand_of_eris:before {
+  content: "\e948";
+}
+.hermetica-N005-discordian_mandala:before {
+  content: "\e949";
+}
+.hermetica-N006-church_of_body_modification:before {
+  content: "\e94a";
+}
+.hermetica-N007-dudeism:before {
+  content: "\e94b";
+}
+.hermetica-N008-brahma_kumaris:before {
+  content: "\e94c";
+}
+.hermetica-N009-rerikhism:before {
+  content: "\e94d";
+}
+.hermetica-N010-tiandism:before {
+  content: "\e94e";
+}
+.hermetica-N011-synanon:before {
+  content: "\e94f";
+}
+.hermetica-N012-cross_of_questioning:before {
+  content: "\e950";
+}
+.hermetica-N013-open_source_judaism:before {
+  content: "\e951";
+}
+.hermetica-N014-branch_davidian_star:before {
+  content: "\e952";
+}
+.hermetica-N015-church_of_the_flying_spaghetti_monster:before {
+  content: "\e953";
+}
+.hermetica-N016-transhumanism:before {
+  content: "\e954";
+}
+.hermetica-N017-yoism:before {
+  content: "\e955";
+}
+.hermetica-N018-deist_cross:before {
+  content: "\e956";
+}
+.hermetica-N019-sinister_order_of_nine_angles:before {
+  content: "\e957";
+}
+.hermetica-N020-order_of_nine_angles_cross:before {
+  content: "\e958";
+}
+.hermetica-N021-golden_dawn_peoples_association:before {
+  content: "\e959";
+}
+.hermetica-N022-veganarchy:before {
+  content: "\e95a";
+}
+.hermetica-N023-anarchy:before {
+  content: "\e95b";
+}
+.hermetica-N024-anarchism:before {
+  content: "\e95c";
+}
+.hermetica-N025-symbionese_liberation_army:before {
+  content: "\e95d";
+}
+.hermetica-N026-fatherland_and_liberty_national_front:before {
+  content: "\e95e";
+}
+.hermetica-N027-femen:before {
+  content: "\e95f";
+}
+.hermetica-N028-alcoholics_anonymous:before {
+  content: "\e960";
+}
+.hermetica-N029-nihilism:before {
+  content: "\e961";
+}
+.hermetica-N030-therianthropy:before {
+  content: "\e962";
+}
+.hermetica-N031-phi_paw:before {
+  content: "\e963";
+}
+.hermetica-N032-sphere_of_deiwos:before {
+  content: "\e964";
+}
+.hermetica-M000-khanda:before {
+  content: "\e965";
+}
+.hermetica-M001-ik_onkar:before {
+  content: "\e966";
+}
+.hermetica-M002-star_of_lakshmi:before {
+  content: "\e967";
+}
+.hermetica-M003-aum:before {
+  content: "\e968";
+}
+.hermetica-M004-srivatsa:before {
+  content: "\e969";
+}
+.hermetica-M005-dharmachakra:before {
+  content: "\e96a";
+}
+.hermetica-M006-gaurmatsya:before {
+  content: "\e96b";
+}
+.hermetica-M007-shankha:before {
+  content: "\e96c";
+}
+.hermetica-M008-padma:before {
+  content: "\e96d";
+}
+.hermetica-M009-bumpa:before {
+  content: "\e96e";
+}
+.hermetica-M010-chataratna:before {
+  content: "\e96f";
+}
+.hermetica-M011-dhvaja:before {
+  content: "\e970";
+}
+.hermetica-M012-vajra:before {
+  content: "\e971";
+}
+.hermetica-M013-vajra_double:before {
+  content: "\e972";
+}
+.hermetica-M014-kartika:before {
+  content: "\e973";
+}
+.hermetica-M015-gankyil:before {
+  content: "\e974";
+}
+.hermetica-M016-taegeuk:before {
+  content: "\e975";
+}
+.hermetica-M017-chondogyo:before {
+  content: "\e976";
+}
+.hermetica-M018-taijitu:before {
+  content: "\e977";
+}
+.hermetica-M019-mitsudomoe:before {
+  content: "\e978";
+}
+.hermetica-M020-kikumon:before {
+  content: "\e979";
+}
+.hermetica-M021-torii:before {
+  content: "\e97a";
+}
+.hermetica-M022-hundun:before {
+  content: "\e97b";
+}
+.hermetica-M023-yiguandao:before {
+  content: "\e97c";
+}
+.hermetica-M024-kun:before {
+  content: "\e97d";
+}
+.hermetica-M025-gen:before {
+  content: "\e97e";
+}
+.hermetica-M026-kan:before {
+  content: "\e97f";
+}
+.hermetica-M027-xun:before {
+  content: "\e980";
+}
+.hermetica-M028-zhen:before {
+  content: "\e981";
+}
+.hermetica-M029-li:before {
+  content: "\e982";
+}
+.hermetica-M030-dui:before {
+  content: "\e983";
+}
+.hermetica-M031-qian:before {
+  content: "\e984";
+}
+.hermetica-M032-lu:before {
+  content: "\e985";
+}
+.hermetica-M033-daesun_jinrihoe:before {
+  content: "\e986";
+}
+.hermetica-M034-yamabishi:before {
+  content: "\e987";
+}
+.hermetica-M035-svastika:before {
+  content: "\e988";
+}
+.hermetica-L000-baal:before {
+  content: "\e989";
+}
+.hermetica-L001-inanna:before {
+  content: "\e98a";
+}
+.hermetica-L002-munus:before {
+  content: "\e98b";
+}
+.hermetica-L003-anu:before {
+  content: "\e98c";
+}
+.hermetica-L004-shamash:before {
+  content: "\e98d";
+}
+.hermetica-L005-sebitti:before {
+  content: "\e98e";
+}
+.hermetica-L006-staff_of_ishkur:before {
+  content: "\e98f";
+}
+.hermetica-L007-ninkhursag:before {
+  content: "\e990";
+}
+.hermetica-L008-nusku:before {
+  content: "\e991";
+}
+.hermetica-L009-bahai_star:before {
+  content: "\e992";
+}
+.hermetica-L010-star_and_crescent:before {
+  content: "\e993";
+}
+.hermetica-L011-barakat_mohammed:before {
+  content: "\e994";
+}
+.hermetica-L012-khatim:before {
+  content: "\e995";
+}
+.hermetica-L013-rub_el_hizb:before {
+  content: "\e996";
+}
+.hermetica-L014-chamsa:before {
+  content: "\e997";
+}
+.hermetica-L015-chamsa_alt:before {
+  content: "\e998";
+}
+.hermetica-L016-etz_chaiim:before {
+  content: "\e999";
+}
+.hermetica-L017-menorah:before {
+  content: "\e99a";
+}
+.hermetica-L018-magen_david:before {
+  content: "\e99b";
+}
+.hermetica-L019-asheret_hadibroth:before {
+  content: "\e99c";
+}
+.hermetica-L020-torah:before {
+  content: "\e99d";
+}
+.hermetica-L021-shofar:before {
+  content: "\e99e";
+}
+.hermetica-L022-merkaba:before {
+  content: "\e99f";
+}
+.hermetica-L023-yaz:before {
+  content: "\e9a0";
+}
+.hermetica-L024-berber_evil_eye:before {
+  content: "\e9a1";
+}
+.hermetica-L025-berber_crow:before {
+  content: "\e9a2";
+}
+.hermetica-L026-berber_spider:before {
+  content: "\e9a3";
+}
+.hermetica-L027-arevakhach:before {
+  content: "\e9a4";
+}
+.hermetica-L028-ingush_solar_emblem:before {
+  content: "\e9a5";
+}
+.hermetica-L029-druze_star:before {
+  content: "\e9a6";
+}
+.hermetica-K000-ankh:before {
+  content: "\e9a7";
+}
+.hermetica-K001-khephra:before {
+  content: "\e9a8";
+}
+.hermetica-K002-uraeus:before {
+  content: "\e9a9";
+}
+.hermetica-K003-wedjat:before {
+  content: "\e9aa";
+}
+.hermetica-K004-djed:before {
+  content: "\e9ab";
+}
+.hermetica-K005-djew:before {
+  content: "\e9ac";
+}
+.hermetica-K006-akhet:before {
+  content: "\e9ad";
+}
+.hermetica-K007-ieb:before {
+  content: "\e9ae";
+}
+.hermetica-K008-shen:before {
+  content: "\e9af";
+}
+.hermetica-K009-shut:before {
+  content: "\e9b0";
+}
+.hermetica-K010-sa:before {
+  content: "\e9b1";
+}
+.hermetica-K011-amenta:before {
+  content: "\e9b2";
+}
+.hermetica-K012-was:before {
+  content: "\e9b3";
+}
+.hermetica-K013-ka:before {
+  content: "\e9b4";
+}
+.hermetica-K014-seba:before {
+  content: "\e9b5";
+}
+.hermetica-K015-duat:before {
+  content: "\e9b6";
+}
+.hermetica-K016-neter:before {
+  content: "\e9b7";
+}
+.hermetica-K017-sema:before {
+  content: "\e9b8";
+}
+.hermetica-K018-sedge:before {
+  content: "\e9b9";
+}
+.hermetica-K019-ha:before {
+  content: "\e9ba";
+}
+.hermetica-K020-menat:before {
+  content: "\e9bb";
+}
+.hermetica-K021-crook_and_flail:before {
+  content: "\e9bc";
+}
+.hermetica-K022-tyet:before {
+  content: "\e9bd";
+}
+.hermetica-J000-solomons_knot:before {
+  content: "\e9be";
+}
+.hermetica-J001-quadruple_solomons_knot:before {
+  content: "\e9bf";
+}
+.hermetica-J002-caduceus:before {
+  content: "\e9c0";
+}
+.hermetica-J003-rod_of_asclepius:before {
+  content: "\e9c1";
+}
+.hermetica-J004-labrys:before {
+  content: "\e9c2";
+}
+.hermetica-J005-meandros:before {
+  content: "\e9c3";
+}
+.hermetica-J006-meandros_small:before {
+  content: "\e9c4";
+}
+.hermetica-J007-meandros_inverted:before {
+  content: "\e9c5";
+}
+.hermetica-J008-meandros_double:before {
+  content: "\e9c6";
+}
+.hermetica-J009-labyrinth:before {
+  content: "\e9c7";
+}
+.hermetica-J010-hercules_knot:before {
+  content: "\e9c8";
+}
+.hermetica-J011-orphic_egg:before {
+  content: "\e9c9";
+}
+.hermetica-J012-oroboros:before {
+  content: "\e9ca";
+}
+.hermetica-J013-tetraktys:before {
+  content: "\e9cb";
+}
+.hermetica-J014-bowl_of_hygeia:before {
+  content: "\e9cc";
+}
+.hermetica-J015-mano_fico:before {
+  content: "\e9cd";
+}
+.hermetica-J016-strophalos:before {
+  content: "\e9ce";
+}
+.hermetica-J017-tanit:before {
+  content: "\e9cf";
+}
+.hermetica-J018-vergina_sol:before {
+  content: "\e9d0";
+}
+.hermetica-J019-triangle_of_pythagoras:before {
+  content: "\e9d1";
+}
+.hermetica-J020-pythagorean_pentacle:before {
+  content: "\e9d2";
+}
+.hermetica-J021-gnostic_sun_sigil:before {
+  content: "\e9d3";
+}
+.hermetica-J022-gnostic_serpent_wheel:before {
+  content: "\e9d4";
+}
+.hermetica-J023-golden_spiral:before {
+  content: "\e9d5";
+}
+.hermetica-J024-fasces:before {
+  content: "\e9d6";
+}
+.hermetica-J025-rosa_camuna:before {
+  content: "\e9d7";
+}
+.hermetica-J026-religio_romana:before {
+  content: "\e9d8";
+}
+.hermetica-I000-druid_sigil:before {
+  content: "\e9d9";
+}
+.hermetica-I001-awen:before {
+  content: "\e9da";
+}
+.hermetica-I002-wheel_of_taranis:before {
+  content: "\e9db";
+}
+.hermetica-I003-triquetra:before {
+  content: "\e9dc";
+}
+.hermetica-I004-triquetra_alt:before {
+  content: "\e9dd";
+}
+.hermetica-I005-interlaced_triquetra:before {
+  content: "\e9de";
+}
+.hermetica-I006-triskelion:before {
+  content: "\e9df";
+}
+.hermetica-I007-triskelion_alt:before {
+  content: "\e9e0";
+}
+.hermetica-I008-triple_spiral:before {
+  content: "\e9e1";
+}
+.hermetica-I009-double_spiral:before {
+  content: "\e9e2";
+}
+.hermetica-I010-double_spiral_alt:before {
+  content: "\e9e3";
+}
+.hermetica-I011-trilithion:before {
+  content: "\e9e4";
+}
+.hermetica-I012-celtic_cross:before {
+  content: "\e9e5";
+}
+.hermetica-I013-samhain:before {
+  content: "\e9e6";
+}
+.hermetica-I014-yule:before {
+  content: "\e9e7";
+}
+.hermetica-I015-imbolc:before {
+  content: "\e9e8";
+}
+.hermetica-I016-ostara:before {
+  content: "\e9e9";
+}
+.hermetica-I017-beltane:before {
+  content: "\e9ea";
+}
+.hermetica-I018-lithe:before {
+  content: "\e9eb";
+}
+.hermetica-I019-lammas:before {
+  content: "\e9ec";
+}
+.hermetica-I020-mabon:before {
+  content: "\e9ed";
+}
+.hermetica-I021-dara_knot:before {
+  content: "\e9ee";
+}
+.hermetica-I022-infinite_cross:before {
+  content: "\e9ef";
+}
+.hermetica-I023-bowen_cross:before {
+  content: "\e9f0";
+}
+.hermetica-I024-lovers_knot_interlaced:before {
+  content: "\e9f1";
+}
+.hermetica-I025-shield_knot_interlaced:before {
+  content: "\e9f2";
+}
+.hermetica-I026-lauburu:before {
+  content: "\e9f3";
+}
+.hermetica-I027-shamrock:before {
+  content: "\e9f4";
+}
+.hermetica-H000-fern_flower:before {
+  content: "\e9f5";
+}
+.hermetica-H001-perkonkrusts:before {
+  content: "\e9f6";
+}
+.hermetica-H002-perkonkrusts_alt:before {
+  content: "\e9f7";
+}
+.hermetica-H003-perkonkrusts_alt_2:before {
+  content: "\e9f8";
+}
+.hermetica-H004-perkonkrusts_alt_3:before {
+  content: "\e9f9";
+}
+.hermetica-H005-ugunskrusts:before {
+  content: "\e9fa";
+}
+.hermetica-H006-menes:before {
+  content: "\e9fb";
+}
+.hermetica-H007-dziviba:before {
+  content: "\e9fc";
+}
+.hermetica-H008-dubultkrusts:before {
+  content: "\e9fd";
+}
+.hermetica-H009-kolard:before {
+  content: "\e9fe";
+}
+.hermetica-H010-ozolins:before {
+  content: "\e9ff";
+}
+.hermetica-H011-maraskrusts:before {
+  content: "\ea00";
+}
+.hermetica-H012-bogownik:before {
+  content: "\ea01";
+}
+.hermetica-H013-wzechslawiec:before {
+  content: "\ea02";
+}
+.hermetica-H014-dhata:before {
+  content: "\ea03";
+}
+.hermetica-H015-rodovik:before {
+  content: "\ea04";
+}
+.hermetica-H016-duchobor:before {
+  content: "\ea05";
+}
+.hermetica-H017-dunija:before {
+  content: "\ea06";
+}
+.hermetica-H018-usins:before {
+  content: "\ea07";
+}
+.hermetica-H019-metenu:before {
+  content: "\ea08";
+}
+.hermetica-H020-trejdeksnis:before {
+  content: "\ea09";
+}
+.hermetica-H021-martina:before {
+  content: "\ea0a";
+}
+.hermetica-H022-jumis:before {
+  content: "\ea0b";
+}
+.hermetica-H023-kupalo:before {
+  content: "\ea0c";
+}
+.hermetica-H024-krupitis:before {
+  content: "\ea0d";
+}
+.hermetica-H025-zalktis:before {
+  content: "\ea0e";
+}
+.hermetica-H026-sign_of_the_moon:before {
+  content: "\ea0f";
+}
+.hermetica-H027-mara:before {
+  content: "\ea10";
+}
+.hermetica-H028-laima:before {
+  content: "\ea11";
+}
+.hermetica-H029-volos:before {
+  content: "\ea12";
+}
+.hermetica-H030-krysen:before {
+  content: "\ea13";
+}
+.hermetica-H031-jana:before {
+  content: "\ea14";
+}
+.hermetica-H032-dieva:before {
+  content: "\ea15";
+}
+.hermetica-H033-zvaigzne:before {
+  content: "\ea16";
+}
+.hermetica-H034-saule:before {
+  content: "\ea17";
+}
+.hermetica-H035-saules_alt:before {
+  content: "\ea18";
+}
+.hermetica-H036-saule_alt_2:before {
+  content: "\ea19";
+}
+.hermetica-H037-kolovrat:before {
+  content: "\ea1a";
+}
+.hermetica-H038_kolovrat_alt:before {
+  content: "\ea1b";
+}
+.hermetica-H039-kolovrat_alt_2:before {
+  content: "\ea1c";
+}
+.hermetica-H040-auseklis:before {
+  content: "\ea1d";
+}
+.hermetica-H041-auseklis_interlaced:before {
+  content: "\ea1e";
+}
+.hermetica-H042-auseklis_alt:before {
+  content: "\ea1f";
+}
+.hermetica-H043-lunula:before {
+  content: "\ea20";
+}
+.hermetica-H044-lunula_double:before {
+  content: "\ea21";
+}
+.hermetica-H045-gromoviti_znaci:before {
+  content: "\ea22";
+}
+.hermetica-H046-gromoviti_znaci_alt:before {
+  content: "\ea23";
+}
+.hermetica-H047-belobog:before {
+  content: "\ea24";
+}
+.hermetica-H048-svarog:before {
+  content: "\ea25";
+}
+.hermetica-H049-swadziebnik:before {
+  content: "\ea26";
+}
+.hermetica-H050-slavic_tree_of_life:before {
+  content: "\ea27";
+}
+.hermetica-H051-dadzbog:before {
+  content: "\ea28";
+}
+.hermetica-H052-romuva:before {
+  content: "\ea29";
+}
+.hermetica-H053-vattisen_yaly:before {
+  content: "\ea2a";
+}
+.hermetica-H054-crimean_tatar_tamga:before {
+  content: "\ea2b";
+}
+.hermetica-H055-tryzub:before {
+  content: "\ea2c";
+}
+.hermetica-H056-redos_ratas:before {
+  content: "\ea2d";
+}
+.hermetica-H057-druwi_redos_ratas:before {
+  content: "\ea2e";
+}
+.hermetica-G000-fehu:before {
+  content: "\ea2f";
+}
+.hermetica-G001-uruz:before {
+  content: "\ea30";
+}
+.hermetica-G002-thurisaz:before {
+  content: "\ea31";
+}
+.hermetica-G003-ansuz:before {
+  content: "\ea32";
+}
+.hermetica-G004-raitho:before {
+  content: "\ea33";
+}
+.hermetica-G005-kaunaz:before {
+  content: "\ea34";
+}
+.hermetica-G006-gebo:before {
+  content: "\ea35";
+}
+.hermetica-G007-wunjo:before {
+  content: "\ea36";
+}
+.hermetica-G008-hagalaz:before {
+  content: "\ea37";
+}
+.hermetica-G009-hagalaz_alt:before {
+  content: "\ea38";
+}
+.hermetica-G010-nauthiz:before {
+  content: "\ea39";
+}
+.hermetica-G011-isa:before {
+  content: "\ea3a";
+}
+.hermetica-G012-jera:before {
+  content: "\ea3b";
+}
+.hermetica-G013-eihwaz:before {
+  content: "\ea3c";
+}
+.hermetica-G014-perthro:before {
+  content: "\ea3d";
+}
+.hermetica-G015-algiz:before {
+  content: "\ea3e";
+}
+.hermetica-G016-sowilo:before {
+  content: "\ea3f";
+}
+.hermetica-G017-tiwaz:before {
+  content: "\ea40";
+}
+.hermetica-G018-berkano:before {
+  content: "\ea41";
+}
+.hermetica-G019-ehwaz:before {
+  content: "\ea42";
+}
+.hermetica-G020-mannaz:before {
+  content: "\ea43";
+}
+.hermetica-G021-laguz:before {
+  content: "\ea44";
+}
+.hermetica-G022-inguz:before {
+  content: "\ea45";
+}
+.hermetica-G023-dagaz:before {
+  content: "\ea46";
+}
+.hermetica-G024-othala:before {
+  content: "\ea47";
+}
+.hermetica-G025-swastika:before {
+  content: "\ea48";
+}
+.hermetica-G026-swastika_bent:before {
+  content: "\ea49";
+}
+.hermetica-G027-swastika_alt:before {
+  content: "\ea4a";
+}
+.hermetica-G028-wolfsangel:before {
+  content: "\ea4b";
+}
+.hermetica-G029-wolfsangel_alt:before {
+  content: "\ea4c";
+}
+.hermetica-G030-odins_horn:before {
+  content: "\ea4d";
+}
+.hermetica-G031-mjolnir:before {
+  content: "\ea4e";
+}
+.hermetica-G032-gungnir:before {
+  content: "\ea4f";
+}
+.hermetica-G033-gungnir_alt:before {
+  content: "\ea50";
+}
+.hermetica-G034-irminsul:before {
+  content: "\ea51";
+}
+.hermetica-G035-gapaldur:before {
+  content: "\ea52";
+}
+.hermetica-G036-donderbezem:before {
+  content: "\ea53";
+}
+.hermetica-G037-shield_knot:before {
+  content: "\ea54";
+}
+.hermetica-G038-shield_knot_interlaced:before {
+  content: "\ea55";
+}
+.hermetica-G039-shield_knot_round:before {
+  content: "\ea56";
+}
+.hermetica-G040-valknut:before {
+  content: "\ea57";
+}
+.hermetica-G041-valknut_unicursal:before {
+  content: "\ea58";
+}
+.hermetica-G042-triceps:before {
+  content: "\ea59";
+}
+.hermetica-G043-trystyka:before {
+  content: "\ea5a";
+}
+.hermetica-G044-triskele:before {
+  content: "\ea5b";
+}
+.hermetica-G045-sonnenrad:before {
+  content: "\ea5c";
+}
+.hermetica-G046-sonnenkreuz:before {
+  content: "\ea5d";
+}
+.hermetica-G047-troll_cross:before {
+  content: "\ea5e";
+}
+.hermetica-G048-wolf_cross:before {
+  content: "\ea5f";
+}
+.hermetica-G049-symbol_of_the_vehmic_courts:before {
+  content: "\ea60";
+}
+.hermetica-G050-tursansydaan:before {
+  content: "\ea61";
+}
+.hermetica-G051-questenbaum:before {
+  content: "\ea62";
+}
+.hermetica-G052-web_of_wyrd:before {
+  content: "\ea63";
+}
+.hermetica-G053-web_of_wyrd_round:before {
+  content: "\ea64";
+}
+.hermetica-G054-order_of_the_jarls_of_baeldur:before {
+  content: "\ea65";
+}
+.hermetica-G055-forn_sidr:before {
+  content: "\ea66";
+}
+.hermetica-G056-beaivi:before {
+  content: "\ea67";
+}
+.hermetica-G057-dragons_eye:before {
+  content: "\ea68";
+}
+.hermetica-G058-fire_eye:before {
+  content: "\ea69";
+}
+.hermetica-F000-triangle_of_art:before {
+  content: "\ea6a";
+}
+.hermetica-F001-eye_of_providence:before {
+  content: "\ea6b";
+}
+.hermetica-F002-seal_of_solomon:before {
+  content: "\ea6c";
+}
+.hermetica-F003-seal_of_melchizidek:before {
+  content: "\ea6d";
+}
+.hermetica-F004-triple_goddess:before {
+  content: "\ea6e";
+}
+.hermetica-F005-horned_god:before {
+  content: "\ea6f";
+}
+.hermetica-F006-wheel_of_the_year:before {
+  content: "\ea70";
+}
+.hermetica-F007-pentagram:before {
+  content: "\ea71";
+}
+.hermetica-F008-pentagram_interlaced:before {
+  content: "\ea72";
+}
+.hermetica-F009-pentagram_circumscribed:before {
+  content: "\ea73";
+}
+.hermetica-F010-hexagram:before {
+  content: "\ea74";
+}
+.hermetica-F011-hexagram_interlaced:before {
+  content: "\ea75";
+}
+.hermetica-F012-hexagram_unicursal:before {
+  content: "\ea76";
+}
+.hermetica-F013-hexagram_unicursal_interlaced:before {
+  content: "\ea77";
+}
+.hermetica-F014-heptagram:before {
+  content: "\ea78";
+}
+.hermetica-F015-heptagram_2:before {
+  content: "\ea79";
+}
+.hermetica-F016-octagram:before {
+  content: "\ea7a";
+}
+.hermetica-F017-octagram_2:before {
+  content: "\ea7b";
+}
+.hermetica-F018-nonagram:before {
+  content: "\ea7c";
+}
+.hermetica-F019-nonagram_2:before {
+  content: "\ea7d";
+}
+.hermetica-F020-decagram:before {
+  content: "\ea7e";
+}
+.hermetica-F021-decagram_2:before {
+  content: "\ea7f";
+}
+.hermetica-F022-decagram_3:before {
+  content: "\ea80";
+}
+.hermetica-F023-decagram_4:before {
+  content: "\ea81";
+}
+.hermetica-F024-unundecagram:before {
+  content: "\ea82";
+}
+.hermetica-F025-unundecagram_2:before {
+  content: "\ea83";
+}
+.hermetica-F026-unundecagram_3:before {
+  content: "\ea84";
+}
+.hermetica-F027-dodecagram:before {
+  content: "\ea85";
+}
+.hermetica-F028-dodecagram_2:before {
+  content: "\ea86";
+}
+.hermetica-F029-dodecagram_3:before {
+  content: "\ea87";
+}
+.hermetica-F030-monad_john_dee:before {
+  content: "\ea88";
+}
+.hermetica-F031-enneagram:before {
+  content: "\ea89";
+}
+.hermetica-F032-pentacle:before {
+  content: "\ea8a";
+}
+.hermetica-F033-seal_saturn:before {
+  content: "\ea8b";
+}
+.hermetica-F034-seal_jupiter:before {
+  content: "\ea8c";
+}
+.hermetica-F035-seal_mars:before {
+  content: "\ea8d";
+}
+.hermetica-F036-seal_sun:before {
+  content: "\ea8e";
+}
+.hermetica-F037-seal_venus:before {
+  content: "\ea8f";
+}
+.hermetica-F038-seal_mercury:before {
+  content: "\ea90";
+}
+.hermetica-F039-seal_moon:before {
+  content: "\ea91";
+}
+.hermetica-F040-sigil_lucifer:before {
+  content: "\ea92";
+}
+.hermetica-F041-nazar:before {
+  content: "\ea93";
+}
+.hermetica-F042-sigil_chaos:before {
+  content: "\ea94";
+}
+.hermetica-F043-rosy_cross:before {
+  content: "\ea95";
+}
+.hermetica-F044-seax_wicca:before {
+  content: "\ea96";
+}
+.hermetica-F045-via:before {
+  content: "\ea97";
+}
+.hermetica-F046-populus:before {
+  content: "\ea98";
+}
+.hermetica-F047-caput_draconis:before {
+  content: "\ea99";
+}
+.hermetica-F048-cauda_draconis:before {
+  content: "\ea9a";
+}
+.hermetica-F049-fortuna_major:before {
+  content: "\ea9b";
+}
+.hermetica-F050-fortuna_minor:before {
+  content: "\ea9c";
+}
+.hermetica-F051-acquistio:before {
+  content: "\ea9d";
+}
+.hermetica-F052-amissio:before {
+  content: "\ea9e";
+}
+.hermetica-F053-tristitia:before {
+  content: "\ea9f";
+}
+.hermetica-F054-laetitia:before {
+  content: "\eaa0";
+}
+.hermetica-F055-rubeus:before {
+  content: "\eaa1";
+}
+.hermetica-F056-albus:before {
+  content: "\eaa2";
+}
+.hermetica-F057-carcer:before {
+  content: "\eaa3";
+}
+.hermetica-F058-conjunctio:before {
+  content: "\eaa4";
+}
+.hermetica-F059-puella:before {
+  content: "\eaa5";
+}
+.hermetica-F060-puer:before {
+  content: "\eaa6";
+}
+.hermetica-E000-roman_cross:before {
+  content: "\eaa7";
+}
+.hermetica-E001-vesica_pisces:before {
+  content: "\eaa8";
+}
+.hermetica-E002-icthys:before {
+  content: "\eaa9";
+}
+.hermetica-E003-auspice_maria:before {
+  content: "\eaaa";
+}
+.hermetica-E004-mater_misericordia:before {
+  content: "\eaab";
+}
+.hermetica-E005-lorraine_cross:before {
+  content: "\eaac";
+}
+.hermetica-E006-patriarchal_cross:before {
+  content: "\eaad";
+}
+.hermetica-E007-papal_cross:before {
+  content: "\eaae";
+}
+.hermetica-E008-salem_cross:before {
+  content: "\eaaf";
+}
+.hermetica-E009-st_ninos_cross:before {
+  content: "\eab0";
+}
+.hermetica-E010-upsilon_cross:before {
+  content: "\eab1";
+}
+.hermetica-E011-orthodox_cross:before {
+  content: "\eab2";
+}
+.hermetica-E012-gnostic_cross:before {
+  content: "\eab3";
+}
+.hermetica-E013-st_clements_cross:before {
+  content: "\eab4";
+}
+.hermetica-E014-st_andrews_cross:before {
+  content: "\eab5";
+}
+.hermetica-E015-tau_cross:before {
+  content: "\eab6";
+}
+.hermetica-E016-shepherds_cross:before {
+  content: "\eab7";
+}
+.hermetica-E017-neronic_cross:before {
+  content: "\eab8";
+}
+.hermetica-E018-jerusalem_cross:before {
+  content: "\eab9";
+}
+.hermetica-E019-maltese_cross:before {
+  content: "\eaba";
+}
+.hermetica-E020-occitan_cross:before {
+  content: "\eabb";
+}
+.hermetica-E021-florian_cross:before {
+  content: "\eabc";
+}
+.hermetica-E022-canterbury_cross:before {
+  content: "\eabd";
+}
+.hermetica-E023-labarum:before {
+  content: "\eabe";
+}
+.hermetica-E024-staurogram:before {
+  content: "\eabf";
+}
+.hermetica-E025-iota_chi:before {
+  content: "\eac0";
+}
+.hermetica-E026-iota_eta:before {
+  content: "\eac1";
+}
+.hermetica-E027-globus_cruciger:before {
+  content: "\eac2";
+}
+.hermetica-E028-alpha_omega:before {
+  content: "\eac3";
+}
+.hermetica-E029-borromean_rings:before {
+  content: "\eac4";
+}
+.hermetica-E030-trefoil:before {
+  content: "\eac5";
+}
+.hermetica-E031-quatrefoil:before {
+  content: "\eac6";
+}
+.hermetica-E032-barbed_quatrefoil:before {
+  content: "\eac7";
+}
+.hermetica-E033-cinquefoil:before {
+  content: "\eac8";
+}
+.hermetica-E034-st_catherines_wheel:before {
+  content: "\eac9";
+}
+.hermetica-E035-keys_of_st_peter:before {
+  content: "\eaca";
+}
+.hermetica-E036-scutum_fidei:before {
+  content: "\eacb";
+}
+.hermetica-E037-holy_trinity:before {
+  content: "\eacc";
+}
+.hermetica-E038-holy_trinity_2:before {
+  content: "\eacd";
+}
+.hermetica-E039-holy_trinity_3:before {
+  content: "\eace";
+}
+.hermetica-E040-holy_trinity_4:before {
+  content: "\eacf";
+}
+.hermetica-E041-holy_trinity_5:before {
+  content: "\ead0";
+}
+.hermetica-E042-holy_trinity_6:before {
+  content: "\ead1";
+}
+.hermetica-E043-salvation:before {
+  content: "\ead2";
+}
+.hermetica-E044-chrisma:before {
+  content: "\ead3";
+}
+.hermetica-E045-chalice_and_cross:before {
+  content: "\ead4";
+}
+.hermetica-E046-christian_universalism:before {
+  content: "\ead5";
+}
+.hermetica-E047-flaming_chalice:before {
+  content: "\ead6";
+}
+.hermetica-E048-iesus_hominem_salvator:before {
+  content: "\ead7";
+}
+.hermetica-E049-opus_dei:before {
+  content: "\ead8";
+}
+.hermetica-E050-quaker_star:before {
+  content: "\ead9";
+}
+.hermetica-E051-coptic_cross:before {
+  content: "\eada";
+}
+.hermetica-E052-comatesque_quincunx:before {
+  content: "\eadb";
+}
+.hermetica-E053-virgin_mary:before {
+  content: "\eadc";
+}
+.hermetica-E054-feast_of_the_epiphany:before {
+  content: "\eadd";
+}
+.hermetica-E055-feast_of_st_anthony:before {
+  content: "\eade";
+}
+.hermetica-E056-feast_of_st_matthew:before {
+  content: "\eadf";
+}
+.hermetica-E057-feast_of_the_annunciation:before {
+  content: "\eae0";
+}
+.hermetica-E058-nativity_of_john_the_baptist:before {
+  content: "\eae1";
+}
+.hermetica-E059-michelmas:before {
+  content: "\eae2";
+}
+.hermetica-E060-feast_of_the_assumption:before {
+  content: "\eae3";
+}
+.hermetica-E061-feast_of_tiburtius:before {
+  content: "\eae4";
+}
+.hermetica-E062-all_saints_day:before {
+  content: "\eae5";
+}
+.hermetica-E063-feast_of_the_circumcision:before {
+  content: "\eae6";
+}
+.hermetica-E064-feast_of_st_catherine:before {
+  content: "\eae7";
+}
+.hermetica-E065-feast_of_st_valentine:before {
+  content: "\eae8";
+}
+.hermetica-E066-christmas_day:before {
+  content: "\eae9";
+}
+.hermetica-E067-pentecostal_cross:before {
+  content: "\eaea";
+}
+.hermetica-D000-fire:before {
+  content: "\eaeb";
+}
+.hermetica-D001-water:before {
+  content: "\eaec";
+}
+.hermetica-D002-air:before {
+  content: "\eaed";
+}
+.hermetica-D003-earth:before {
+  content: "\eaee";
+}
+.hermetica-D004-akasha:before {
+  content: "\eaef";
+}
+.hermetica-D005-blood:before {
+  content: "\eaf0";
+}
+.hermetica-D006-sulfur:before {
+  content: "\eaf1";
+}
+.hermetica-D007-sulfur_alt:before {
+  content: "\eaf2";
+}
+.hermetica-D008-philosophers_sulfur:before {
+  content: "\eaf3";
+}
+.hermetica-D009-magnesium:before {
+  content: "\eaf4";
+}
+.hermetica-D010-red_arsenic:before {
+  content: "\eaf5";
+}
+.hermetica-D011-white_arsenic:before {
+  content: "\eaf6";
+}
+.hermetica-D012-realgar:before {
+  content: "\eaf7";
+}
+.hermetica-D013-realgar_alt:before {
+  content: "\eaf8";
+}
+.hermetica-D014-phosphorus:before {
+  content: "\eaf9";
+}
+.hermetica-D015-cinnabar:before {
+  content: "\eafa";
+}
+.hermetica-D016-potash:before {
+  content: "\eafb";
+}
+.hermetica-D017-ash:before {
+  content: "\eafc";
+}
+.hermetica-D018-aqua_vitae:before {
+  content: "\eafd";
+}
+.hermetica-D019-aqua_regia:before {
+  content: "\eafe";
+}
+.hermetica-D020-aqua_fortis:before {
+  content: "\eaff";
+}
+.hermetica-D021-sal_ammoniac:before {
+  content: "\eb00";
+}
+.hermetica-D022-gold_alt:before {
+  content: "\eb01";
+}
+.hermetica-D023-gold_alt_2:before {
+  content: "\eb02";
+}
+.hermetica-D024-gold_foil:before {
+  content: "\eb03";
+}
+.hermetica-D025-aurum_pigmentum:before {
+  content: "\eb04";
+}
+.hermetica-D026-silver_alt:before {
+  content: "\eb05";
+}
+.hermetica-D027-silver_alt_2:before {
+  content: "\eb06";
+}
+.hermetica-D028-platinum:before {
+  content: "\eb07";
+}
+.hermetica-D029-cobalt:before {
+  content: "\eb08";
+}
+.hermetica-D030-magnetic_iron:before {
+  content: "\eb09";
+}
+.hermetica-D031-lead_alt:before {
+  content: "\eb0a";
+}
+.hermetica-D032-zinc:before {
+  content: "\eb0b";
+}
+.hermetica-D033-zinc_oxide:before {
+  content: "\eb0c";
+}
+.hermetica-D034-steel:before {
+  content: "\eb0d";
+}
+.hermetica-D035-nickel:before {
+  content: "\eb0e";
+}
+.hermetica-D036-metal:before {
+  content: "\eb0f";
+}
+.hermetica-D037-aurichalcum:before {
+  content: "\eb10";
+}
+.hermetica-D038-bismuth:before {
+  content: "\eb11";
+}
+.hermetica-D039-marcasite:before {
+  content: "\eb12";
+}
+.hermetica-D040-borax:before {
+  content: "\eb13";
+}
+.hermetica-D041-borax_alt:before {
+  content: "\eb14";
+}
+.hermetica-D042-cinder:before {
+  content: "\eb15";
+}
+.hermetica-D043-antimony:before {
+  content: "\eb16";
+}
+.hermetica-D044-antimony_oxide:before {
+  content: "\eb17";
+}
+.hermetica-D045-hepar_calcis:before {
+  content: "\eb18";
+}
+.hermetica-D046-terra_ponderosa:before {
+  content: "\eb19";
+}
+.hermetica-D047-vitriol:before {
+  content: "\eb1a";
+}
+.hermetica-D048-red_vitriol:before {
+  content: "\eb1b";
+}
+.hermetica-D049-blue_vitriol:before {
+  content: "\eb1c";
+}
+.hermetica-D050-iron_vitriol:before {
+  content: "\eb1d";
+}
+.hermetica-D051-oil_of_vitriol:before {
+  content: "\eb1e";
+}
+.hermetica-D052-oil:before {
+  content: "\eb1f";
+}
+.hermetica-D053-soap:before {
+  content: "\eb20";
+}
+.hermetica-D054-calcinated_copper:before {
+  content: "\eb21";
+}
+.hermetica-D055-cuprum_arsenicatum:before {
+  content: "\eb22";
+}
+.hermetica-D056-arsenic_acid:before {
+  content: "\eb23";
+}
+.hermetica-D057-sal_alcalinus:before {
+  content: "\eb24";
+}
+.hermetica-D058-salt_water:before {
+  content: "\eb25";
+}
+.hermetica-D059-salprapuratum:before {
+  content: "\eb26";
+}
+.hermetica-D060-lithargirium:before {
+  content: "\eb27";
+}
+.hermetica-D061-lye:before {
+  content: "\eb28";
+}
+.hermetica-D062-lime:before {
+  content: "\eb29";
+}
+.hermetica-D063-quicklime:before {
+  content: "\eb2a";
+}
+.hermetica-D064-clay:before {
+  content: "\eb2b";
+}
+.hermetica-D065-stone:before {
+  content: "\eb2c";
+}
+.hermetica-D066-rock_salt:before {
+  content: "\eb2d";
+}
+.hermetica-D067-lapis_lazuli:before {
+  content: "\eb2e";
+}
+.hermetica-D068-wood:before {
+  content: "\eb2f";
+}
+.hermetica-D069-sand:before {
+  content: "\eb30";
+}
+.hermetica-D070-gravel:before {
+  content: "\eb31";
+}
+.hermetica-D071-vinegar:before {
+  content: "\eb32";
+}
+.hermetica-D072-distilled_vinegar:before {
+  content: "\eb33";
+}
+.hermetica-D073-hematite:before {
+  content: "\eb34";
+}
+.hermetica-D074-liquor:before {
+  content: "\eb35";
+}
+.hermetica-D075-sap:before {
+  content: "\eb36";
+}
+.hermetica-D076-sugar:before {
+  content: "\eb37";
+}
+.hermetica-D077-honey:before {
+  content: "\eb38";
+}
+.hermetica-D078-saffron:before {
+  content: "\eb39";
+}
+.hermetica-D079-glass:before {
+  content: "\eb3a";
+}
+.hermetica-D080-alum:before {
+  content: "\eb3b";
+}
+.hermetica-D081-ink:before {
+  content: "\eb3c";
+}
+.hermetica-D082-wax:before {
+  content: "\eb3d";
+}
+.hermetica-D083-rubber:before {
+  content: "\eb3e";
+}
+.hermetica-D084-urine:before {
+  content: "\eb3f";
+}
+.hermetica-D085-manure:before {
+  content: "\eb40";
+}
+.hermetica-D086-caput_mortuum:before {
+  content: "\eb41";
+}
+.hermetica-D087-cornua_cervi:before {
+  content: "\eb42";
+}
+.hermetica-D088-crucible:before {
+  content: "\eb43";
+}
+.hermetica-D089-retort:before {
+  content: "\eb44";
+}
+.hermetica-D090-melting_furnace:before {
+  content: "\eb45";
+}
+.hermetica-D091-preserve:before {
+  content: "\eb46";
+}
+.hermetica-D092-purify:before {
+  content: "\eb47";
+}
+.hermetica-D093-decoction:before {
+  content: "\eb48";
+}
+.hermetica-D094-composing:before {
+  content: "\eb49";
+}
+.hermetica-D095-decomposing:before {
+  content: "\eb4a";
+}
+.hermetica-D096-spring:before {
+  content: "\eb4b";
+}
+.hermetica-D097-summer:before {
+  content: "\eb4c";
+}
+.hermetica-D098-autumn:before {
+  content: "\eb4d";
+}
+.hermetica-D099-winter:before {
+  content: "\eb4e";
+}
+.hermetica-D100-hour:before {
+  content: "\eb4f";
+}
+.hermetica-D101-day:before {
+  content: "\eb50";
+}
+.hermetica-D102-day_and_night:before {
+  content: "\eb51";
+}
+.hermetica-D103-week:before {
+  content: "\eb52";
+}
+.hermetica-D104-month:before {
+  content: "\eb53";
+}
+.hermetica-D105-year:before {
+  content: "\eb54";
+}
+.hermetica-C000-hades:before {
+  content: "\eb55";
+}
+.hermetica-C001-admetos:before {
+  content: "\eb56";
+}
+.hermetica-C002-zeus:before {
+  content: "\eb57";
+}
+.hermetica-C003-chronos:before {
+  content: "\eb58";
+}
+.hermetica-C004-poseidon:before {
+  content: "\eb59";
+}
+.hermetica-C005-vulcanus:before {
+  content: "\eb5a";
+}
+.hermetica-C006-apollon:before {
+  content: "\eb5b";
+}
+.hermetica-C007-cupido:before {
+  content: "\eb5c";
+}
+.hermetica-C008-hebe:before {
+  content: "\eb5d";
+}
+.hermetica-C009-astraea:before {
+  content: "\eb5e";
+}
+.hermetica-C010-fortuna:before {
+  content: "\eb5f";
+}
+.hermetica-C011-flora:before {
+  content: "\eb60";
+}
+.hermetica-C012-metis:before {
+  content: "\eb61";
+}
+.hermetica-C013-amphitrite:before {
+  content: "\eb62";
+}
+.hermetica-C014-melpomene:before {
+  content: "\eb63";
+}
+.hermetica-C015-eunomia:before {
+  content: "\eb64";
+}
+.hermetica-C016-europa:before {
+  content: "\eb65";
+}
+.hermetica-C017-iris:before {
+  content: "\eb66";
+}
+.hermetica-C018-proserpina:before {
+  content: "\eb67";
+}
+.hermetica-C019-hygeia:before {
+  content: "\eb68";
+}
+.hermetica-C020-egeria:before {
+  content: "\eb69";
+}
+.hermetica-C021-parthenope:before {
+  content: "\eb6a";
+}
+.hermetica-C022-thetis:before {
+  content: "\eb6b";
+}
+.hermetica-C023-psyche:before {
+  content: "\eb6c";
+}
+.hermetica-C024-bellona:before {
+  content: "\eb6d";
+}
+.hermetica-C025-fides:before {
+  content: "\eb6e";
+}
+.hermetica-C026-leukothea:before {
+  content: "\eb6f";
+}
+.hermetica-C027-toro:before {
+  content: "\eb70";
+}
+.hermetica-C028-eros:before {
+  content: "\eb71";
+}
+.hermetica-C029-dionysus:before {
+  content: "\eb72";
+}
+.hermetica-C030-asbolus:before {
+  content: "\eb73";
+}
+.hermetica-C031-hylonome:before {
+  content: "\eb74";
+}
+.hermetica-C032-okryhoe:before {
+  content: "\eb75";
+}
+.hermetica-C033-thereus:before {
+  content: "\eb76";
+}
+.hermetica-C034-typhon:before {
+  content: "\eb77";
+}
+.hermetica-C035-eris:before {
+  content: "\eb78";
+}
+.hermetica-C036-dysnomia:before {
+  content: "\eb79";
+}
+.hermetica-C037-sedna:before {
+  content: "\eb7a";
+}
+.hermetica-C038-quaoar:before {
+  content: "\eb7b";
+}
+.hermetica-C039-weywot:before {
+  content: "\eb7c";
+}
+.hermetica-C040-orcus:before {
+  content: "\eb7d";
+}
+.hermetica-C041-vanth:before {
+  content: "\eb7e";
+}
+.hermetica-C042-varuna:before {
+  content: "\eb7f";
+}
+.hermetica-C043-huya:before {
+  content: "\eb80";
+}
+.hermetica-C044-salacia:before {
+  content: "\eb81";
+}
+.hermetica-C045-actaea:before {
+  content: "\eb82";
+}
+.hermetica-C046-rhadamanthus:before {
+  content: "\eb83";
+}
+.hermetica-C047-ixion:before {
+  content: "\eb84";
+}
+.hermetica-C048-make_make:before {
+  content: "\eb85";
+}
+.hermetica-C049-haumea:before {
+  content: "\eb86";
+}
+.hermetica-C050-hiiaka:before {
+  content: "\eb87";
+}
+.hermetica-C051-namaka:before {
+  content: "\eb88";
+}
+.hermetica-C052-cruinthne:before {
+  content: "\eb89";
+}
+.hermetica-C053-avalon:before {
+  content: "\eb8a";
+}
+.hermetica-C054-snow_white:before {
+  content: "\eb8b";
+}
+.hermetica-C055-aristotle_swen_dao:before {
+  content: "\eb8c";
+}
+.hermetica-C056-hidalgo:before {
+  content: "\eb8d";
+}
+.hermetica-C057-urania:before {
+  content: "\eb8e";
+}
+.hermetica-C058-hestia:before {
+  content: "\eb8f";
+}
+.hermetica-C059-vulcan:before {
+  content: "\eb90";
+}
+.hermetica-C060-phobos:before {
+  content: "\eb91";
+}
+.hermetica-C061-deimos:before {
+  content: "\eb92";
+}
+.hermetica-C062-ganymede:before {
+  content: "\eb93";
+}
+.hermetica-C063-europa:before {
+  content: "\eb94";
+}
+.hermetica-C064-io:before {
+  content: "\eb95";
+}
+.hermetica-C065-callisto:before {
+  content: "\eb96";
+}
+.hermetica-C066-titan:before {
+  content: "\eb97";
+}
+.hermetica-C067-iapetus:before {
+  content: "\eb98";
+}
+.hermetica-C068-rhea:before {
+  content: "\eb99";
+}
+.hermetica-C069-enceladus:before {
+  content: "\eb9a";
+}
+.hermetica-C070-hyperion:before {
+  content: "\eb9b";
+}
+.hermetica-C071-dione:before {
+  content: "\eb9c";
+}
+.hermetica-C072-mimas:before {
+  content: "\eb9d";
+}
+.hermetica-C073-tethys:before {
+  content: "\eb9e";
+}
+.hermetica-C074-titania:before {
+  content: "\eb9f";
+}
+.hermetica-C075-oberon:before {
+  content: "\eba0";
+}
+.hermetica-C076-miranda:before {
+  content: "\eba1";
+}
+.hermetica-C077-ariel:before {
+  content: "\eba2";
+}
+.hermetica-C078-umbriel:before {
+  content: "\eba3";
+}
+.hermetica-C079-proteus:before {
+  content: "\eba4";
+}
+.hermetica-C080-triton:before {
+  content: "\eba5";
+}
+.hermetica-C081-nereid:before {
+  content: "\eba6";
+}
+.hermetica-C082-charon:before {
+  content: "\eba7";
+}
+.hermetica-C083-nyx:before {
+  content: "\eba8";
+}
+.hermetica-C084-hydra:before {
+  content: "\eba9";
+}
+.hermetica-C085-kerberos:before {
+  content: "\ebaa";
+}
+.hermetica-C086-styx:before {
+  content: "\ebab";
+}
+.hermetica-C087-aquila:before {
+  content: "\ebac";
+}
+.hermetica-C088-ara:before {
+  content: "\ebad";
+}
+.hermetica-C089-auriga:before {
+  content: "\ebae";
+}
+.hermetica-C090-bootes:before {
+  content: "\ebaf";
+}
+.hermetica-C091-canis_major:before {
+  content: "\ebb0";
+}
+.hermetica-C092-canis_minor:before {
+  content: "\ebb1";
+}
+.hermetica-C093-centaurus:before {
+  content: "\ebb2";
+}
+.hermetica-C094-cepheus:before {
+  content: "\ebb3";
+}
+.hermetica-C095-cetus:before {
+  content: "\ebb4";
+}
+.hermetica-C096-coma_berenices:before {
+  content: "\ebb5";
+}
+.hermetica-C097-corona_australis:before {
+  content: "\ebb6";
+}
+.hermetica-C098-corona_borealis:before {
+  content: "\ebb7";
+}
+.hermetica-C099-corvus:before {
+  content: "\ebb8";
+}
+.hermetica-C100-crater:before {
+  content: "\ebb9";
+}
+.hermetica-C101-crux:before {
+  content: "\ebba";
+}
+.hermetica-C102-cygnus:before {
+  content: "\ebbb";
+}
+.hermetica-C103-draco:before {
+  content: "\ebbc";
+}
+.hermetica-C104-hercules:before {
+  content: "\ebbd";
+}
+.hermetica-C105-lacerta:before {
+  content: "\ebbe";
+}
+.hermetica-C106-lepus:before {
+  content: "\ebbf";
+}
+.hermetica-C107-lupus:before {
+  content: "\ebc0";
+}
+.hermetica-C108-lynx:before {
+  content: "\ebc1";
+}
+.hermetica-C109-lyra:before {
+  content: "\ebc2";
+}
+.hermetica-C110-mosca:before {
+  content: "\ebc3";
+}
+.hermetica-C111-octans:before {
+  content: "\ebc4";
+}
+.hermetica-C112-orion:before {
+  content: "\ebc5";
+}
+.hermetica-C113-pegasus:before {
+  content: "\ebc6";
+}
+.hermetica-C114-phoenix:before {
+  content: "\ebc7";
+}
+.hermetica-C115-sagitta:before {
+  content: "\ebc8";
+}
+.hermetica-C116-scutum:before {
+  content: "\ebc9";
+}
+.hermetica-C117-serpens:before {
+  content: "\ebca";
+}
+.hermetica-C118-sextans:before {
+  content: "\ebcb";
+}
+.hermetica-C119-ursa_major:before {
+  content: "\ebcc";
+}
+.hermetica-C120-ursa_minor:before {
+  content: "\ebcd";
+}
+.hermetica-C121-vulpecula:before {
+  content: "\ebce";
+}
+.hermetica-B000-sun:before {
+  content: "\ebcf";
+}
+.hermetica-B001-moon:before {
+  content: "\ebd0";
+}
+.hermetica-B002-mercury:before {
+  content: "\ebd1";
+}
+.hermetica-B003-venus:before {
+  content: "\ebd2";
+}
+.hermetica-B004-earth:before {
+  content: "\ebd3";
+}
+.hermetica-B005-mars:before {
+  content: "\ebd4";
+}
+.hermetica-B006-jupiter:before {
+  content: "\ebd5";
+}
+.hermetica-B007-saturn:before {
+  content: "\ebd6";
+}
+.hermetica-B008-uranus:before {
+  content: "\ebd7";
+}
+.hermetica-B009-uranus_alt:before {
+  content: "\ebd8";
+}
+.hermetica-B010-neptune:before {
+  content: "\ebd9";
+}
+.hermetica-B011-pluto:before {
+  content: "\ebda";
+}
+.hermetica-B012-pallas:before {
+  content: "\ebdb";
+}
+.hermetica-B013-juno:before {
+  content: "\ebdc";
+}
+.hermetica-B014-ceres:before {
+  content: "\ebdd";
+}
+.hermetica-B015-chiron:before {
+  content: "\ebde";
+}
+.hermetica-B016-vesta:before {
+  content: "\ebdf";
+}
+.hermetica-B017-lilith:before {
+  content: "\ebe0";
+}
+.hermetica-B018-comet:before {
+  content: "\ebe1";
+}
+.hermetica-B019-asteroid:before {
+  content: "\ebe2";
+}
+.hermetica-B020-moon_phase_waxing_crescent:before {
+  content: "\ebe3";
+}
+.hermetica-B021-moon_phase_waxing_half:before {
+  content: "\ebe4";
+}
+.hermetica-B022-moon_phase_waxing_gibbous:before {
+  content: "\ebe5";
+}
+.hermetica-B023-moon_phase_full:before {
+  content: "\ebe6";
+}
+.hermetica-B024-moon_phase_waning_gibbous:before {
+  content: "\ebe7";
+}
+.hermetica-B025-moon_phase_waning_half:before {
+  content: "\ebe8";
+}
+.hermetica-B026-moon_phase_waning_crescent:before {
+  content: "\ebe9";
+}
+.hermetica-B027-moon_phase_new:before {
+  content: "\ebea";
+}
+.hermetica-A000-aries:before {
+  content: "\ebeb";
+}
+.hermetica-A001-taurus:before {
+  content: "\ebec";
+}
+.hermetica-A002-gemini:before {
+  content: "\ebed";
+}
+.hermetica-A003-cancer:before {
+  content: "\ebee";
+}
+.hermetica-A004-leo:before {
+  content: "\ebef";
+}
+.hermetica-A005-virgo:before {
+  content: "\ebf0";
+}
+.hermetica-A006-libra:before {
+  content: "\ebf1";
+}
+.hermetica-A007-scorpio:before {
+  content: "\ebf2";
+}
+.hermetica-A008-sagittarius:before {
+  content: "\ebf3";
+}
+.hermetica-A009-capricorn:before {
+  content: "\ebf4";
+}
+.hermetica-A010-aquarius:before {
+  content: "\ebf5";
+}
+.hermetica-A011-pisces:before {
+  content: "\ebf6";
+}
+.hermetica-A012-north_node:before {
+  content: "\ebf7";
+}
+.hermetica-A013-south_node:before {
+  content: "\ebf8";
+}
+.hermetica-A014-part_of_fortune:before {
+  content: "\ebf9";
+}
+.hermetica-A015-conjunction:before {
+  content: "\ebfa";
+}
+.hermetica-A016-opposition:before {
+  content: "\ebfb";
+}
+.hermetica-A017-trine:before {
+  content: "\ebfc";
+}
+.hermetica-A018-square:before {
+  content: "\ebfd";
+}
+.hermetica-A020-semisextile:before {
+  content: "\ebfe";
+}
+.hermetica-A021-quincunx:before {
+  content: "\ebff";
+}
+.hermetica-A022-semi_square:before {
+  content: "\ec00";
+}
+.hermetica-A023-sesquiquadrate:before {
+  content: "\ec01";
+}
+.hermetica-A024-decile:before {
+  content: "\ec02";
+}

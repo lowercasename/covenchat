@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css?family=Gabriela|IM+Fell+English|Old+Standard+TT&display=swap');
+
+#altar {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+}
+
+#altar h1 {
+    margin: 1rem auto;
+    font-family: 'Righteous', sans-serif;
+}
+
+#candleHolder {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+}
+
+#altarControls {
+    position: absolute;
+    width: 200px;
+    right: 10px;
+    top: 10px;
+    z-index:100;
+    opacity: 0.5;
+    transform: 150ms;
+}
+
+#altarControls:hover {
+    opacity: 1;
+}
+
+#altarGrid {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-rows: 1fr;
+    grid-auto-columns: 1fr;
+    grid-gap: 10px;
+}
+
+#altarGrid .cell {
+    font-family: 'Gabriela', serif;
+    font-size: 3vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed transparent;
+    position: relative;
+    text-align: center;
+    /* overflow: hidden; */
+}
+
+#altarGrid .cell svg {
+    fill: rgba(255, 255, 255, 0.5);
+    max-height: 100%;
+}
+
+#altarGrid.editingMode .cell {
+    border-color: rgba(255,255,255,0.1);
+    cursor: pointer;
+}
+#altarGrid.editingMode .cell:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+#altarGrid textarea {
+    font-size: 1.5rem;
+    font-family: 'Gabriela', serif;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: center;
+    margin: 0;
+}
+
+#altarGrid textarea:focus {
+    box-shadow: none;
+}
+
+.altarIcon {
+    font-size: 16vw;
+    /* color: rgba(255,255,255,0.5); */
+}
+
+.cellEditingTools {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 200;
+    font-family: 'Fira Sans', sans-serif;
+    text-align: left;
+    transition: 150ms;
+}
+.cellEditingTools button {
+    margin: 0;
+    margin-left: 10px;
+}
+.rfipbtn--default {
+    border: none !important;
+    border-radius: 6px !important;
+}
+.rfipbtn--default .rfipbtn__button {
+    border: none !important;
+    border-radius: 0 6px 6px 0 !important;
+    background: var(--green) !important;
+    color: var(--dark-purple) !important;
+}
+.rfipbtn--default .rfipbtn__button:hover {
+    background: var(--bright-green) !important;
+}
+.rfipdropdown--default {
+    border-radius: 6px !important;
+}
+.rfipdropdown--default input {
+    padding: 5px !important;
+}
+
+.candleDuration {
+    background: white;
+    border: 1px solid;
+    width: 60px;
+    color: var(--dark-purple);
+    padding: 5px;
+    margin: 0;
+}
+
+.candleDuration:focus {
+    box-shadow: none;
+    background: white;
+}
+
+.candleColorCircle {
+    font-size: 0.75rem;
+    margin-right: 5px;
+}
+
+.candle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.candle-body {
+  width: 30px;
+  height: 250px;
+  background: white;
+  border-radius: 5px 5px 0 0 ;
+  box-shadow: inset -17px 0px 0px -10px rgba(0,0,0,0.1), -20px 0px 30px rgba(0, 0, 0, 0.3);
+}
+.candle-wick {
+  height: 10px;
+  width: 4px;
+  background: #AD88A9;
+}
+.candle-flame {
+  position: relative;
+  top: 4px;
+  width: 15px;
+  height: 30px;
+  background: #ffa100;
+  border-radius: 8px 8px 8px 8px / 20px 20px 8px 8px;
+  box-shadow: 0 0 20px 0 rgba(255, 202, 0, 0.7);
+  animation: border-radius 8s ease infinite, size 8s ease infinite, flame 2s ease infinite;
+  transform: translateZ(0);
+}
+@keyframes border-radius {
+  0%, 22%, 49%, 62%, 81%, 100% {
+    border-radius: 2px 14px 8px 8px / 20px 20px 8px 8px;
+  }
+  14%, 32%, 56%, 70%, 89% {
+    border-radius: 14px 2px 8px 8px / 20px 20px 8px 8px;
+  }
+}
+@keyframes size {
+  0%, 100% {
+    transform: scale(1);
+  }
+  30%, 60% {
+    transform: scaleY(1.2);
+    transform: scaleX(0.9);
+  }
+  20%, 45%, 80% {
+    transform: scaleX(1.2);
+    transform: scaleY(0.9);
+  }
+}
+@keyframes flame {
+  0%, 30%, 60%, 80%, 100% {
+    box-shadow: 0 0 20px 0 rgba(255, 202, 0, 0.7);
+  }
+  20%, 50%, 70% {
+    box-shadow: 0 0 22px 0 rgba(255, 202, 0, 0.7);
+  }
+}

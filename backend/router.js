@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const passport = require('passport');
 const Pusher = require('pusher');
 const parser = require('./parser');
@@ -559,5 +560,141 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 		}
 	})
 });
+
+router.get('/api/altar/fetch/:userID', authorizeUser, function(req,res) {
+	Altar.findOne({
+		user: req.params.userID
+	})
+	.then(altar => {
+		if (altar) {
+			res.status(200).json({
+				altar: altar
+			});
+		} else {
+			res.status(404);
+		}
+	})
+})
+
+router.post('/api/altar/edit-cell/contents', authorizeUser, function(req,res) {
+	let targetCell = Object.keys(req.body.payload)[0];
+	let newValue = req.body.payload[targetCell];
+	let cellIndex = parseInt(targetCell.slice(5)) - 1;
+
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$set: {
+			[`cells.${cellIndex}.contents`]: newValue
+		}
+	})
+	.then(response => {
+		res.status(200).json({
+			index: cellIndex,
+			value: newValue
+		});
+	})
+})
+
+router.post('/api/altar/edit-cell/type', authorizeUser, function(req,res) {
+	let targetCell = Object.keys(req.body.payload)[0];
+	let newType = req.body.payload[targetCell];
+	let cellIndex = parseInt(targetCell.slice(5)) - 1;
+
+	console.log(targetCell)
+	console.log(newType)
+	console.log(cellIndex)
+
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$set: {
+			[`cells.${cellIndex}.type`]: newType,
+			[`cells.${cellIndex}.contents`]: ''
+		}
+	})
+	.then(response => {
+		console.log(response);
+		res.status(200).json({
+			index: cellIndex,
+			type: newType
+		});
+	})
+})
+
+router.post('/api/altar/edit-cell/color', authorizeUser, function(req,res) {
+	let targetCell = Object.keys(req.body.payload)[0];
+	let newColor = req.body.payload[targetCell];
+	let cellIndex = parseInt(targetCell.slice(5)) - 1;
+	console.log(newColor)
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$set: {
+			[`cells.${cellIndex}.color`]: newColor
+		}
+	})
+	.then(response => {
+		console.log(response);
+		res.status(200).json({
+			index: cellIndex,
+			color: newColor
+		});
+	})
+})
+
+router.post('/api/altar/edit-background', authorizeUser, function(req,res) {
+	let newColor = req.body.color;
+	console.log(newColor)
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$set: {
+			backgroundColor: newColor
+		}
+	})
+	.then(response => {
+		console.log(response);
+		res.status(200).json({
+			color: newColor
+		});
+	})
+})
+
+router.post('/api/altar/candle/new', authorizeUser, function(req,res) {
+	let candleID = mongoose.Types.ObjectId();
+	let newCandle = {...req.body.candle, _id: candleID}
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$push: {
+			candles: newCandle
+		}
+	})
+	.then(response => {
+		console.log(response);
+		res.status(200).json({
+			candle: newCandle
+		});
+	})
+})
+
+router.post('/api/altar/candle/delete/:candleID', authorizeUser, function(req,res) {
+	Altar.update({user: req.user._id}, { $pull: { candles: { _id: req.params.candleID }}})
+	.then(response => {
+		console.log(response)
+		Altar.find({user: req.user._id},{candles:1})
+		.then(candles => {
+			res.status(200).json({
+				candles: candles[0].candles
+			});
+		})
+	})
+})
 
 module.exports = router;

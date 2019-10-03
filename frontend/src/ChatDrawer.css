@@ -77,7 +77,6 @@
 }
 
 .welcomeMessage {
-    position: fixed;
     overflow-y: scroll;
     background: #805a93;
     z-index: 100;

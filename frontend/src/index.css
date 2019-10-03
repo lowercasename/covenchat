@@ -1,6 +1,7 @@
 @import-normalize;
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans+Condensed:400,400i|Fira+Sans:400,400i,700,700i&display=swap&subset=cyrillic');
 @import url('https://fonts.googleapis.com/css?family=Righteous&display=swap');
+@import './hermetica.css';
 
 * {
   margin: 0;
@@ -103,10 +104,106 @@ button.small {
   border: 0;
 }
 
+button.active {
+    background-color: var(--bright-green);
+    box-shadow: inset 2px 2px 1px rgba(0,0,0,0.2);
+}
+
 button[disabled] {
     background: #c6c6c6;
     color: #6f6f6f;
     cursor: default;
+}
+
+.dropdown {
+    margin: 0;
+    font-size: 1rem;
+    text-transform: none;
+    font-weight: 400;
+    opacity: 1 !important;
+    position: relative;
+}
+
+.dropdown-button {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: var(--green);
+  color: var(--dark-purple);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.dropdown-button:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--dark-purple);
+}
+
+.dropdown-button:hover {
+  background-color: var(--bright-green);
+}
+
+
+.dropdown-input {
+  display: none;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0;
+  margin: 2px 0 0 0;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+  background-color: #ffffff;
+  color: var(--dark-purple);
+  list-style-type: none;
+  min-width: 160px;
+}
+
+.dropdown-input + .dropdown-menu {
+  display: none;
+}
+
+.dropdown-input:checked + .dropdown-menu {
+  display: block;
+    position: absolute;
+    top: 40px;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown-menu li.selected {
+    background-color: #e8e8e8;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f6f6f6;
+}
+
+.dropdown-menu li a {
+  display: block;
+  margin: -10px -20px;
+  padding: 10px 20px;
+}
+
+.dropdown-menu li.divider{
+  padding: 0;
+  border-bottom: 1px solid #cccccc;
 }
 
 label {
@@ -202,6 +299,7 @@ label {
 
 .sideNav {
   width: 60px;
+  min-width: 60px;
   height: 100%;
   padding-top: 10px;
   background: var(--dark-purple);
@@ -275,7 +373,7 @@ label {
 
 .statusBar .statusItem {
     padding: 0 10px;
-    opacity: 0.7;
+    opacity: 0.6;
     display: flex;
     align-items: center;
 }
@@ -476,4 +574,9 @@ input[type="submit"]:hover {
 .green-toast {
     background: var(--green) !important;
     color: var(--dark-purple) !important;
+}
+
+.editable:empty:after, .editable span:first-child:empty:after {
+    content: 'Click to edit';
+    opacity:.5;
 }
