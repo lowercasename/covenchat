@@ -8,11 +8,11 @@ import { toast } from 'react-toastify';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint} from '@fortawesome/free-solid-svg-icons';
-import { faComments } from '@fortawesome/free-regular-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass)
 
 toast.configure()
 
@@ -61,8 +61,11 @@ class Dashboard extends Component {
         let mapStyle = this.state.visibleModule === "map" ? {display:'flex'} : {display: 'none'};
         return (
             <div className="App">
-                <nav className="sideNav">
-                    <img src="magic-ball-alt.svg" className="navLogo" onClick={() => this.toggleView('map')}/>
+                <nav className="sideNav"><i class="fas fa-compass"></i>
+                    <img src="magic-ball-alt.svg" className="navLogo" />
+                    <div className="navIcon" onClick={() => this.toggleView('map')}>
+                        <FontAwesomeIcon icon={['far', 'compass']} />
+                    </div>
                     <div className="navIcon" onClick={() => this.toggleView('chat')}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>

@@ -552,6 +552,12 @@ class ChatDrawer extends Component {
         });
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.isVisible !== this.props.isVisible) {
+            scrollToBottom();
+        }
+    }
+
     handleSubmit(e) {
         e.preventDefault()
         var messageContent = this.state.message.trim();
