@@ -139,42 +139,42 @@ const icons = {
 }
 
 class ColorPickerButton extends Component {
-  state = {
-    displayColorPicker: false
-  };
+    state = {
+        displayColorPicker: false
+    };
 
-  handleClick = () => {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker })
-  };
+    handleClick = () => {
+        this.setState({ displayColorPicker: !this.state.displayColorPicker })
+    };
 
-  handleClose = () => {
-    this.setState({ displayColorPicker: false })
-  };
+    handleClose = () => {
+        this.setState({ displayColorPicker: false })
+    };
 
-  render() {
-    const popover = {
-      position: 'absolute',
-      zIndex: '400'
+    render() {
+        const popover = {
+            position: 'absolute',
+            zIndex: '400'
+        }
+        const cover = {
+            position: 'fixed',
+            top: '0px',
+            right: '0px',
+            bottom: '0px',
+            left: '0px'
+        }
+        return (
+            <div style={{ display: "inline-block" }} className={this.props.className} >
+                <button type="button" className={this.props.className} style={{ marginTop: (this.props.backgroundPicker ? "0.5rem" : "0"), background: this.props.backgroundPicker ? "var(--green)" : 'rgba(' + this.props.color.r + ',' + this.props.color.g + ',' + this.props.color.b + ',' + this.props.color.a + ')' }} onClick={this.handleClick}><FontAwesomeIcon icon="tint" />{this.props.backgroundPicker && " Background color"}</button>
+                {this.state.displayColorPicker ? <div style={popover}>
+                    <div style={cover} onClick={this.handleClose} />
+                    <ChromePicker
+                        color={this.props.color}
+                        onChangeComplete={(color, event) => this.props.handleChangeComplete(color, event, this.props.cellIndex)} />
+                </div> : null}
+            </div>
+        )
     }
-    const cover = {
-      position: 'fixed',
-      top: '0px',
-      right: '0px',
-      bottom: '0px',
-      left: '0px'
-    }
-    return (
-        <div style={{display:"inline-block"}} className={this.props.className} >
-            <button type="button" className={this.props.className} style={{marginTop:(this.props.backgroundPicker ? "0.5rem" : "0"),background: this.props.backgroundPicker ? "var(--green)" : 'rgba('+this.props.color.r+','+this.props.color.g+','+this.props.color.b+','+this.props.color.a+')'}} onClick={ this.handleClick }><FontAwesomeIcon icon="tint"/>{this.props.backgroundPicker && " Background color"}</button>
-            { this.state.displayColorPicker ? <div style={ popover }>
-              <div style={ cover } onClick={ this.handleClose }/>
-              <ChromePicker
-                color={this.props.color}
-                onChangeComplete={(color, event) => this.props.handleChangeComplete(color, event, this.props.cellIndex)}/>
-            </div> : null }
-        </div>
-    )
-  }
 }
 
 class CellEditingTools extends Component {
@@ -186,30 +186,30 @@ class CellEditingTools extends Component {
         let typeIcon = () => {
             switch (this.props.cell.type) {
                 case "empty":
-                    return <FontAwesomeIcon icon="ban" style={{marginRight:'25px'}}/>;
+                    return <FontAwesomeIcon icon="ban" style={{ marginRight: '25px' }} />;
                 case "image":
-                    return <FontAwesomeIcon icon="shapes" style={{marginRight:'25px'}}/>;
+                    return <FontAwesomeIcon icon="shapes" style={{ marginRight: '25px' }} />;
                 case "text":
-                    return <FontAwesomeIcon icon="paragraph" style={{marginRight:'25px'}}/>
+                    return <FontAwesomeIcon icon="paragraph" style={{ marginRight: '25px' }} />
             }
         }
-        return(
+        return (
             <div className="cellEditingTools">
-                <label className="dropdown" style={{display:"inline-block"}}>
+                <label className="dropdown" style={{ display: "inline-block" }}>
                     <div className="dropdown-button">
                         {typeIcon()}
                     </div>
                     <input type="checkbox" className="dropdown-input" />
                     <ul className="dropdown-menu">
-                        <li onClick={() => this.props.editAltarCellType({[`cell-${this.props.index+1}`]:"empty"})} className={(this.props.cell.type == "empty" && "selected")}><FontAwesomeIcon icon="ban"/> Empty</li>
-                        <li onClick={() => this.props.editAltarCellType({[`cell-${this.props.index+1}`]:"image"})} className={(this.props.cell.type == "image" && "selected")}><FontAwesomeIcon icon="shapes"/> Image</li>
-                        <li onClick={() => this.props.editAltarCellType({[`cell-${this.props.index+1}`]:"text"})} className={(this.props.cell.type == "text" && "selected")}><FontAwesomeIcon icon="paragraph"/> Text</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type == "empty" && "selected")}><FontAwesomeIcon icon="ban" /> Empty</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type == "image" && "selected")}><FontAwesomeIcon icon="shapes" /> Image</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type == "text" && "selected")}><FontAwesomeIcon icon="paragraph" /> Text</li>
                     </ul>
                 </label>
                 <ColorPickerButton
                     handleChangeComplete={this.props.handleChangeComplete}
-                    cellIndex={this.props.index+1}
-                    color={this.props.cell.color}/>
+                    cellIndex={this.props.index + 1}
+                    color={this.props.cell.color} />
             </div>
         )
     }
@@ -235,7 +235,7 @@ class Candle extends Component {
             console.log("Candle has not yet expired!");
             let startTime = expiryTime - this.state.duration;
             let timeElapsed = now - startTime;
-            let currentHeight = this.state.height - ((timeElapsed/this.state.duration) * this.state.height);
+            let currentHeight = this.state.height - ((timeElapsed / this.state.duration) * this.state.height);
             let step = this.state.duration / this.state.height;
             this.setState({
                 step: step,
@@ -244,7 +244,7 @@ class Candle extends Component {
             });
             this.burn = setInterval(() => this.burnCandle(), step);
         } else {
-            console.log("Candle has expired, destroying candle",this.props.index);
+            console.log("Candle has expired, destroying candle", this.props.index);
             clearInterval(this.burn);
             this.props.extinguishCandle(this.props.id, this.props.index);
         }
@@ -271,7 +271,7 @@ class Candle extends Component {
                 </div>
                 <div className="candle-wick">
                 </div>
-                <div className="candle-body" style={{background:this.state.color, height: this.state.height + 'px'}}></div>
+                <div className="candle-body" style={{ background: this.state.color, height: this.state.height + 'px' }}></div>
             </div>
         )
     }
@@ -281,6 +281,8 @@ export default class Altar extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            originalUser: this.props.user,
+            user: this.props.user,
             cells: [],
             candles: [],
             candleDuration: '10',
@@ -291,14 +293,28 @@ export default class Altar extends Component {
 
     componentDidMount() {
 
-        fetch('/api/altar/fetch/' + this.props.user._id)
-        .then(res => {
-            if (res.status === 200) return res.json();
-        })
-        .then(res => {
-            this.setState({cells: res.altar.cells, candles: res.altar.candles, backgroundColor: res.altar.backgroundColor});
-        })
+        fetch('/api/altar/fetch/' + this.state.user._id)
+            .then(res => {
+                if (res.status === 200) return res.json();
+            })
+            .then(res => {
+                this.setState({ cells: res.altar.cells, candles: res.altar.candles, backgroundColor: res.altar.backgroundColor });
+            })
 
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        console.log("Previously:", prevProps.user.username)
+        console.log("Now:", this.props.user.username)
+        if (prevProps.user != this.props.user) {
+            fetch('/api/altar/fetch/' + this.props.user._id)
+                .then(res => {
+                    if (res.status === 200) return res.json();
+                })
+                .then(res => {
+                    this.setState({ cells: res.altar.cells, candles: res.altar.candles, backgroundColor: res.altar.backgroundColor });
+                })
+        }
     }
 
     handleInputChange = (event) => {
@@ -314,45 +330,47 @@ export default class Altar extends Component {
         let now = new Date().getTime();
         let candle = {
             color: color,
-    		duration: candleDuration,
-    		expiryTime: now + candleDuration
+            duration: candleDuration,
+            expiryTime: now + candleDuration
         }
+        var audio = new Audio('/match.mp3');
+        audio.play();
         fetch('/api/altar/candle/new', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({candle})
+            body: JSON.stringify({ candle })
         })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res)
-            this.setState({ candles: [...this.state.candles, res.candle]});
-        })
+            .then(res => res.json())
+            .then(res => {
+                console.log(res)
+                this.setState({ candles: [...this.state.candles, res.candle] });
+            })
     }
 
     extinguishCandle = (candleID, index) => {
-        console.log("Destroying candle",index)
+        console.log("Destroying candle", index)
         fetch('/api/altar/candle/delete/' + candleID, {
             method: 'POST'
         })
-        .then(res => res.json())
-        .then(res => {
-            let remainingCandles = this.state.candles.filter(candle => candle._id !== candleID);
-            this.setState({candles: remainingCandles});
-            // this.setState({candles: res.candles});
-            console.log("Candle with index",index,"has been destroyed")
-        })
-        .catch(err => {
-            console.error("Error!",err);
-            let remainingCandles = this.state.candles.filter(candle => candle._id !== candleID);
-            this.setState({candles: remainingCandles});
-        })
+            .then(res => res.json())
+            .then(res => {
+                let remainingCandles = this.state.candles.filter(candle => candle._id !== candleID);
+                this.setState({ candles: remainingCandles });
+                // this.setState({candles: res.candles});
+                console.log("Candle with index", index, "has been destroyed")
+            })
+            .catch(err => {
+                console.error("Error!", err);
+                let remainingCandles = this.state.candles.filter(candle => candle._id !== candleID);
+                this.setState({ candles: remainingCandles });
+            })
     }
 
     toggleEditingMode = () => {
-        this.setState({editingMode: !this.state.editingMode})
+        this.setState({ editingMode: !this.state.editingMode })
     }
 
     parseCellContents = (cell, cellNumber) => {
@@ -360,22 +378,22 @@ export default class Altar extends Component {
             if (cell.type === "text") {
                 return (
                     <RIETextArea
-                      value={cell.contents}
-                      change={this.editAltarCellContents}
-                      propName={"cell-"+cellNumber}
-                      className="editable"
-                      rows={4}
-                      editProps={{placeholder:"Click to edit"}} />
+                        value={cell.contents}
+                        change={this.editAltarCellContents}
+                        propName={"cell-" + cellNumber}
+                        className="editable"
+                        rows={4}
+                        editProps={{ placeholder: "Click to edit" }} />
                 )
             } else if (cell.type === "image") {
                 let pickerProps = {
-                  icons: icons,
-                  theme: 'default',
-                  renderUsing: 'class',
-                  value: cell.contents,
-                  onChange: (value) => this.editAltarCellContents({[`cell-${cellNumber}`]:value}),
-                  isMulti: false,
-                  iconsPerPage: 10
+                    icons: icons,
+                    theme: 'default',
+                    renderUsing: 'class',
+                    value: cell.contents,
+                    onChange: (value) => this.editAltarCellContents({ [`cell-${cellNumber}`]: value }),
+                    isMulti: false,
+                    iconsPerPage: 10
                 };
                 return (
                     <FontIconPicker {...pickerProps} />
@@ -386,7 +404,7 @@ export default class Altar extends Component {
                 return <span className="altarText">{cell.contents}</span>;
             }
             if (cell.type === "image") {
-                return <span className={["altarIcon",cell.contents].join(" ")} />
+                return <span className={["altarIcon", cell.contents].join(" ")} />
             }
         }
     }
@@ -419,18 +437,18 @@ export default class Altar extends Component {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({payload})
+            body: JSON.stringify({ payload })
         })
-        .then(res => res.json())
-        .then(res => {
-            let cells = this.state.cells;
-            cells.map((cell, index) => {
-                if (index === res.index) {
-                    cell.contents = res.value;
-                }
+            .then(res => res.json())
+            .then(res => {
+                let cells = this.state.cells;
+                cells.map((cell, index) => {
+                    if (index === res.index) {
+                        cell.contents = res.value;
+                    }
+                })
+                this.setState({ cells: cells })
             })
-            this.setState({cells: cells})
-        })
     }
 
     editAltarCellType = (payload) => {
@@ -440,25 +458,25 @@ export default class Altar extends Component {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({payload})
+            body: JSON.stringify({ payload })
         })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res);
-            let cells = this.state.cells;
-            cells.map((cell, index) => {
-                if (index === res.index) {
-                    cell.type = res.type;
-                    cell.contents = '';
-                }
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+                let cells = this.state.cells;
+                cells.map((cell, index) => {
+                    if (index === res.index) {
+                        cell.type = res.type;
+                        cell.contents = '';
+                    }
+                })
+                this.setState({ cells: cells })
             })
-            this.setState({cells: cells})
-        })
     }
 
     handleChangeComplete = (color, event, cellIndex) => {
         let payload = {
-            [`cell-${cellIndex}`]:color.rgb
+            [`cell-${cellIndex}`]: color.rgb
         }
         fetch('/api/altar/edit-cell/color', {
             method: 'POST',
@@ -466,19 +484,19 @@ export default class Altar extends Component {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({payload})
+            body: JSON.stringify({ payload })
         })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res);
-            let cells = this.state.cells;
-            cells.map((cell, index) => {
-                if (index === res.index) {
-                    cell.color = res.color;
-                }
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+                let cells = this.state.cells;
+                cells.map((cell, index) => {
+                    if (index === res.index) {
+                        cell.color = res.color;
+                    }
+                })
+                this.setState({ cells: cells })
             })
-            this.setState({cells: cells})
-        })
     }
 
     changeBackgroundColor = (color) => {
@@ -488,69 +506,84 @@ export default class Altar extends Component {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({color: color.rgb})
+            body: JSON.stringify({ color: color.rgb })
         })
-        .then(res => res.json())
-        .then(res => {
-            this.setState({backgroundColor: res.color})
-        })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({ backgroundColor: res.color })
+            })
     }
 
 
     render() {
         let style = {
             display: this.props.isVisible ? 'block' : 'none',
-            backgroundColor: this.state.backgroundColor ? 'rgba('+this.state.backgroundColor.r+','+this.state.backgroundColor.g+','+this.state.backgroundColor.b+','+this.state.backgroundColor.a+')' : 'rgba(62,41,72,1)'
+            backgroundColor: this.state.backgroundColor ? 'rgba(' + this.state.backgroundColor.r + ',' + this.state.backgroundColor.g + ',' + this.state.backgroundColor.b + ',' + this.state.backgroundColor.a + ')' : 'rgba(62,41,72,1)'
         };
         return (
             <div id="altar" style={style}>
-                <div id="altarControls">
-                    <label className="dropdown">
-                        <div className="dropdown-button full-width">
-                            <FontAwesomeIcon icon="burn" /> Light candle
-                        </div>
-                        <input type="checkbox" className="dropdown-input" id="lightCandle" />
-                        <ul className="dropdown-menu">
-                            <li>
-                            <input
-                                name="candleDuration"
-                                className="candleDuration"
-                                type="number"
-                                value={this.state.candleDuration}
-                                onChange={this.handleInputChange}
-                            /> minutes</li>
-                            <li className="divider"></li>
-                            <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{color:"white"}} icon="circle"/> White</li>
-                            <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#111111"}} icon="circle"/>Black</li>
-                            <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#503327"}} icon="circle"/>Brown</li>
-                            <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#d40a0a"}} icon="circle"/>Red</li>
-                            <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#FF851B"}} icon="circle"/>Orange</li>
-                            <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#FFDC00"}} icon="circle"/>Yellow</li>
-                            <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#2ECC40"}} icon="circle"/>Green</li>
-                            <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#0074D9"}} icon="circle"/>Blue</li>
-                            <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#8d0dc9"}} icon="circle"/>Purple</li>
-                            <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{color:"#fa69d9"}} icon="circle"/>Pink</li>
-                        </ul>
-                    </label>
-                    <button
-                        className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
-                        type="button"
-                        onClick={this.toggleEditingMode}
-                    >
-                        <FontAwesomeIcon icon="th" /> Edit Altar
-                    </button>
-                    <ColorPickerButton
-                        className="full-width"
-                        handleChangeComplete={this.changeBackgroundColor}
-                        color={this.state.backgroundColor}
-                        backgroundPicker={true}/>
+                <div id="altarNav">
+                    <span class="altarUsername">
+                        <img src={this.props.user.settings.flair} className="altarFlair" /> {this.props.user.username}&nbsp;
+                    {this.props.user !== this.state.originalUser &&
+                            <button
+                                className="small"
+                                onClick={() => this.props.changeAltarUser(this.state.originalUser)}
+                            >
+                                <FontAwesomeIcon icon="times" />
+                            </button>
+                        }
+                    </span>
                 </div>
+                {this.props.user === this.state.originalUser &&
+                    <div id="altarControls">
+                        <label className="dropdown">
+                            <div className="dropdown-button full-width">
+                                <FontAwesomeIcon icon="burn" /> Light candle
+                                </div>
+                            <input type="checkbox" className="dropdown-input" id="lightCandle" />
+                            <ul className="dropdown-menu">
+                                <li>
+                                    <input
+                                        name="candleDuration"
+                                        className="candleDuration"
+                                        type="number"
+                                        value={this.state.candleDuration}
+                                        onChange={this.handleInputChange}
+                                    /> minutes</li>
+                                <li className="divider"></li>
+                                <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "white" }} icon="circle" /> White</li>
+                                <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#111111" }} icon="circle" />Black</li>
+                                <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#503327" }} icon="circle" />Brown</li>
+                                <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#d40a0a" }} icon="circle" />Red</li>
+                                <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FF851B" }} icon="circle" />Orange</li>
+                                <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FFDC00" }} icon="circle" />Yellow</li>
+                                <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#2ECC40" }} icon="circle" />Green</li>
+                                <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#0074D9" }} icon="circle" />Blue</li>
+                                <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#8d0dc9" }} icon="circle" />Purple</li>
+                                <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#fa69d9" }} icon="circle" />Pink</li>
+                            </ul>
+                        </label>
+                        <button
+                            className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
+                            type="button"
+                            onClick={this.toggleEditingMode}
+                        >
+                            <FontAwesomeIcon icon="th" /> Edit Altar
+                            </button>
+                        <ColorPickerButton
+                            className="full-width"
+                            handleChangeComplete={this.changeBackgroundColor}
+                            color={this.state.backgroundColor}
+                            backgroundPicker={true} />
+                    </div>
+                }
                 <div id="altarGrid" className={this.state.editingMode ? "editingMode" : ""}>
                     {this.state.cells.map((cell, index) => {
-                        let cellNumber = index+1;
+                        let cellNumber = index + 1;
                         return (
                             <div class={["cell", "cell-" + cellNumber, "cell-" + cell.type].join(" ")}>
-                                {this.state.editingMode && (
+                                {this.state.editingMode && this.props.user === this.state.originalUser && (
                                     <CellEditingTools
                                         cell={cell}
                                         index={index}
@@ -558,16 +591,16 @@ export default class Altar extends Component {
                                         handleChangeComplete={this.handleChangeComplete}
                                     />
                                 )}
-                                <span style={{color:(cell.color ? 'rgba('+cell.color.r+','+cell.color.g+','+cell.color.b+','+cell.color.a+')' : 'rgba(255,255,255,0.5)')}}>
+                                <span style={{ color: (cell.color ? 'rgba(' + cell.color.r + ',' + cell.color.g + ',' + cell.color.b + ',' + cell.color.a + ')' : 'rgba(255,255,255,0.5)') }}>
                                     {this.parseCellContents(cell, cellNumber)}
                                 </span>
                             </div>
                         )
                     })}
                 </div>
-                { !this.state.editingMode &&
+                {!this.state.editingMode &&
                     <div id="candleHolder">
-                        { this.state.candles.map((candle, index) => {
+                        {this.state.candles.map((candle, index) => {
                             return (
                                 <Candle
                                     id={candle._id}
@@ -579,7 +612,7 @@ export default class Altar extends Component {
                                     extinguishCandle={this.extinguishCandle.bind(this)}
                                 />
                             )
-                        }) }
+                        })}
                     </div>
                 }
             </div>

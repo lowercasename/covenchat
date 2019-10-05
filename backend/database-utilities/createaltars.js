@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 // DATABASE
-const configDatabase = require('./database.js');
+const configDatabase = require('../database.js');
 mongoose.connect(configDatabase.url, {useNewUrlParser: true, useUnifiedTopology: true});
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -12,8 +12,8 @@ db.once('open', function() {
   console.log("Connected to MongoDB!")
 });
 
-User = require('./database/user');
-Altar = require('./database/altar');
+User = require('../database/user');
+Altar = require('../database/altar');
 
 async function createAltars() {
     var allUsers = await User.find();

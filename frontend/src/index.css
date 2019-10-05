@@ -318,7 +318,7 @@ label {
   cursor: pointer;
 }
 
-.navIcon {
+/* .navIcon {
     color: var(--dark-purple);
     height: 50px;
     width: 50px;
@@ -345,18 +345,35 @@ label {
 
 .navIcon:hover {
   background: var(--bright-green);
+} */
+
+.navIcon {
+  color: rgba(255,255,255,0.45);
+  height: 50px;
+  width: 50px;
+  background: rgba(0,0,0,0.2);
+  transition: all 150ms ease-in;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  border-radius: 50%;
+  margin-top: 1rem;
 }
+
+.navIcon.active {
+    color: var(--green);
+}
+
+.navIcon:hover {
+    color: var(--bright-green);
+  }
 
 .content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-}
-
-#map {
-  width: 100%;
-  height: 100%;
-  flex: 1;
 }
 
 .statusBar {
@@ -369,6 +386,7 @@ label {
     font-size: 0.9rem;
     display: flex;
     align-items: center;
+    z-index: 100;
 }
 
 .statusBar .statusItem {

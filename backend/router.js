@@ -125,11 +125,17 @@ router.post('/api/user/register', async function(req, res) {
 				globalCoven.members.push({user: user._id, role: 'member'});
 				globalCoven.save()
 				.then(response => {
-					res.status(200)
-					.json({success: true})
+					let newAltar = new Altar({
+						user: user._id,
+						cells: [{type: 'empty', contents: ''},{type: 'text', contents: 'As above, so below'},{type: 'empty', contents: ''},{type: 'empty', contents: ''},{type: 'image', contents: 'hermetica-F032-pentacle'},{type: 'empty', contents: ''},{type: 'empty', contents: ''},{type: 'empty', contents: ''},{type: 'empty', contents: ''}]
+					})
+					newAltar.save()
+					.then(response => {
+						res.status(200)
+						.json({success: true})
+					})
 				})
 			})
-
 		})
 		.catch(error => {
 			console.log(err)
@@ -139,6 +145,24 @@ router.post('/api/user/register', async function(req, res) {
 	}
 });
 
+router.post('/api/user/settings/update', authorizeUser, async function(req, res) {
+	let subValue = req.body.type == "statusBar" ? ".set" : "";
+	User.update({_id: req.user._id},{
+		$set: { [`settings.${req.body.setting}${subValue}`]: req.body.value }
+	})
+	.then(response => {
+		if (response.ok) {
+			User.findById(req.user._id)
+			.then(user => {
+				console.log(user)
+				res.status(200).json({
+					user: user
+				})
+			})
+		}
+	})
+});
+
 router.post('/pusher/auth', function(req, res) {
 	var socketId = req.body.socket_id;
 	var channel = req.body.channel_name;
@@ -146,28 +170,32 @@ router.post('/pusher/auth', function(req, res) {
 	res.send(auth);
 });
 
-router.post('/api/geolocation/update', function(req,res) {
+router.post('/api/geolocation/update', authorizeUser, function(req,res) {
+	let now = new Date();
 	var payload = {
 		longitude: req.body.position.longitude,
 		latitude: req.body.position.latitude,
-		userID: req.body.userID,
-		state: req.body.state
+		expiry: now.setTime(now.getTime() + (1*60*60*1000)) // Location is displayed for one hour
 	}
-	var geolocation = Geolocation.findOneAndUpdate(
-		{
-			userID: req.body.userID
-		},
-		payload,
-		{
-			upsert: true,
-			new: true
-		}
-	)
+
+	User.update({_id: req.user._id}, {geolocation: payload})
 	.then(response => {
-		if (req.body.state === "online"){
-			pusher.trigger('geolocations', 'geolocation-updated', payload, req.body.socketId)
-		}
+		pusher.trigger('geolocations', 'geolocation-updated', {user: req.user, geolocation: payload}, req.body.socketId)
 	})
+});
+
+router.get('/api/geolocation/fetch-all', authorizeUser, function(req,res) {
+	let now = new Date().toISOString();
+	User.find({_id: { $ne: req.user._id }, "geolocation.expiry": { $gte: now }})
+	.then(users => {
+		res.status(200).json({
+			users: users
+		})
+	})
+	
+	// .then(response => {
+	// 	pusher.trigger('geolocations', 'geolocation-updated', {user: req.user, geolocation: payload}, req.body.socketId)
+	// })
 });
 
 router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
@@ -185,7 +213,7 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 	});
 	message.save()
 	.then(message => {
-		var savedMessage = Message.findById(message._id)
+		Message.findById(message._id)
 		.populate('user')
 		.populate('room')
 		.then(retrievedMessage => {
@@ -233,10 +261,14 @@ router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
 });
 
 router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res) {
-	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}}).sort('name')
+	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}, hiddenBy: {$ne: req.user._id}}).populate('members.user').sort('name')
 	.then(async rooms => {
 		async function getUnreadMessages (rooms) {
 			const promiseArray = rooms.map(async room => {
+				const otherUser = false;
+				if (room.type === "direct-message") {
+					const otherUser = room.members.find(m => m.user.username !== req.user.username);
+				}
 				const unreadMessages = await Message.find({
 					room: room._id,
 					readBy: { $ne: req.user._id }
@@ -244,7 +276,7 @@ router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res)
 				.then(unreadMessages => {
 					return unreadMessages.length;
 				})
-				return {...room._doc, unreadMessages: unreadMessages};
+				return {...room._doc, unreadMessages: unreadMessages, otherUser: otherUser};
 			});
 			const finalArray = await Promise.all(promiseArray);
 			return finalArray;
@@ -284,7 +316,7 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	{ $push: { readBy: req.user._id } }, {multi: true})
 	.then(response => {
 		console.log(response)
-		pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug})
+		pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug, roomType: room.type})
 		res.status(200)
 		.json({
 			messages: messages,
@@ -295,19 +327,33 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 });
 
 router.post('/api/chat/room/create', authorizeUser, function(req,res) {
-	const { roomSlug, roomName, roomDescription, roomPrivacy } = req.body;
+	const { roomType, roomName, roomDescription, roomPrivacy } = req.body;
+	let roomID = mongoose.Types.ObjectId();
+	if (roomType === "direct-message") {
+		roomSlug = roomID.toString();
+		roomMembers = req.body.roomMembers
+	} else {
+		roomSlug = req.body.roomSlug;
+		roomMembers = [{user: req.user._id, role: 'administrator'}];
+	}
 	var room = new Room({
+		_id: roomID,
+		type: roomType,
 		slug: roomSlug,
 		name: roomName,
 		description: roomDescription,
 		public: (roomPrivacy == 'public' ? true : false),
-		members: [{user: req.user._id, role: 'administrator'}]
+		members: roomMembers
 	})
 	room.save()
 	.then(room => {
 		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
 		.then(response => {
-			pusher.trigger('general', 'room-created', {room: room, user: req.user});
+			if (roomType === "direct-message") {
+				pusher.trigger('general', 'direct-message-room-created', {room: room, sender: req.user, recipient: req.body.recipient});
+			} else {
+				pusher.trigger('general', 'room-created', {room: room, user: req.user});
+			}
 			res.sendStatus(200);
 		})
 	})
@@ -383,6 +429,16 @@ router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
 		})
 	})
 });
+
+router.post('/api/chat/room/hide/:room', authorizeUser, function(req,res) {
+	Room.update({slug: req.params.room}, { $push: { hiddenBy: req.user._id } })
+	.then(response => {
+		console.log(response);
+		res.status(200).json({
+			room: req.params.room
+		});
+	})
+})
 
 router.post('/api/chat/room/enter/:room', authorizeUser, async function(req,res) {
 	Room.findOne({

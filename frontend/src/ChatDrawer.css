@@ -3,13 +3,15 @@
     flex-direction: row;
     background: var(--purple);
     flex: 1;
+    overflow: hidden;
 }
 
 .roomList {
     width: 200px;
     border-right: 1px solid rgba(0,0,0,0.5);
     padding: 10px 10px 10px 10px;
-    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .roomList header, .userList header {
@@ -52,19 +54,19 @@
     width: 200px;
     border-left: 1px solid rgba(0,0,0,0.5);
     padding: 10px 10px 10px 10px;
-    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .userListInner,
 .roomListInner {
-    overflow-y: scroll;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .roomControls {
-    position: absolute;
-    bottom: 10px;
-    width: 180px;
-    background: var(--purple);
+    margin-top: auto;
 }
 
 .chatInterface {
@@ -138,7 +140,7 @@
 
 .messageList {
     margin: 0;
-    padding: 10px 5px 0px 5px;
+    padding: 10px 10px 0px 10px;
 }
 
 .messageList .messageContainer {
@@ -148,14 +150,14 @@
     border-radius: 6px;
     transition: 300ms;
 }
-.messageList .messageContainer .message,
+/*.messageList .messageContainer .message,
 .messageList .messageContainer .tarot,
 .messageList .messageContainer .runes,
 .messageList .messageContainer .action {
     text-indent: -43px;
     margin-left: 45px;
     user-select: text;
-}
+} */
 
 .dateMessage {
     list-style-type: none;
@@ -193,10 +195,51 @@
 has its date displayed, even when the author is the same as that of
 the previous day's message */
 .dateMessage + .messageContainer .messageMetadata {
-    opacity: 1 !important;
+    display: flex !important;
 }
 
-.messageTimestamp {
+/* Loose message view */
+
+.alert .messageMetadata {
+    display: inline;
+    /* margin-right: 5px; */
+}
+
+.alert .messageTimestamp {
+    margin-right: 5px;
+}
+
+.messageMetadata {
+    display: flex;
+    align-content: baseline;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+.messageMetadata .messageAuthor {
+    order: 1;
+    font-weight: 700;
+    margin-right: 5px;
+    user-select: text;
+}
+
+.messageMetadata .messageTimestamp {
+    order: 2;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    opacity: 0.4;
+    user-select: text;
+    position: relative;
+    top: 1px;
+}
+
+.message .hidden {
+    display: none;
+}
+
+
+/* Compact message view */
+
+/* .messageTimestamp {
     font-family: 'Fira Sans Condensed', sans-serif;
     opacity: 0.4;
     padding-right: 8px;
@@ -212,7 +255,7 @@ the previous day's message */
     font-weight: 700;
     padding-right: 5px;
     user-select: text;
-}
+} */
 
 /* .message .hidden {
     opacity: 0;
@@ -300,4 +343,20 @@ the previous day's message */
 
 .userBusy {
     color: rgb(201, 12, 12);
+}
+
+.userTooltip {
+    display: flex;
+    flex-direction: column;
+}
+
+.userTooltip button {
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.userFlair {
+    height: 1rem;
+    position: relative;
+    top: 2px;
 }

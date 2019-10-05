@@ -176,13 +176,69 @@ class CreateRoomControls extends Component {
                                 <div className="radioBox">
                                     <span>
                                         <strong>Private</strong><br/>
-                                        <small>An invite code is needed to join a private Coven.</small>
+                                        <small>New members must be invited to a private Coven.</small>
                                     </span>
                                 </div>
                             </label>
                         </div>
-                        <p>You will not be able to change the Coven's privacy after it is made.</p>
-                        <button type="submit" className="full-width" disabled={this.state.submitDisabled}>Create Coven</button>
+                        <small>You will not be able to change the Coven's privacy after it is made.</small>
+                        <button style={{marginTop:"1rem"}} type="submit" className="full-width" disabled={this.state.submitDisabled}>Create Coven</button>
+                    </form>
+                </Modal>
+            </>
+        )
+    }
+}
+
+class HideRoomControls extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            showModal: false
+        }
+    }
+    showModal = () => {
+        this.setState({modalVisible: true})
+    }
+
+    hideModal = () => {
+        this.setState({modalVisible: false})
+    }
+    handleSubmit = (event) => {
+        event.preventDefault();
+        let roomToHide = this.props.currentRoom;
+        fetch('/api/chat/room/hide/' + roomToHide.slug, {
+            method: 'POST',
+        })
+        .then(res => {
+            if (res.status === 200) {
+                this.setState({
+                    modalVisible: false
+                });
+                this.props.hideRoom(roomToHide);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            this.setState({ alertBox: 'Error hiding room! Please try again.' });
+        });
+    }
+    render() {
+        return (
+            <>
+                <button
+                    onClick={this.showModal}
+                    className="full-width"
+                >
+                    <FontAwesomeIcon icon="eye-slash"/> Hide this chat
+                </button>
+                <Modal show={this.state.modalVisible} handleClose={this.hideModal}>
+                    <h1>Hide chat</h1>
+                    <form
+                        onSubmit={this.handleSubmit}
+                    >
+                        <p style={{marginBottom:"1rem"}}>Are you sure you want to hide this chat? You will not be notified of any new messages in it. You can unhide it in your settings.</p>
+                        <button type="submit" className="full-width">Hide chat</button>
                     </form>
                 </Modal>
             </>
@@ -197,7 +253,6 @@ class JoinLeaveRoomControls extends Component {
 
         }
     }
-
     render() {
         return (
             <>
@@ -493,4 +548,4 @@ class InviteToRoomControls extends Component {
     }
 }
 
-export { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls }
+export { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls }

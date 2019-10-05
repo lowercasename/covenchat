@@ -7,14 +7,16 @@ var roomMemberSchema = new mongoose.Schema({
 })
 
 var roomSchema = new mongoose.Schema({
+    type: {type: String, default: 'room'},
     slug: {type: String, unique: true},
-    name: {type: String, unique: true},
+    name: {type: String},
     description: String,
     welcomeMessage: {type: String, default: ''},
     lastUpdated: {type: Date, default: new Date()},
     public: {type: Boolean, default: true},
     members: [roomMemberSchema],
-    visitors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
+    visitors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    hiddenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 
 module.exports = mongoose.model('Room', roomSchema);

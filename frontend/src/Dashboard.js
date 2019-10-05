@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 
 import StatusBar from './StatusBar';
+import Map from './Map';
 import ChatDrawer from './ChatDrawer';
 import Altar from './Altar';
+import Settings from './Settings';
 
 import { toast } from 'react-toastify';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash)
 
 toast.configure()
 
@@ -20,10 +22,15 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            visibleModule: 'altar',
-            user: this.props.user
+            visibleModule: 'map',
+            user: this.props.user,
+            altarUser: this.props.user
         }
         this.logOut = this.logOut.bind(this);
+        this.changeAltarUser = this.changeAltarUser.bind(this);
+        this.handleStatusBarUpdate = this.handleStatusBarUpdate.bind(this);
+        this.handleSettingsInputChange = this.handleSettingsInputChange.bind(this);
+
     }
 
     componentDidMount() {
@@ -36,6 +43,13 @@ class Dashboard extends Component {
     toggleView(module) {
         this.setState({
             visibleModule: module
+        })
+    }
+
+    changeAltarUser(user) {
+        this.setState({
+            visibleModule: 'altar',
+            altarUser: user
         })
     }
 
@@ -57,36 +71,109 @@ class Dashboard extends Component {
         });
     }
 
+    handleStatusBarUpdate(event) {
+        const target = event.target;
+        fetch('/api/user/settings/update',
+        {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'statusBar',
+                setting: "statusBarModules." + target.name,
+                value: target.checked
+            })
+        })
+        .then(res => {
+            if (res.status === 200) {
+                return res.json();
+            }
+        })
+        .then(res => {
+            this.setState({
+                user: res.user,
+                altarUser: res.user
+            })
+        })
+    }
+
+    handleSettingsInputChange(event) {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.name;
+
+        fetch('/api/user/settings/update',
+        {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'setting',
+                setting: name,
+                value: value
+            })
+        })
+        .then(res => {
+            if (res.status === 200) {
+                return res.json();
+            }
+        })
+        .then(res => {
+            this.setState({
+                user: res.user,
+                altarUser: res.user
+            })
+        })
+    }
+
     render() {
-        let mapStyle = this.state.visibleModule === "map" ? {display:'flex'} : {display: 'none'};
         return (
             <div className="App">
                 <nav className="sideNav"><i class="fas fa-compass"></i>
                     <img src="magic-ball-alt.svg" className="navLogo" />
-                    <div className="navIcon" onClick={() => this.toggleView('map')}>
+                    <div className={["navIcon",(this.state.visibleModule == "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
                         <FontAwesomeIcon icon={['far', 'compass']} />
                     </div>
-                    <div className="navIcon" onClick={() => this.toggleView('chat')}>
+                    <div className={["navIcon",(this.state.visibleModule == "chat" ? "active" : "")].join(" ")} onClick={() => this.toggleView('chat')}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
-                    <div className="navIcon" onClick={() => this.toggleView('altar')}>
+                    <div className={["navIcon",(this.state.visibleModule == "altar" ? "active" : "")].join(" ")} onClick={() => this.toggleView('altar')}>
                         <span className="hermetica-F032-pentacle" style={{fontSize:"40px"}}/>
                     </div>
-                    <div className="navIcon" onClick={this.logOut} >
-                        <FontAwesomeIcon icon="sign-out-alt" />
+                    <div className={["navIcon",(this.state.visibleModule == "settings" ? "active" : "")].join(" ")} onClick={() => this.toggleView('settings')}>
+                        <FontAwesomeIcon icon="cog" />
                     </div>
                 </nav>
                 <main className="content">
-                    <div id="map" style={mapStyle}><h1>Map</h1></div>
+                    <Map
+                        user={this.state.user}
+                        isVisible={this.state.visibleModule === "map" ? true : false}
+                        locationPermission={this.state.user.settings.shareLocation}
+                    />
                     <ChatDrawer
                         isVisible={this.state.visibleModule === "chat" ? true : false}
                         user={this.state.user}
+                        changeAltarUser={this.changeAltarUser}
                     />
                     <Altar
                         isVisible={this.state.visibleModule === "altar" ? true : false}
-                        user={this.state.user}
+                        user={this.state.altarUser}
+                        changeAltarUser={this.changeAltarUser}
                     />
-                    <StatusBar />
+                    <Settings
+                        isVisible={this.state.visibleModule === "settings" ? true : false}
+                        user={this.state.user}
+                        handleSettingsInputChange={this.handleSettingsInputChange}
+                        handleStatusBarUpdate={this.handleStatusBarUpdate}
+                        logOut={this.logOut}
+                    />
+                    <StatusBar
+                        modules={this.state.user.settings.statusBarModules}
+                    />
                 </main>
             </div>
         );

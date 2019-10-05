@@ -10,10 +10,18 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './ChatDrawer.css';
 
-import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls } from './components/RoomControls';
+import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
 
 function scrollToBottom() {
     var messages = document.querySelector('#chatWindow .simplebar-content-wrapper'); messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
+}
+
+class UserFlair extends Component {
+    render() {
+        return (
+            <img src={this.props.user.settings.flair} className="userFlair" />
+        )
+    }
 }
 
 class MessageList extends Component {
@@ -80,7 +88,7 @@ class MessageList extends Component {
                                                 {displayTimestamp(message.timestamp)}
                                             </span>
                                             <span className="messageAuthor">
-                                                {message.user.username}
+                                            <UserFlair user={message.user} /> {message.user.username}
                                             </span>
                                         </span>
 
@@ -150,6 +158,7 @@ class RoomList extends Component {
         this.state = {
             joinedRooms: this.props.joinedRooms,
             publicRooms: this.props.publicRooms,
+            directMessages: this.props.directMessages
         }
     }
 
@@ -169,77 +178,86 @@ class RoomList extends Component {
         }
         return (
             <nav className="roomList">
-                <header>
-                    <h2><FontAwesomeIcon icon="moon"/> Your Covens </h2>
-                    <CreateRoomControls />
-                </header>
-                <ul>
-                    {this.props.joinedRooms.map(room => {
-                        return (
-                            <Tooltip
-                                title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
-                                position="right"
-                                trigger="mouseenter"
-                                theme="left"
-                                delay={300}
-                            >
+                <div className="roomListInner">
+                    <header>
+                        <h2><FontAwesomeIcon icon="moon"/> Your Covens </h2>
+                        <CreateRoomControls />
+                    </header>
+                    <ul>
+                        {this.props.joinedRooms.map(room => {
+                            return (
+                                <Tooltip
+                                    title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + (room.public ? "Public" : "Private") + " Coven, " + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
+                                    position="right"
+                                    trigger="mouseenter"
+                                    theme="left"
+                                    delay={300}
+                                    popperOptions={{modifiers: {
+                                        preventOverflow: {
+                                          escapeWithReference: true
+                                        }    
+                                    }}}
+                                >
+                                    <li
+                                        key={room._id}
+                                        className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
+                                        onClick={() => {this.props.switchRoom(room.slug)}}
+                                    >
+                                        {room.name}
+                                        {room.slug != this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
+                                    </li>
+                                </Tooltip>
+                            )
+                        })}
+                    </ul>
+                    {this.props.publicRooms.length > 0 ? (
+                        <header><h2 style={{marginTop: "0.5rem"}}><FontAwesomeIcon icon="users"/> Public Covens</h2></header>
+                    ) : ''}
+                    <ul>
+                        {this.props.publicRooms.map(room => {
+                            return (
+                                <Tooltip
+                                    title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
+                                    position="right"
+                                    trigger="mouseenter"
+                                    theme="left"
+                                    delay={300}
+                                    popperOptions={{modifiers: {
+                                        preventOverflow: {
+                                          escapeWithReference: true
+                                        }    
+                                    }}}
+                                >
+                                    <li
+                                        key={room._id}
+                                        className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
+                                        onClick={() => {this.props.switchRoom(room.slug)}}
+                                    >
+                                        {room.name}
+                                    </li>
+                                </Tooltip>
+                            )
+                        })}
+                    </ul>
+                    {this.props.directMessages.length > 0 ? (
+                        <header><h2 style={{marginTop: "0.5rem"}}><FontAwesomeIcon icon="star"/> Private messages</h2></header>
+                    ) : ''}
+                    <ul>
+                        {this.props.directMessages.map(room => {
+                            let otherUser = room.members.find(m => m.user.username !== this.props.user.username);
+                            return (
                                 <li
                                     key={room._id}
                                     className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
                                     onClick={() => {this.props.switchRoom(room.slug)}}
                                 >
-                                    {room.name}
+                                    <span><UserFlair user={otherUser.user} /> {otherUser.user.username}</span>
                                     {room.slug != this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
-                                    {room._id === this.props.currentRoom &&
-                                    <button
-                                        onClick={(e) => {this.props.leaveRoom(room, e)}}
-                                        className="small"
-                                        disabled={this.props.leaveDisabled}
-                                    >
-                                        <FontAwesomeIcon icon="minus"/>
-                                    </button>
-                                }
                                 </li>
-                            </Tooltip>
-                        )
-                    })}
-                </ul>
-                {this.props.publicRooms.length > 0 ? (
-                    <header><h2 style={{marginTop: "0.5rem"}}><FontAwesomeIcon icon="moon"/> Public Covens</h2></header>
-                ) : ''}
-                <ul>
-                    {this.props.publicRooms.map(room => {
-                        return (
-                            <Tooltip
-                                title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
-                                position="right"
-                                trigger="mouseenter"
-                                theme="left"
-                                delay={300}
-                            >
-                                <li
-                                    key={room._id}
-                                    className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
-                                >
-                                    <div
-                                        onClick={() => {this.props.switchRoom(room.slug)}}
-                                    >
-                                        {room.name}
-                                    </div>
-                                    {room._id === this.props.currentRoom &&
-                                        <button
-                                            onClick={(e) => {this.props.joinRoom(room, e)}}
-                                            className="small"
-                                            disabled={this.props.joinDisabled}
-                                        >
-                                            <FontAwesomeIcon icon="plus"/>
-                                        </button>
-                                    }
-                                </li>
-                            </Tooltip>
-                        )
-                    })}
-                </ul>
+                            )
+                        })}
+                    </ul>
+                </div>
                 <nav class="roomControls">
                     {this.props.children}
                 </nav>
@@ -286,10 +304,35 @@ class UserBadge extends Component {
                 userColor = "var(--white)";
                 break
         }
+        let userTooltip = (
+            <div className="userTooltip">
+                <strong><UserFlair user={user} /> {user.username}</strong>
+                <br/>
+                {!this.props.isYou ?
+                    <>
+                        <button type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
+                        <button type="button" className="small" onClick={() => this.props.directMessage(user)}><FontAwesomeIcon icon="comment-dots"/> Private message</button>
+                    </>
+                    :
+                    <>
+                        <p style={{marginTop:"0.5rem"}}>It's you!</p>
+                    </>
+                }
+            </div>
+        )
         return (
-            <li key={user._id} style={{color: userColor}}>
-                <span><FontAwesomeIcon className={lessThanOneDayAgo(new Date(user.lastOnline).getTime()) ? userStatus : "userInactive" } icon="circle"/> {user.username}</span>
-            </li>
+            <Tooltip
+                html={userTooltip}
+                position="left"
+                trigger="mouseenter"
+                interactive="true"
+                theme="left"
+                delay={300}
+            >
+                <li key={user._id} style={{color: userColor}}>
+                    <span><UserFlair user={user} /> {user.username} <FontAwesomeIcon className={lessThanOneDayAgo(new Date(user.lastOnline).getTime()) ? userStatus : "userInactive" } icon="circle"/></span>
+                </li>
+            </Tooltip>
         )
     }
 }
@@ -302,32 +345,41 @@ class UserList extends Component {
     render() {
         return (
             <section className="userList">
-                <div className="userListInner">
-                    <header>
-                        <h2>Members</h2>
-                    </header>
-                    <ul>
-                        {this.props.members.map(member => {
-                            return (
-                                <UserBadge member={member} role={member.role} key={member.user._id}/>
-                            )
-                        })}
-                    </ul>
-                    {this.props.visitors.length > 0 &&
-                        <>
-                            <header style={{marginTop:"1rem"}}>
-                                <h2>Visitors</h2>
-                            </header>
-                            <ul>
-                                {this.props.visitors.map(visitor => {
-                                    return (
-                                        <UserBadge member={visitor} key={visitor._id}/>
-                                    )
-                                })}
-                            </ul>
-                        </>
-                    }
-                </div>
+                <header>
+                    <h2>Members</h2>
+                </header>
+                <ul>
+                    {this.props.members.map(member => {
+                        return (
+                            <UserBadge
+                                isYou={member.user._id === this.props.user._id ? true : false}
+                                directMessage={this.props.directMessage}
+                                changeAltarUser={this.props.changeAltarUser}
+                                member={member}
+                                role={member.role}
+                                key={member.user._id}/>
+                        )
+                    })}
+                </ul>
+                {this.props.visitors.length > 0 &&
+                    <>
+                        <header style={{marginTop:"0.5rem"}}>
+                            <h2>Visitors</h2>
+                        </header>
+                        <ul>
+                            {this.props.visitors.map(visitor => {
+                                return (
+                                    <UserBadge
+                                        isYou={visitor._id === this.props.user._id ? true : false}
+                                        directMessage={this.props.directMessage}
+                                        changeAltarUser={this.props.changeAltarUser}
+                                        member={visitor}
+                                        key={visitor._id}/>
+                                )
+                            })}
+                        </ul>
+                    </>
+                }
             </section>
         )
     }
@@ -347,6 +399,7 @@ class ChatDrawer extends Component {
             currentRoomVisitors: [],
             showWelcomeMessage: true,
             joinedRooms: [],
+            directMessages: [],
             publicRooms: [],
             joinDisabled: false,
             leaveDisabled: false
@@ -378,7 +431,9 @@ class ChatDrawer extends Component {
         fetch('/api/chat/room/fetch-joined/')
             .then(res => res.json())
             .then(payload => {
-                this.setState({ joinedRooms: payload });
+                let joinedRooms = payload.filter(room => room.type === "room");
+                let directMessages = payload.filter(room => room.type === "direct-message");
+                this.setState({ joinedRooms: joinedRooms, directMessages: directMessages });
         });
         fetch('/api/chat/room/fetch-public/')
             .then(res => res.json())
@@ -394,7 +449,9 @@ class ChatDrawer extends Component {
         fetch('/api/chat/room/fetch-joined/')
             .then(res => res.json())
             .then(payload => {
-                this.setState({ joinedRooms: payload });
+                let joinedRooms = payload.filter(room => room.type === "room");
+                let directMessages = payload.filter(room => room.type === "direct-message");
+                this.setState({ joinedRooms: joinedRooms, directMessages: directMessages });
         });
 
         fetch('/api/chat/room/fetch-public/')
@@ -431,6 +488,16 @@ class ChatDrawer extends Component {
                         })
                         this.setState({
                             joinedRooms: joinedRooms
+                        })
+                    } else if (this.state.directMessages.some(r => r.slug === data.room.slug)) {
+                        var directMessages = [...this.state.directMessages];
+                        directMessages.forEach(r => {
+                            if (r.slug === data.room.slug) {
+                                r.unreadMessages++;
+                            }
+                        })
+                        this.setState({
+                            directMessages: directMessages
                         })
                     }
                 }
@@ -535,18 +602,52 @@ class ChatDrawer extends Component {
                     });
                 }
             });
+            generalChannel.bind('direct-message-room-created', data => {
+                if (data.sender.username === this.state.user.username || data.recipient.username === this.state.user.username) {
+                    fetch('/api/chat/room/fetch/' + data.room.slug)
+                    .then(res => res.json())
+                    .then(payload => {
+                        var directMessages = [...this.state.directMessages, payload.room]
+                        directMessages.map(r => {
+                            let otherUser = r.members.find(m => m.user.username !== this.props.user.username);
+                            r.otherUser = otherUser.user.username;
+                        })
+                        directMessages.sort((a, b) => a.otherUser.localeCompare( b.otherUser ))
+                        this.setState({
+                            directMessages: directMessages,
+                            messages: payload.messages,
+                            currentRoom: payload.room,
+                            currentRoomMembers: payload.room.members,
+                            currentRoomVisitors: payload.room.visitors,
+                        });
+                        scrollToBottom();
+                    });
+                }
+            });
 
             generalChannel.bind('messages-read', data => {
                 if (this.state.currentRoom.slug === data.room) {
-                    var joinedRooms = [...this.state.joinedRooms];
-                    joinedRooms.forEach(r => {
-                        if (r.slug === data.room) {
-                            r.unreadMessages = 0;
-                        }
-                    })
-                    this.setState({
-                        joinedRooms: joinedRooms
-                    })
+                    if (data.roomType === "direct-message") {
+                        var directMessages = [...this.state.directMessages];
+                        directMessages.forEach(r => {
+                            if (r.slug === data.room) {
+                                r.unreadMessages = 0;
+                            }
+                        })
+                        this.setState({
+                            directMessages: directMessages
+                        })
+                    } else {
+                        var joinedRooms = [...this.state.joinedRooms];
+                        joinedRooms.forEach(r => {
+                            if (r.slug === data.room) {
+                                r.unreadMessages = 0;
+                            }
+                        })
+                        this.setState({
+                            joinedRooms: joinedRooms
+                        })
+                    }
                 }
             });
         });
@@ -679,20 +780,61 @@ class ChatDrawer extends Component {
         })
     }
 
+    hideRoom = (room) => {
+        this.reloadRoom('global-coven');
+        this.reloadRoomList();
+    }
+
+    directMessage = (user) => {
+        let directMessageExists = false;
+        let currentDirectMessages = this.state.directMessages;
+        currentDirectMessages.forEach(room => {
+            if (room.members.some(m => m.user._id === user._id)){
+                directMessageExists = room.slug;
+            }
+        })
+        if (!directMessageExists) {
+            let directMessageRoom = {
+                roomType: 'direct-message',
+                roomPrivacy: 'private',
+                roomMembers: [{user:this.state.user._id,role:'member'},{user:user._id, role:'member'}],
+                recipient: user
+            }
+            fetch('/api/chat/room/create', {
+                method: 'POST',
+                body: JSON.stringify(directMessageRoom),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (res.status === 200) {
+
+                }
+            })
+        } else {
+            this.switchRoom(directMessageExists);
+        }
+    }
+
     render() {
         var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
-        var isMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoom.slug));
+        var isMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoom.slug) || this.state.directMessages.some(r => r.slug === this.state.currentRoom.slug));
         var isAdministrator = (this.state.currentRoomMembers.some(m => m.user.username === this.state.user.username && m.role === "administrator"));
         var isPrivateRoom = (this.state.currentRoom.public === false ? true : false);
+        var textareaPlaceholder = (this.state.currentRoom.type === "direct-message" ? this.state.currentRoom.members.find(m => m.user.username !== this.props.user.username).user.username : this.state.currentRoom.name);
+        var isDirectMessage = this.state.currentRoom.type === "direct-message";
         return (
             <main className="chatDrawer" style={style}>
                 <RoomList
+                    user={this.state.user}
                     currentRoom={this.state.currentRoom}
                     switchRoom={this.switchRoom.bind(this)}
                     joinedRooms={this.state.joinedRooms}
+                    directMessages={this.state.directMessages}
                     publicRooms={this.state.publicRooms}
                 >
-                    {isAdministrator &&
+                    {isAdministrator && !isDirectMessage &&
                         <EditRoomControls
                             currentRoom={this.state.currentRoom}
                             currentRoomMembers={this.state.currentRoomMembers}
@@ -702,18 +844,26 @@ class ChatDrawer extends Component {
                             socketId={this.state.socketId}
                         />
                     }
-                    {isPrivateRoom &&
+                    {isPrivateRoom && !isDirectMessage &&
                         <InviteToRoomControls
                             currentRoom={this.state.currentRoom}
                         />
                     }
-                    <JoinLeaveRoomControls
-                        joinRoom={this.joinRoom.bind(this)}
-                        leaveRoom={this.leaveRoom.bind(this)}
-                        currentRoom={this.state.currentRoom}
-                        currentRoomMembers={this.state.currentRoomMembers}
-                        user={this.state.user}
-                    />
+                    {!isDirectMessage && 
+                        <JoinLeaveRoomControls
+                            joinRoom={this.joinRoom.bind(this)}
+                            leaveRoom={this.leaveRoom.bind(this)}
+                            currentRoom={this.state.currentRoom}
+                            currentRoomMembers={this.state.currentRoomMembers}
+                            user={this.state.user}
+                        />
+                    }
+                    {isDirectMessage && 
+                        <HideRoomControls
+                            currentRoom={this.state.currentRoom}
+                            hideRoom={this.hideRoom.bind(this)}
+                        />
+                    }
                 </RoomList>
                 <section className="chatInterface">
                     {this.state.currentRoom.welcomeMessage && this.state.showWelcomeMessage &&
@@ -733,7 +883,7 @@ class ChatDrawer extends Component {
                             <Textarea
                                 id="message"
                                 autoComplete="off"
-                                placeholder={"Message " + this.state.currentRoom.name}
+                                placeholder={"Message " + textareaPlaceholder}
                                 onChange={this.handleChange}
                                 onKeyDown={this.onEnterPress}
                                 value={this.state.message}
@@ -748,6 +898,8 @@ class ChatDrawer extends Component {
                     user={this.state.user}
                     members={this.state.currentRoomMembers}
                     visitors={this.state.currentRoomVisitors}
+                    changeAltarUser={this.props.changeAltarUser}
+                    directMessage={this.directMessage}
                 />
             </main>
         );
