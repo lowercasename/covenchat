@@ -33,6 +33,8 @@ Message = require('./database/message');
 Room = require('./database/room');
 User = require('./database/user');
 Altar = require('./database/altar');
+Link = require('./database/link');
+
 
 // ROUTER
 const router = require('./router');

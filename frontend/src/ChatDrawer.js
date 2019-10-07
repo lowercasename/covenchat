@@ -17,9 +17,14 @@ function scrollToBottom() {
 }
 
 class UserFlair extends Component {
+    componentDidUpdate(prevProps) {
+        if(this.props.user.settings.flair !== prevProps.user.settings.flair) {
+            console.log("User flair has changed!")
+        }
+    }
     render() {
         return (
-            <img src={this.props.user.settings.flair} className="userFlair" />
+            <span className="userFlair"><img src={this.props.user.settings.flair} />&nbsp;</span>
         )
     }
 }
@@ -88,7 +93,7 @@ class MessageList extends Component {
                                                 {displayTimestamp(message.timestamp)}
                                             </span>
                                             <span className="messageAuthor">
-                                            <UserFlair user={message.user} /> {message.user.username}
+                                            <UserFlair user={message.user} />{message.user.username}
                                             </span>
                                         </span>
 
@@ -251,7 +256,7 @@ class RoomList extends Component {
                                     className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
                                     onClick={() => {this.props.switchRoom(room.slug)}}
                                 >
-                                    <span><UserFlair user={otherUser.user} /> {otherUser.user.username}</span>
+                                    <span><UserFlair user={otherUser.user} />{otherUser.user.username}</span>
                                     {room.slug != this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
                                 </li>
                             )
@@ -277,20 +282,28 @@ class UserBadge extends Component {
             const aDayAgo = Date.now() - oneDay;
             return date > aDayAgo;
         }
-        let userStatus;
-        switch (user.status) {
-            case "active":
-                userStatus = "userActive";
+        let userStatus, userStatusText;
+        switch (user.settings.status) {
+            case "available":
+                userStatus = "userAvailable";
+                userStatusText = "Available";
                 break;
             case "away":
-                userStatus = "userInactive";
+                userStatus = "userAway";
+                userStatusText = "Away";
                 break;
-            case "busy":
-                userStatus = "userBusy";
+            case "dnd":
+                userStatus = "userDnD";
+                userStatusText = "Do not disturb";
                 break
             case "invisible":
-                userStatus = "userInactive";
+                userStatus = "userAway";
+                userStatusText = "Away";
                 break
+            default:
+                userStatus = "userAvailable"
+                userStatusText = "Available";
+                break;
         }
         let userColor;
         switch (this.props.role) {
@@ -304,9 +317,23 @@ class UserBadge extends Component {
                 userColor = "var(--white)";
                 break
         }
+        let userBadge;
+        switch (this.props.role) {
+            case "administrator":
+                userBadge = <span className="badge userBadge">Admin</span>;
+                break;
+            case "moderator":
+                userBadge = <span className="badge userBadge">Mod</span>;
+                break;
+            case "member":
+                userBadge = "";
+                break
+        }
         let userTooltip = (
             <div className="userTooltip">
-                <strong><UserFlair user={user} /> {user.username}</strong>
+                <strong><UserFlair user={user} />{user.username} {userBadge}</strong>
+                <br/>
+                {this.props.online && <span><FontAwesomeIcon className={userStatus} icon="circle"/> {userStatusText}</span>}
                 <br/>
                 {!this.props.isYou ?
                     <>
@@ -329,8 +356,8 @@ class UserBadge extends Component {
                 theme="left"
                 delay={300}
             >
-                <li key={user._id} style={{color: userColor}}>
-                    <span><UserFlair user={user} /> {user.username} <FontAwesomeIcon className={lessThanOneDayAgo(new Date(user.lastOnline).getTime()) ? userStatus : "userInactive" } icon="circle"/></span>
+                <li key={user._id}>
+                    <span><UserFlair user={user} />{user.username}{userBadge}</span>{this.props.online && <span>&nbsp;<FontAwesomeIcon className={userStatus} icon="circle"/></span>}
                 </li>
             </Tooltip>
         )
@@ -343,25 +370,59 @@ class UserList extends Component {
     }
 
     render() {
+        const lessThanOneHourAgo = (date) => {
+            const oneHour = 1000 * 60 * 60;
+            const anHourAgo = Date.now() - oneHour;
+            return date > anHourAgo;
+        }
+        let onlineMembers = this.props.members.filter(member => lessThanOneHourAgo(new Date(member.user.lastOnline).getTime()) && member.user.settings.status !== "invisible");
+        let offlineMembers = this.props.members.filter(member => !lessThanOneHourAgo(new Date(member.user.lastOnline).getTime()) || member.user.settings.status === "invisible");
+        let visibleVisitors = this.props.visitors.filter(visitor => visitor.settings.status !== "invisible");
         return (
             <section className="userList">
-                <header>
-                    <h2>Members</h2>
-                </header>
-                <ul>
-                    {this.props.members.map(member => {
-                        return (
-                            <UserBadge
-                                isYou={member.user._id === this.props.user._id ? true : false}
-                                directMessage={this.props.directMessage}
-                                changeAltarUser={this.props.changeAltarUser}
-                                member={member}
-                                role={member.role}
-                                key={member.user._id}/>
-                        )
-                    })}
-                </ul>
-                {this.props.visitors.length > 0 &&
+                {onlineMembers.length > 0 &&
+                    <>
+                        <header>
+                            <h2>Online</h2>
+                        </header>
+                        <ul>
+                            {onlineMembers.map(member => {
+                                return (
+                                    <UserBadge
+                                        online={true}
+                                        isYou={member.user._id === this.props.user._id ? true : false}
+                                        directMessage={this.props.directMessage}
+                                        changeAltarUser={this.props.changeAltarUser}
+                                        member={member}
+                                        role={member.role}
+                                        key={member.user._id}/>
+                                )
+                            })}
+                        </ul>
+                    </>
+                }
+                {offlineMembers.length > 0 &&
+                    <>
+                        <header style={{marginTop:"0.5rem"}}>
+                            <h2>Offline</h2>
+                        </header>
+                        <ul>
+                            {offlineMembers.map(member => {
+                                return (
+                                    <UserBadge
+                                        online={false}
+                                        isYou={member.user._id === this.props.user._id ? true : false}
+                                        directMessage={this.props.directMessage}
+                                        changeAltarUser={this.props.changeAltarUser}
+                                        member={member}
+                                        role={member.role}
+                                        key={member.user._id}/>
+                                )
+                            })}
+                        </ul>
+                    </>
+                }
+                {visibleVisitors.length > 0 &&
                     <>
                         <header style={{marginTop:"0.5rem"}}>
                             <h2>Visitors</h2>
@@ -390,7 +451,6 @@ class ChatDrawer extends Component {
         super(props);
         this.state = {
             socketId: '',
-            user: this.props.user,
             messages: [],
             message: '',
             modalVisible: false,
@@ -443,8 +503,8 @@ class ChatDrawer extends Component {
     }
 
     componentDidMount() {
-        console.log("lastroom:",this.state.user.memory.lastRoom)
-        this.reloadRoom((this.state.user.memory ? this.state.user.memory.lastRoom : 'global-coven'))
+        console.log("lastroom:",this.props.user.memory.lastRoom)
+        this.reloadRoom((this.props.user.memory ? this.props.user.memory.lastRoom : 'global-coven'))
 
         fetch('/api/chat/room/fetch-joined/')
             .then(res => res.json())
@@ -474,6 +534,14 @@ class ChatDrawer extends Component {
             var generalChannel = pusher.subscribe('general');
             messagesChannel.bind('message-sent', data => {
                 if (this.state.currentRoom.slug === data.room.slug) {
+                    if (data.type === "tarot") {
+                        var audio = new Audio('/card.mp3');
+                        audio.play();
+                    }
+                    if (data.type === "runes") {
+                        var audio = new Audio('/runes.mp3');
+                        audio.play();
+                    }
                     this.setState({
                         messages: [...this.state.messages, data]
                     });
@@ -503,7 +571,7 @@ class ChatDrawer extends Component {
                 }
             });
             generalChannel.bind('room-created', data => {
-                if (data.user.username === this.state.user.username) {
+                if (data.user.username === this.props.user.username) {
                     fetch('/api/chat/room/fetch/' + data.room.slug)
                     .then(res => res.json())
                     .then(payload => {
@@ -577,7 +645,7 @@ class ChatDrawer extends Component {
                 }
             });
             generalChannel.bind('user-invited-to-room', data => {
-                if (this.state.user._id === data.user._id) {
+                if (this.props.user._id === data.user._id) {
                     // Add room to user's rooms
                     var joinedRooms = [...this.state.joinedRooms, data.room]
                     joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
@@ -603,7 +671,7 @@ class ChatDrawer extends Component {
                 }
             });
             generalChannel.bind('direct-message-room-created', data => {
-                if (data.sender.username === this.state.user.username || data.recipient.username === this.state.user.username) {
+                if (data.sender.username === this.props.user.username || data.recipient.username === this.props.user.username) {
                     fetch('/api/chat/room/fetch/' + data.room.slug)
                     .then(res => res.json())
                     .then(payload => {
@@ -797,7 +865,7 @@ class ChatDrawer extends Component {
             let directMessageRoom = {
                 roomType: 'direct-message',
                 roomPrivacy: 'private',
-                roomMembers: [{user:this.state.user._id,role:'member'},{user:user._id, role:'member'}],
+                roomMembers: [{user:this.props.user._id,role:'member'},{user:user._id, role:'member'}],
                 recipient: user
             }
             fetch('/api/chat/room/create', {
@@ -820,14 +888,14 @@ class ChatDrawer extends Component {
     render() {
         var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
         var isMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoom.slug) || this.state.directMessages.some(r => r.slug === this.state.currentRoom.slug));
-        var isAdministrator = (this.state.currentRoomMembers.some(m => m.user.username === this.state.user.username && m.role === "administrator"));
+        var isAdministrator = (this.state.currentRoomMembers.some(m => m.user.username === this.props.user.username && m.role === "administrator"));
         var isPrivateRoom = (this.state.currentRoom.public === false ? true : false);
         var textareaPlaceholder = (this.state.currentRoom.type === "direct-message" ? this.state.currentRoom.members.find(m => m.user.username !== this.props.user.username).user.username : this.state.currentRoom.name);
         var isDirectMessage = this.state.currentRoom.type === "direct-message";
         return (
             <main className="chatDrawer" style={style}>
                 <RoomList
-                    user={this.state.user}
+                    user={this.props.user}
                     currentRoom={this.state.currentRoom}
                     switchRoom={this.switchRoom.bind(this)}
                     joinedRooms={this.state.joinedRooms}
@@ -838,7 +906,7 @@ class ChatDrawer extends Component {
                         <EditRoomControls
                             currentRoom={this.state.currentRoom}
                             currentRoomMembers={this.state.currentRoomMembers}
-                            user={this.state.user}
+                            user={this.props.user}
                             reloadRoom={this.reloadRoom.bind(this)}
                             reloadRoomList={this.reloadRoomList.bind(this)}
                             socketId={this.state.socketId}
@@ -855,7 +923,7 @@ class ChatDrawer extends Component {
                             leaveRoom={this.leaveRoom.bind(this)}
                             currentRoom={this.state.currentRoom}
                             currentRoomMembers={this.state.currentRoomMembers}
-                            user={this.state.user}
+                            user={this.props.user}
                         />
                     }
                     {isDirectMessage && 
@@ -895,7 +963,7 @@ class ChatDrawer extends Component {
                     }
                 </section>
                 <UserList
-                    user={this.state.user}
+                    user={this.props.user}
                     members={this.state.currentRoomMembers}
                     visitors={this.state.currentRoomVisitors}
                     changeAltarUser={this.props.changeAltarUser}

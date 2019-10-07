@@ -37,7 +37,7 @@ input[type="checkbox"] {
 #flairSelector {
     margin: 0.5rem 0;
     display: flex;
-    max-width: 235px;
+    max-width: 376px;
     flex-wrap: wrap;
 }
 
@@ -56,16 +56,42 @@ input[type="checkbox"] {
     background: rgba(255,255,255,0.2);
 }
 
-#flairSelector input[type=radio] {
+#flairSelector input[type=radio],
+#statusSelector input[type=radio] {
     display: none;
 }
+
 
 #flairSelector input[type=radio]:checked + .icon {
     background: rgba(255,255,255,0.3);
     border-color: rgba(255,255,255,0.5);
 }
 
-#flairSelector label {
+#flairSelector label,
+#statusSelector label {
     margin: 0;
     padding: 0;
+}
+
+#statusSelector {
+    margin: 0.5rem 0 1rem 0;
+}
+
+#statusSelector input[type=radio] + span {
+    border: 1px solid transparent;
+    background: rgba(255,255,255,0.075);
+    padding: 5px;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    width: 200px;
+    display: block;
+}
+
+#statusSelector input[type=radio] + span:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+#statusSelector input[type=radio]:checked + span {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
 }

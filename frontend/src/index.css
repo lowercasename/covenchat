@@ -151,8 +151,6 @@ button[disabled] {
 .dropdown-button:hover {
   background-color: var(--bright-green);
 }
-
-
 .dropdown-input {
   display: none;
 }
@@ -181,27 +179,33 @@ button[disabled] {
     top: 40px;
 }
 
-.dropdown-menu li {
+.dropdown-menu li,
+.candle-dropdown li {
   padding: 10px;
   cursor: pointer;
   white-space: nowrap;
+  text-align: left;
 }
 
-.dropdown-menu li.selected {
+.dropdown-menu li.selected,
+.candle-dropdown li.selected {
     background-color: #e8e8e8;
 }
 
-.dropdown-menu li:hover {
+.dropdown-menu li:hover,
+.candle-dropdown li:hover {
   background-color: #f6f6f6;
 }
 
-.dropdown-menu li a {
+.dropdown-menu li a,
+.candle-dropdown li a {
   display: block;
   margin: -10px -20px;
   padding: 10px 20px;
 }
 
-.dropdown-menu li.divider{
+.dropdown-menu li.divider,
+.candle-dropdown li.divider {
   padding: 0;
   border-bottom: 1px solid #cccccc;
 }
@@ -394,6 +398,7 @@ label {
     opacity: 0.6;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .statusBar .statusItem:not(:last-child) {
@@ -592,9 +597,22 @@ input[type="submit"]:hover {
 .green-toast {
     background: var(--green) !important;
     color: var(--dark-purple) !important;
+    font-size: 0.9rem;
 }
 
 .editable:empty:after, .editable span:first-child:empty:after {
     content: 'Click to edit';
     opacity:.5;
+}
+
+.green-toast .Toastify__toast-body {
+  padding-right: 5px;
+}
+
+.green-toast button
+ {
+  display: block;
+  background: var(--purple);
+  color: var(--white);
+  font-size: small;
 }

@@ -8,6 +8,9 @@ import './Altar.css';
 
 import { ChromePicker } from 'react-color';
 
+import { Tooltip } from 'react-tippy';
+import 'react-tippy/dist/tippy.css'
+
 import FontIconPicker from '@fonticonpicker/react-fonticonpicker';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.base-theme.react.css';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.material-theme.react.css';
@@ -138,41 +141,41 @@ const icons = {
     ]
 }
 
+class EmptyIcon extends Component {
+    render() {
+        var style = { ...this.props.style, border: "2px dashed", borderRadius: "2px", width: "1rem", height: "1rem", display: "inline-block", position: "relative", top: "2.5px" }
+        return (
+            <span style={style}></span>
+        )
+    }
+}
+
 class ColorPickerButton extends Component {
     state = {
         displayColorPicker: false
     };
 
-    handleClick = () => {
-        this.setState({ displayColorPicker: !this.state.displayColorPicker })
-    };
-
-    handleClose = () => {
-        this.setState({ displayColorPicker: false })
-    };
-
     render() {
-        const popover = {
-            position: 'absolute',
-            zIndex: '400'
-        }
-        const cover = {
-            position: 'fixed',
-            top: '0px',
-            right: '0px',
-            bottom: '0px',
-            left: '0px'
-        }
         return (
-            <div style={{ display: "inline-block" }} className={this.props.className} >
-                <button type="button" className={this.props.className} style={{ marginTop: (this.props.backgroundPicker ? "0.5rem" : "0"), background: this.props.backgroundPicker ? "var(--green)" : 'rgba(' + this.props.color.r + ',' + this.props.color.g + ',' + this.props.color.b + ',' + this.props.color.a + ')' }} onClick={this.handleClick}><FontAwesomeIcon icon="tint" />{this.props.backgroundPicker && " Background color"}</button>
-                {this.state.displayColorPicker ? <div style={popover}>
-                    <div style={cover} onClick={this.handleClose} />
+            <Tooltip
+                trigger="click"
+                interactive
+                theme="colorPicker"
+                arrow="true"
+                html={(
                     <ChromePicker
                         color={this.props.color}
                         onChangeComplete={(color, event) => this.props.handleChangeComplete(color, event, this.props.cellIndex)} />
-                </div> : null}
-            </div>
+                )}
+            >
+                <button
+                    type="button"
+                    className={this.props.className}
+                    style={{ marginTop: (this.props.backgroundPicker ? "0.5rem" : "0") }}
+                >
+                    <FontAwesomeIcon icon="tint"/> {this.props.backgroundPicker && " Background color"}
+                </button>
+            </Tooltip>
         )
     }
 }
@@ -186,7 +189,7 @@ class CellEditingTools extends Component {
         let typeIcon = () => {
             switch (this.props.cell.type) {
                 case "empty":
-                    return <FontAwesomeIcon icon="ban" style={{ marginRight: '25px' }} />;
+                    return <EmptyIcon style={{ marginRight: '25px' }} />;
                 case "image":
                     return <FontAwesomeIcon icon="shapes" style={{ marginRight: '25px' }} />;
                 case "text":
@@ -201,7 +204,7 @@ class CellEditingTools extends Component {
                     </div>
                     <input type="checkbox" className="dropdown-input" />
                     <ul className="dropdown-menu">
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type == "empty" && "selected")}><FontAwesomeIcon icon="ban" /> Empty</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type == "empty" && "selected")}><EmptyIcon /> Empty</li>
                         <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type == "image" && "selected")}><FontAwesomeIcon icon="shapes" /> Image</li>
                         <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type == "text" && "selected")}><FontAwesomeIcon icon="paragraph" /> Text</li>
                     </ul>
@@ -287,7 +290,8 @@ export default class Altar extends Component {
             candles: [],
             candleDuration: '10',
             editingMode: false,
-            backgroundColor: ''
+            backgroundColor: '',
+            selectedTab: 'altar'
         }
     }
 
@@ -316,6 +320,13 @@ export default class Altar extends Component {
                 })
         }
     }
+
+    toggleTab(tab) {
+        this.setState({
+            selectedTab: tab
+        })
+    }
+
 
     handleInputChange = (event) => {
         const { value, name } = event.target;
@@ -517,15 +528,17 @@ export default class Altar extends Component {
 
     render() {
         let style = {
-            display: this.props.isVisible ? 'block' : 'none',
+            display: this.props.isVisible ? 'flex' : 'none',
             backgroundColor: this.state.backgroundColor ? 'rgba(' + this.state.backgroundColor.r + ',' + this.state.backgroundColor.g + ',' + this.state.backgroundColor.b + ',' + this.state.backgroundColor.a + ')' : 'rgba(62,41,72,1)'
         };
         return (
             <div id="altar" style={style}>
-                <div id="altarNav">
+                <nav id="altarNav">
                     <span class="altarUsername">
-                        <img src={this.props.user.settings.flair} className="altarFlair" /> {this.props.user.username}&nbsp;
-                    {this.props.user !== this.state.originalUser &&
+                        <span>
+                            <img src={this.props.user.settings.flair} className="altarFlair" />{this.props.user.username}
+                        </span>
+                        {this.props.user !== this.state.originalUser &&
                             <button
                                 className="small"
                                 onClick={() => this.props.changeAltarUser(this.state.originalUser)}
@@ -534,51 +547,85 @@ export default class Altar extends Component {
                             </button>
                         }
                     </span>
-                </div>
-                {this.props.user === this.state.originalUser &&
-                    <div id="altarControls">
-                        <label className="dropdown">
-                            <div className="dropdown-button full-width">
-                                <FontAwesomeIcon icon="burn" /> Light candle
-                                </div>
-                            <input type="checkbox" className="dropdown-input" id="lightCandle" />
-                            <ul className="dropdown-menu">
-                                <li>
-                                    <input
-                                        name="candleDuration"
-                                        className="candleDuration"
-                                        type="number"
-                                        value={this.state.candleDuration}
-                                        onChange={this.handleInputChange}
-                                    /> minutes</li>
-                                <li className="divider"></li>
-                                <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "white" }} icon="circle" /> White</li>
-                                <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#111111" }} icon="circle" />Black</li>
-                                <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#503327" }} icon="circle" />Brown</li>
-                                <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#d40a0a" }} icon="circle" />Red</li>
-                                <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FF851B" }} icon="circle" />Orange</li>
-                                <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FFDC00" }} icon="circle" />Yellow</li>
-                                <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#2ECC40" }} icon="circle" />Green</li>
-                                <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#0074D9" }} icon="circle" />Blue</li>
-                                <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#8d0dc9" }} icon="circle" />Purple</li>
-                                <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#fa69d9" }} icon="circle" />Pink</li>
-                            </ul>
-                        </label>
-                        <button
-                            className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
-                            type="button"
-                            onClick={this.toggleEditingMode}
-                        >
-                            <FontAwesomeIcon icon="th" /> Edit Altar
-                            </button>
-                        <ColorPickerButton
-                            className="full-width"
-                            handleChangeComplete={this.changeBackgroundColor}
-                            color={this.state.backgroundColor}
-                            backgroundPicker={true} />
-                    </div>
-                }
-                <div id="altarGrid" className={this.state.editingMode ? "editingMode" : ""}>
+                    <ul class="altarNavLinks">
+                        <li
+                            className={this.state.selectedTab === "altar" && "selected"}
+                            onClick={() => this.toggleTab("altar")}>
+                            Altar
+                        </li>
+                        <li
+                            className={this.state.selectedTab === "journal" && "selected"}
+                            onClick={() => this.toggleTab("journal")}>
+                            Journal
+                        </li>
+                        <li
+                            className={this.state.selectedTab === "spellbook" && "selected"}
+                            onClick={() => this.toggleTab("spellbook")}>
+                            Spellbook
+                        </li>
+                        <li
+                            className={this.state.selectedTab === "lore" && "selected"}
+                            onClick={() => this.toggleTab("lore")}>
+                            Lore
+                        </li>
+                    </ul>
+                    {this.props.user === this.state.originalUser && this.state.selectedTab === "altar" &&
+                        <div id="altarControls">
+                            <Tooltip
+                                trigger="click"
+                                interactive
+                                theme="colorPicker"
+                                arrow="true"
+                                html={(
+                                    <ul className="candle-dropdown">
+                                        <li>
+                                            <input
+                                                name="candleDuration"
+                                                className="candleDuration"
+                                                type="number"
+                                                value={this.state.candleDuration}
+                                                onChange={this.handleInputChange}
+                                            /> minutes</li>
+                                        <li className="divider"></li>
+                                        <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "white" }} icon="circle" /> White</li>
+                                        <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#111111" }} icon="circle" />Black</li>
+                                        <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#503327" }} icon="circle" />Brown</li>
+                                        <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#d40a0a" }} icon="circle" />Red</li>
+                                        <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FF851B" }} icon="circle" />Orange</li>
+                                        <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FFDC00" }} icon="circle" />Yellow</li>
+                                        <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#2ECC40" }} icon="circle" />Green</li>
+                                        <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#0074D9" }} icon="circle" />Blue</li>
+                                        <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#8d0dc9" }} icon="circle" />Purple</li>
+                                        <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#fa69d9" }} icon="circle" />Pink</li>
+                                    </ul>
+                                )}
+                            >
+                                <button
+                                    type="button"
+                                    className="full-width"
+                                >
+                                    <FontAwesomeIcon icon="burn" /> Light candle
+                                </button>
+                            </Tooltip>
+                            <button
+                                className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
+                                type="button"
+                                onClick={this.toggleEditingMode}
+                            >
+                                <FontAwesomeIcon icon="th" /> Edit Altar
+                                </button>
+                            <ColorPickerButton
+                                className="full-width"
+                                handleChangeComplete={this.changeBackgroundColor}
+                                color={this.state.backgroundColor}
+                                backgroundPicker={true} />
+                        </div>
+                    }
+                </nav>
+                <div
+                    style={{display:(this.state.selectedTab === "altar" ? "flex" : "none")}}
+                    id="altarGrid"
+                    className={this.state.editingMode ? "editingMode" : ""}>
                     {this.state.cells.map((cell, index) => {
                         let cellNumber = index + 1;
                         return (
@@ -598,7 +645,25 @@ export default class Altar extends Component {
                         )
                     })}
                 </div>
-                {!this.state.editingMode &&
+                <div
+                    style={{display:(this.state.selectedTab === "journal" ? "flex" : "none")}}
+                    id="journal"
+                >
+                    Journal
+                </div>
+                <div
+                    style={{display:(this.state.selectedTab === "spellbook" ? "flex" : "none")}}
+                    id="spellbook"
+                >
+                    Spellbook
+                </div>
+                <div
+                    style={{display:(this.state.selectedTab === "lore" ? "flex" : "none")}}
+                    id="journal"
+                >
+                    Lore
+                </div>
+                {!this.state.editingMode && this.state.selectedTab === "altar" &&
                     <div id="candleHolder">
                         {this.state.candles.map((candle, index) => {
                             return (

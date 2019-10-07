@@ -7,18 +7,26 @@ var geolocationSchema = new mongoose.Schema({
   expiry: Date
 })
 
+var notificationSchema = new mongoose.Schema({
+  type: String,
+  text: String,
+  buttonText: String,
+  sender: String
+})
+
 var userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   lastOnline: { type: Date, default: new Date() },
-  status: { type: String, default: 'active' },
   geolocation: geolocationSchema,
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   memory: {
     lastRoom: { type: String, default: 'global-coven' }
   },
+  notifications: [notificationSchema],
   settings: {
+    status: { type: String, default: 'available' },
     flair: String,
     shareLocation: {type: Boolean, default: true},
     statusBarModules: {

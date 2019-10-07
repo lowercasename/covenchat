@@ -163,6 +163,55 @@ router.post('/api/user/settings/update', authorizeUser, async function(req, res)
 	})
 });
 
+router.get('/api/user/fetch-notifications', authorizeUser, async function(req, res) {
+	User.findById(req.user._id)
+	.then(user => {
+		if (user) {
+			res.status(200).json({
+				username: user.username,
+				notifications: user.notifications
+			})
+		}
+	})
+})
+
+router.post('/api/user/send-notification', authorizeUser, async function(req, res) {
+	User.update({username: req.body.user}, {$push: {notifications: {...req.body.notification, sender: req.user.username}}})
+	.then(response => {
+		if (response) {
+			pusher.trigger('notifications', 'notification-sent', {username: req.body.user, notification: req.body.notification}, req.body.socketId)
+			res.sendStatus(200);
+		}
+	})
+})
+
+router.post('/api/user/delete-notification', authorizeUser, async function(req, res) {
+	User.update({username: req.body.username}, {$pull: {notifications: {_id: req.body.notificationID}}})
+	.then(response => {
+		if (req.body.response === "yes") {
+			let linkDuration = 1 * 60 * 1000; // Milliseconds
+			let now = new Date().getTime();
+			let link = new Link({
+				fromUsername: req.body.notificationSender,
+				toUsername: req.user.username,
+				expiryTime: now + linkDuration
+			})
+			link.save()
+			.then(response => {
+				setTimeout(() => {
+					Link.remove({_id: link._id})
+					.then(result => {
+						console.log(result);
+						pusher.trigger('geolocations', 'link-expired', {linkFrom: req.body.notificationSender, linkTo: req.user.username}, req.body.socketId)
+					})
+				}, linkDuration)
+				pusher.trigger('geolocations', 'link-created', {linkFrom: req.body.notificationSender, linkTo: req.user.username}, req.body.socketId)
+			})
+		}
+		res.sendStatus(200);
+	})
+})
+
 router.post('/pusher/auth', function(req, res) {
 	var socketId = req.body.socket_id;
 	var channel = req.body.channel_name;
@@ -445,7 +494,6 @@ router.post('/api/chat/room/enter/:room', authorizeUser, async function(req,res)
 		slug: req.params.room
 	})
 	.then(room => {
-		console.log(req.params.room)
 		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': req.params.room}});
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
@@ -548,11 +596,14 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 			res.sendStatus(200);
 		} else {
 			// Only add user to visitors array if it's a public room
-			console.log(room.public)
 			if (room.public == true){
 				// Add user to visitors array
 				room.visitors.push(req.user._id);
 			}
+		}
+		// If there is now only one member in the room, they become an admin
+		if (room.members.length === 1) {
+			room.members[0].role = "administrator";
 		}
 		// Reset leaving user's last saved room memory
 		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': 'global-coven'}});

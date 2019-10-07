@@ -194,7 +194,10 @@
 /* Silly hack to make sure that a message after a date marker always
 has its date displayed, even when the author is the same as that of
 the previous day's message */
-.dateMessage + .messageContainer .messageMetadata {
+.dateMessage + .messageContainer .message .messageMetadata,
+.dateMessage + .messageContainer .action .messageMetadata,
+.dateMessage + .messageContainer .tarot .messageMetadata,
+.dateMessage + .messageContainer .runes .messageMetadata {
     display: flex !important;
 }
 
@@ -270,9 +273,13 @@ the previous day's message */
     background: #37204233;
 }
 
-.messageContent {
-    opacity: 1;
+.message .messageContent,
+.action .messageContent,
+.tarot .messageContent,
+.runes .messageContent {
     user-select: text;
+    display: block;
+    margin-left: 20px;
 }
 
 .messageList .action .messageContent,
@@ -316,7 +323,7 @@ the previous day's message */
     box-shadow: 2px 2px 3px rgba(0,0,0,0.5);
     border-radius: 6px;
     position: relative;
-    left: 40px;
+    left: 20px;
 }
 
 .runestone {
@@ -324,25 +331,29 @@ the previous day's message */
     height: 67px;
     filter: drop-shadow(4px 4px 3px rgba(0,0,0,0.5));
     position: relative;
-    left: 40px;
+    left: 20px;
 }
 
-.userActive, .userInactive, .userBusy {
+.userAvailable, .userAway, .userDnD, .userInvisible {
     font-size: 0.5rem;
     position: relative;
     top: -2px;
 }
 
-.userActive {
-    color: rgb(46, 248, 46);
+.userAvailable {
+    color: #2ef82e;
 }
 
-.userInactive {
-    color: rgb(161, 161, 161);
+.userAway {
+    color: #ff9215;
 }
 
-.userBusy {
-    color: rgb(201, 12, 12);
+.userDnD {
+    color: rgb(233, 0, 0);
+}
+
+.userInvisible {
+    color: rgb(180, 180, 180);
 }
 
 .userTooltip {
@@ -356,7 +367,19 @@ the previous day's message */
 }
 
 .userFlair {
-    height: 1rem;
     position: relative;
     top: 2px;
+}
+
+.userFlair img {
+    height: 1rem;
+}
+
+.userBadge {
+    border-radius: 2px;
+    margin: 0 4px;
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    position: relative;
+    top: -1px;
 }
