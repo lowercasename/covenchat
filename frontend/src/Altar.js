@@ -15,6 +15,10 @@ import FontIconPicker from '@fonticonpicker/react-fonticonpicker';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.base-theme.react.css';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.material-theme.react.css';
 
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
+
+import Editor from './Editor.js';
+
 const icons = {
     "Occult": [
         "hermetica-F032-pentacle",
@@ -291,7 +295,14 @@ export default class Altar extends Component {
             candleDuration: '10',
             editingMode: false,
             backgroundColor: '',
-            selectedTab: 'altar'
+            selectedTab: 'altar',
+            editorCategory: 'journal',
+            modalVisible: false,
+            postMode: 'create',
+            editTarget: '',
+            journalPosts: [],
+            spellbookPosts: [],
+            lorePosts: []
         }
     }
 
@@ -302,22 +313,41 @@ export default class Altar extends Component {
                 if (res.status === 200) return res.json();
             })
             .then(res => {
-                this.setState({ cells: res.altar.cells, candles: res.altar.candles, backgroundColor: res.altar.backgroundColor });
+                let journalPosts = res.posts.filter(p => p.category === "journal");
+                let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
+                let lorePosts = res.posts.filter(p => p.category === "lore");
+                this.setState({
+                    cells: res.altar.cells,
+                    candles: res.altar.candles,
+                    backgroundColor: res.altar.backgroundColor,
+                    journalPosts: journalPosts,
+                    spellbookPosts: spellbookPosts,
+                    lorePosts: lorePosts
+                });
             })
 
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log("Previously:", prevProps.user.username)
-        console.log("Now:", this.props.user.username)
         if (prevProps.user != this.props.user) {
             fetch('/api/altar/fetch/' + this.props.user._id)
                 .then(res => {
                     if (res.status === 200) return res.json();
                 })
                 .then(res => {
-                    this.setState({ cells: res.altar.cells, candles: res.altar.candles, backgroundColor: res.altar.backgroundColor });
+                    let journalPosts = res.posts.filter(p => p.category === "journal");
+                    let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
+                    let lorePosts = res.posts.filter(p => p.category === "lore");
+                    this.setState({
+                        cells: res.altar.cells,
+                        candles: res.altar.candles,
+                        backgroundColor: res.altar.backgroundColor,
+                        journalPosts: journalPosts,
+                        spellbookPosts: spellbookPosts,
+                        lorePosts: lorePosts
+                    });
                 })
+                window.history.replaceState({}, null, '/altar/'+this.props.user.username);
         }
     }
 
@@ -525,18 +555,131 @@ export default class Altar extends Component {
             })
     }
 
+    showModal = () => {
+        this.setState({
+            postMode: 'create',
+            editTarget: '',
+            modalVisible: true
+        })
+    }
+
+    hideModal = () => {
+        this.setState({
+            modalVisible: false
+        })
+    }
+
+    updatePosts = (post) => {
+        if (this.state.postMode === 'create') {
+            console.log(post.category)
+            switch(post.category) {
+                case 'journal':
+                    this.setState({journalPosts: [...this.state.journalPosts, post]});
+                    break;
+                case 'spellbook':
+                    this.setState({spellbookPosts: [...this.state.spellbookPosts, post]});
+                    break;
+                case 'lore':
+                    this.setState({lorePosts: [...this.state.lorePosts, post]});
+                    break;
+            }
+        } else if (this.state.postMode === 'edit') {
+            console.log(post)
+            switch(post.category) {
+                case 'journal':
+                    let journalPosts = this.state.journalPosts;
+                    journalPosts.forEach(oldPost => {
+                        if (oldPost._id === post._id) {
+                            oldPost.title = post.title;
+                            oldPost.public = post.public;
+                            oldPost.content = post.content;
+                            this.setState({journalPosts: journalPosts});
+                        }
+                    })
+                    break;
+                case 'spellbook':
+                    let spellbookPosts = this.state.spellbookPosts;
+                    spellbookPosts.forEach(oldPost => {
+                        if (oldPost._id === post._id) {
+                            oldPost.title = post.title;
+                            oldPost.public = post.public;
+                            oldPost.content = post.content;
+                            this.setState({spellBookPosts: spellbookPosts});
+                        }
+                    })
+                    break;
+                case 'lore':
+                    let lorePosts = this.state.lorePosts;
+                    lorePosts.forEach(oldPost => {
+                        if (oldPost._id === post._id) {
+                            oldPost.title = post.title;
+                            oldPost.public = post.public;
+                            oldPost.content = post.content;
+                            this.setState({lorePosts: lorePosts});
+                        }
+                    })
+                    break;
+            }
+        }
+        this.setState({
+            postMode: 'create',
+            editTarget: ''
+        })
+    }
+
+    deletePost = (post) => {
+        if (window.confirm("Are you sure you want to delete this post? This cannot be undone.")) {
+            fetch('/api/post/delete', {
+                method: 'POST',
+                body: JSON.stringify(post),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (res.status === 200) {
+                    return res.json();
+                } else {
+                    alert('Error deleting post, please try again.')
+                    return false;
+                }
+            })
+            .then(res => {
+                switch(post.category) {
+                    case 'journal':
+                        this.setState({journalPosts: this.state.journalPosts.filter(p => p._id !== post._id)});
+                    case 'spellbook':
+                        this.setState({spellbookPosts: this.state.spellbookPosts.filter(p => p._id !== post._id)});
+                    case 'lore':
+                        this.setState({lorePosts: this.state.lorePosts.filter(p => p._id !== post._id)});
+                }
+            })
+        }
+    }
+
+    editPost = (post) => {
+        this.setState({
+            modalVisible: true,
+            postMode: 'edit',
+            editTarget: post
+        })
+    }
+
 
     render() {
         let style = {
             display: this.props.isVisible ? 'flex' : 'none',
             backgroundColor: this.state.backgroundColor ? 'rgba(' + this.state.backgroundColor.r + ',' + this.state.backgroundColor.g + ',' + this.state.backgroundColor.b + ',' + this.state.backgroundColor.a + ')' : 'rgba(62,41,72,1)'
         };
+        let journalPosts = this.state.journalPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
+        let spellbookPosts = this.state.spellbookPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
+        let lorePosts = this.state.lorePosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
         return (
             <div id="altar" style={style}>
                 <nav id="altarNav">
                     <span class="altarUsername">
                         <span>
-                            <img src={this.props.user.settings.flair} className="altarFlair" />{this.props.user.username}
+                            <img src={this.props.user.settings.flair} className="altarFlair" />&nbsp;{this.props.user.username}
                         </span>
                         {this.props.user !== this.state.originalUser &&
                             <button
@@ -556,17 +699,17 @@ export default class Altar extends Component {
                         <li
                             className={this.state.selectedTab === "journal" && "selected"}
                             onClick={() => this.toggleTab("journal")}>
-                            Journal
+                            <span>Journal</span><span className="badge">{journalPosts.length}</span>
                         </li>
                         <li
                             className={this.state.selectedTab === "spellbook" && "selected"}
                             onClick={() => this.toggleTab("spellbook")}>
-                            Spellbook
+                            <span>Spellbook</span><span className="badge">{spellbookPosts.length}</span>
                         </li>
                         <li
                             className={this.state.selectedTab === "lore" && "selected"}
                             onClick={() => this.toggleTab("lore")}>
-                            Lore
+                            <span>Lore</span><span className="badge">{lorePosts.length}</span>
                         </li>
                     </ul>
                     {this.props.user === this.state.originalUser && this.state.selectedTab === "altar" &&
@@ -621,6 +764,23 @@ export default class Altar extends Component {
                                 backgroundPicker={true} />
                         </div>
                     }
+                    {this.props.user === this.state.originalUser && this.state.selectedTab !== "altar" &&
+                        <div id="altarControls">
+                            <button
+                                className="full-width"
+                                onClick={this.showModal}
+                            >
+                                <FontAwesomeIcon icon="edit"/> New post
+                            </button>
+                            <Editor
+                                mode={this.state.postMode}
+                                editTarget={this.state.editTarget}
+                                updatePosts={this.updatePosts}
+                                modalVisible={this.state.modalVisible}
+                                category={this.state.editorCategory}
+                                hideModal={this.hideModal}/>
+                        </div>
+                    }
                 </nav>
                 <div
                     style={{display:(this.state.selectedTab === "altar" ? "flex" : "none")}}
@@ -648,20 +808,59 @@ export default class Altar extends Component {
                 <div
                     style={{display:(this.state.selectedTab === "journal" ? "flex" : "none")}}
                     id="journal"
+                    className="postViewer"
                 >
-                    Journal
+                    {journalPosts.map(post => {
+                        return (
+                            <article className="post">
+                                <header>
+                                    <h2>{post.title}</h2>
+                                </header>
+                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                <main>
+                                    { ReactHtmlParser(post.content) }
+                                </main>
+                            </article>
+                        )
+                    })}
                 </div>
                 <div
                     style={{display:(this.state.selectedTab === "spellbook" ? "flex" : "none")}}
                     id="spellbook"
+                    className="postViewer"
                 >
-                    Spellbook
+                    {spellbookPosts.map(post => {
+                        return (
+                            <article className="post">
+                                <header>
+                                    <h2>{post.title}</h2>
+                                </header>
+                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                <main>
+                                    { ReactHtmlParser(post.content) }
+                                </main>
+                            </article>
+                        )
+                    })}
                 </div>
                 <div
                     style={{display:(this.state.selectedTab === "lore" ? "flex" : "none")}}
                     id="journal"
+                    className="postViewer"
                 >
-                    Lore
+                    {lorePosts.map(post => {
+                        return (
+                            <article className="post">
+                                <header>
+                                    <h2>{post.title}</h2>
+                                </header>
+                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                <main>
+                                    { ReactHtmlParser(post.content) }
+                                </main>
+                            </article>
+                        )
+                    })}
                 </div>
                 {!this.state.editingMode && this.state.selectedTab === "altar" &&
                     <div id="candleHolder">

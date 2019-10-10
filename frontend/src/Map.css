@@ -42,7 +42,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     padding-right:20px;
 }
-  
+
 .mapboxgl-popup-content h2 {
     text-transform: none;
     color: var(--white);
@@ -58,11 +58,9 @@
     padding: 0;
     margin: 0;
 }
-/* 
+/*
 .mapboxgl-popup-content button {
     margin: 0;
     padding: 0;
     background: transparent;
 } */
-  
-  

@@ -1,4 +1,15 @@
 const express = require('express');
+const multer  = require('multer');
+const shortid = require('shortid');
+const storage = multer.diskStorage({
+	destination: './uploads',
+	filename(req, file, cb) {
+		var re = /(?:\.([^.]+))?$/;
+		var extension = re.exec(file.originalname)[1];
+		cb(null, shortid.generate() + '.' + extension);
+	},
+});
+const upload = multer({ storage });
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -176,40 +187,64 @@ router.get('/api/user/fetch-notifications', authorizeUser, async function(req, r
 })
 
 router.post('/api/user/send-notification', authorizeUser, async function(req, res) {
-	User.update({username: req.body.user}, {$push: {notifications: {...req.body.notification, sender: req.user.username}}})
+	let notificationID = new mongoose.Types.ObjectId();
+	User.update({username: req.body.user}, {$push: {notifications: {...req.body.notification, _id: notificationID, sender: req.user.username}}})
 	.then(response => {
-		if (response) {
-			pusher.trigger('notifications', 'notification-sent', {username: req.body.user, notification: req.body.notification}, req.body.socketId)
+		if (response.ok){
+			pusher.trigger('notifications', 'notification-sent', {username: req.body.user, notification: {...req.body.notification, _id: notificationID}}, req.body.socketId)
 			res.sendStatus(200);
 		}
 	})
 })
 
-router.post('/api/user/delete-notification', authorizeUser, async function(req, res) {
+router.post('/api/user/delete-notification', authorizeUser, function(req, res) {
+	console.log("Deleting notification", req.body)
 	User.update({username: req.body.username}, {$pull: {notifications: {_id: req.body.notificationID}}})
 	.then(response => {
-		if (req.body.response === "yes") {
-			let linkDuration = 1 * 60 * 1000; // Milliseconds
-			let now = new Date().getTime();
-			let link = new Link({
-				fromUsername: req.body.notificationSender,
-				toUsername: req.user.username,
-				expiryTime: now + linkDuration
-			})
-			link.save()
-			.then(response => {
-				setTimeout(() => {
-					Link.remove({_id: link._id})
-					.then(result => {
-						console.log(result);
-						pusher.trigger('geolocations', 'link-expired', {linkFrom: req.body.notificationSender, linkTo: req.user.username}, req.body.socketId)
-					})
-				}, linkDuration)
-				pusher.trigger('geolocations', 'link-created', {linkFrom: req.body.notificationSender, linkTo: req.user.username}, req.body.socketId)
-			})
+		console.log(response)
+		if (response.ok){
+			res.sendStatus(200);
 		}
-		res.sendStatus(200);
 	})
+})
+
+router.post('/api/link/upsert', authorizeUser, async function(req, res) {
+	// Find users' geolocations
+	let fromCoordinates = req.body.fromCoordinates || await User.find({username: req.body.fromUsername}, {geolocation: 1});
+	let toCoordinates = req.body.toCoordinates || await User.find({username: req.body.toUsername}, {geolocation: 1});
+	// Format coordinates correctly if they're from the database
+	if (!req.body.fromCoordinates && !req.body.toCoordinates) {
+		console.log("Using db coords")
+		fromCoordinates = [fromCoordinates[0].geolocation.longitude, fromCoordinates[0].geolocation.latitude];
+		toCoordinates = [toCoordinates[0].geolocation.longitude, toCoordinates[0].geolocation.latitude];
+	} else {
+		console.log("Using supplied coords")
+	}
+	if (fromCoordinates && toCoordinates) {
+		let linkDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
+		let now = new Date().getTime();
+		let upsertLink = Link.findOneAndUpdate({fromUsername: req.body.fromUsername, toUsername: req.body.toUsername},
+		{
+			fromUsername: req.body.fromUsername,
+			toUsername: req.body.toUsername,
+			fromCoordinates: fromCoordinates,
+			toCoordinates: toCoordinates,
+			expiryTime: now + linkDuration,
+		}, { new: true, upsert: true })
+		.then(response => {
+			setTimeout(() => {
+				Link.remove({_id: response._id})
+				.then(result => {
+					console.log(result);
+					pusher.trigger('geolocations', 'link-expired', {id: response._id}, req.body.socketId)
+				})
+			}, linkDuration)
+			pusher.trigger('geolocations', 'link-created', {link: {...response._doc, revision: req.body.revision}}, req.body.socketId)
+		})
+	} else {
+		// No coordinates found
+		console.error("No coordinates found or supplied, exiting.")
+	}
 })
 
 router.post('/pusher/auth', function(req, res) {
@@ -224,7 +259,8 @@ router.post('/api/geolocation/update', authorizeUser, function(req,res) {
 	var payload = {
 		longitude: req.body.position.longitude,
 		latitude: req.body.position.latitude,
-		expiry: now.setTime(now.getTime() + (1*60*60*1000)) // Location is displayed for one hour
+		expiry: now.setTime(now.getTime() + (1*60*60*1000)), // Location is displayed for one hour
+		updated: now.getTime()
 	}
 
 	User.update({_id: req.user._id}, {geolocation: payload})
@@ -233,18 +269,14 @@ router.post('/api/geolocation/update', authorizeUser, function(req,res) {
 	})
 });
 
-router.get('/api/geolocation/fetch-all', authorizeUser, function(req,res) {
+router.get('/api/geolocation/fetch-all', authorizeUser, async function(req,res) {
 	let now = new Date().toISOString();
-	User.find({_id: { $ne: req.user._id }, "geolocation.expiry": { $gte: now }})
-	.then(users => {
-		res.status(200).json({
-			users: users
-		})
+	let users = await User.find({_id: { $ne: req.user._id }, "geolocation.expiry": { $gte: now }})
+	let links = await Link.find({expiryTime: { $gte: now }})
+	res.status(200).json({
+		users: users,
+		links: links
 	})
-	
-	// .then(response => {
-	// 	pusher.trigger('geolocations', 'geolocation-updated', {user: req.user, geolocation: payload}, req.body.socketId)
-	// })
 });
 
 router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
@@ -345,13 +377,21 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	}
 	let room = await Room.findOne({
 		slug: targetSlug
+
 	})
 	.populate('members.user')
 	.populate('visitors');
+
+	// var startOfToday = new Date().setHours(0,0,0,0);
 	let messages = await Message.find({
-		room: room._id
+		room: room._id,
+		// timestamp: {$gte: startOfToday}
 	})
+	.sort('-timestamp')
+	.limit(100)
 	.populate('user');
+
+	messages.reverse();
 
 	// Work out if we should be showing this user a welcome message
 	if (room.members.some(m => m.user.equals(req.user._id) && m.showWelcomeMessage == false)) {
@@ -374,6 +414,23 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 		});
 	});
 });
+
+router.post('/api/chat/room/fetch-messages', authorizeUser, function(req,res) {
+	Message.find({
+		room: req.body.room,
+		_id: {$lt: req.body.earlierThan}
+	})
+	.sort('-timestamp')
+	.limit(100)
+	.populate('user')
+	.then(messages => {
+		messages.reverse();
+		res.status(200)
+		.json({
+			messages: messages
+		});
+	})
+})
 
 router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	const { roomType, roomName, roomDescription, roomPrivacy } = req.body;
@@ -668,19 +725,19 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 	})
 });
 
-router.get('/api/altar/fetch/:userID', authorizeUser, function(req,res) {
-	Altar.findOne({
+router.get('/api/altar/fetch/:userID', authorizeUser, async function(req,res) {
+	let altar = await Altar.findOne({
 		user: req.params.userID
 	})
-	.then(altar => {
-		if (altar) {
-			res.status(200).json({
-				altar: altar
-			});
-		} else {
-			res.status(404);
-		}
-	})
+	let posts = await Post.find({user: req.params.userID}).populate('user');
+	if (altar) {
+		res.status(200).json({
+			altar: altar,
+			posts: posts
+		});
+	} else {
+		res.status(404);
+	}
 })
 
 router.post('/api/altar/edit-cell/contents', authorizeUser, function(req,res) {
@@ -708,11 +765,6 @@ router.post('/api/altar/edit-cell/type', authorizeUser, function(req,res) {
 	let targetCell = Object.keys(req.body.payload)[0];
 	let newType = req.body.payload[targetCell];
 	let cellIndex = parseInt(targetCell.slice(5)) - 1;
-
-	console.log(targetCell)
-	console.log(newType)
-	console.log(cellIndex)
-
 	Altar.update({
 		user: req.user._id
 	},
@@ -723,7 +775,6 @@ router.post('/api/altar/edit-cell/type', authorizeUser, function(req,res) {
 		}
 	})
 	.then(response => {
-		console.log(response);
 		res.status(200).json({
 			index: cellIndex,
 			type: newType
@@ -735,7 +786,6 @@ router.post('/api/altar/edit-cell/color', authorizeUser, function(req,res) {
 	let targetCell = Object.keys(req.body.payload)[0];
 	let newColor = req.body.payload[targetCell];
 	let cellIndex = parseInt(targetCell.slice(5)) - 1;
-	console.log(newColor)
 	Altar.update({
 		user: req.user._id
 	},
@@ -745,7 +795,6 @@ router.post('/api/altar/edit-cell/color', authorizeUser, function(req,res) {
 		}
 	})
 	.then(response => {
-		console.log(response);
 		res.status(200).json({
 			index: cellIndex,
 			color: newColor
@@ -755,7 +804,6 @@ router.post('/api/altar/edit-cell/color', authorizeUser, function(req,res) {
 
 router.post('/api/altar/edit-background', authorizeUser, function(req,res) {
 	let newColor = req.body.color;
-	console.log(newColor)
 	Altar.update({
 		user: req.user._id
 	},
@@ -765,7 +813,6 @@ router.post('/api/altar/edit-background', authorizeUser, function(req,res) {
 		}
 	})
 	.then(response => {
-		console.log(response);
 		res.status(200).json({
 			color: newColor
 		});
@@ -803,5 +850,50 @@ router.post('/api/altar/candle/delete/:candleID', authorizeUser, function(req,re
 		})
 	})
 })
+
+router.post('/api/image/upload', authorizeUser, upload.single('image'), (req, res) => {
+	const image = req.file;
+	const meta = req.body;
+	let dbDoc = new Image({
+		filename: req.file.filename,
+		uploader: req.user._id
+	})
+	dbDoc.save()
+	.then(response => res.status(200).json(response))
+	.catch((error) => res.status(500).json(error));
+});
+
+router.post('/api/post/new', authorizeUser, (req, res) => {
+	let post = new Post({
+		user: req.user._id,
+		title: req.body.title,
+	    content: req.body.text,
+	    category: req.body.category,
+	    public: req.body.privacy === "public" ? true : false,
+	})
+	post.save()
+	.then(response => res.status(200).json(response))
+	.catch((error) => res.status(500).json(error));
+});
+
+router.post('/api/post/edit', authorizeUser, (req, res) => {
+	Post.findOneAndUpdate({_id: req.body.id}, {
+		title: req.body.title,
+		content: req.body.text,
+		category: req.body.category,
+		public: req.body.privacy === "public" ? true : false,
+	}, {new: true})
+	.then(response => {
+		console.log(response)
+		res.status(200).json(response)
+	})
+	.catch((error) => res.status(500).json(error));
+});
+
+router.post('/api/post/delete', authorizeUser, (req, res) => {
+	Post.remove({_id: req.body._id})
+	.then(response => res.status(200).json(response))
+	.catch((error) => res.status(500).json(error));
+});
 
 module.exports = router;

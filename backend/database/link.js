@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 var linkSchema = new mongoose.Schema({
-    fromCoordinates: [String, String],
-    toCoordinates: [String, String],
+    fromCoordinates: [Number, Number],
+    toCoordinates: [Number, Number],
     fromUsername: String,
     toUsername: String,
-    expiryTime: Number
+    expiryTime: Date
 });
 
 module.exports = mongoose.model('Link', linkSchema);

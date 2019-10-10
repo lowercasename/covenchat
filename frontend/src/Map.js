@@ -6,6 +6,10 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Pusher from 'pusher-js';
 import './Map.css';
 
+const ID = function () {
+  return '_' + Math.random().toString(36).substr(2, 9);
+};
+
 export default class Map extends Component {
     constructor(props) {
         super(props);
@@ -13,7 +17,10 @@ export default class Map extends Component {
             socketId: '',
             usersOnMap: [],
             userMarkers: [],
-            userPosition: ''
+            currentLinks: [],
+            userPosition: '',
+            linksForUser: [],
+            lastGeolocationUpdate: []
         }
 
         this.createLink = this.createLink.bind(this);
@@ -23,14 +30,16 @@ export default class Map extends Component {
 
         const userMarkers = {};
 
+        const haveNotified = [];
+
         mapboxgl.accessToken = 'pk.eyJ1IjoicmFwaGFlbGthYm8iLCJhIjoiY2swcGhlbjVuMDBseDNibDQ5b25zbHNpcyJ9.ezfbQZXwGDYA6kAGez3v3A';
 
-        const map = new mapboxgl.Map({
+        this.setState({map: new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/raphaelkabo/ck1dskh912mlx1cpmjmxp48zr',
             center: [0, 50],
             zoom: 2
-        });
+        })});
 
         const addMarker = (lng, lat, user) => {
             let otherUser = false;
@@ -45,11 +54,13 @@ export default class Map extends Component {
                     <h2>
                         <img src={user.settings.flair} className="userFlair" /> {user.username}
                     </h2>
-                    {otherUser ?
-                        <button
-                            className="small"
-                            onClick={() => this.sendLinkNotification(user.username)}
-                        >Create link</button>
+                    {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
+                        <div>
+                            <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.sendLinkNotification(user.username)}><FontAwesomeIcon icon="arrows-alt-h"/> Create link</button>
+                            <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
+                        </div>
+                    :
+                        <p>Currently linked</p>
                     :
                         <p>It's you!</p>
                     }
@@ -58,11 +69,11 @@ export default class Map extends Component {
 
             const placeholder = document.createElement('div');
             ReactDOM.render(html, placeholder);
-        
+
             const marker = new mapboxgl.Marker(el, { anchor: 'right' })
             .setLngLat([lng, lat])
             .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(placeholder))
-            .addTo(map);
+            .addTo(this.state.map);
 
             return marker;
         }
@@ -70,13 +81,24 @@ export default class Map extends Component {
         fetch('/api/geolocation/fetch-all')
         .then(res => res.json())
         .then(res => {
+            console.log("Creating markers!")
+            let markersProcessed = 0;
             res.users.forEach(user => {
                 let userMarkers = [...this.state.userMarkers, addMarker(user.geolocation.longitude, user.geolocation.latitude, user)];
                 userMarkers[userMarkers.length - 1].username = user.username;
+                userMarkers[userMarkers.length - 1].updated = new Date().getTime();
                 this.setState({
                     usersOnMap: [...this.state.usersOnMap, user.username],
                     userMarkers: userMarkers
-                })
+                }, () => markersProcessed++);
+                // Only make links after userMarkers has been filled
+                if (markersProcessed === res.users.length){
+                    console.log("Creating links!")
+                    res.links.forEach(link => {
+                        console.log("Creating link", link)
+                        this.createLink(link, this.state.map);
+                    })
+                }
             })
         });
 
@@ -107,14 +129,13 @@ export default class Map extends Component {
                         trackUserLocation: true,
                         showUserLocation: false,
                     })
-                    map.addControl(geolocate)
-                    map.on('load', function (error) {
+                    this.state.map.addControl(geolocate)
+                    this.state.map.on('error', function (error) {
                         console.log(error);
                     });
-                    map.on('error', function () {
+                    this.state.map.on('load', function () {
                         geolocate.trigger();
                         // map.resize();
-
                     });
                     geolocate.on('geolocate', (e) => {
                         var lng = e.coords.longitude;
@@ -124,6 +145,7 @@ export default class Map extends Component {
                         if (positionMarkerRendered === false) {
                             let userMarkers = [...this.state.userMarkers, addMarker(lng, lat, this.props.user)];
                             userMarkers[userMarkers.length - 1].username = this.props.user.username;
+                            userMarkers[userMarkers.length - 1].updated = new Date().getTime();
                             this.setState({userMarkers:userMarkers});
                             positionMarkerRendered = true;
 
@@ -139,102 +161,219 @@ export default class Map extends Component {
                                 socketId: this.state.socketId
                             })
                         });
+                        // Add links for user once they're geolocated
+                        this.state.linksForUser.forEach(link => {
+                            console.log("Creating saved link",link)
+                            this.createLink(link, this.state.map);
+                            // Remove the link from state so it don't bug us again
+                            this.setState({linksForUser: this.state.linksForUser.filter(l => l._id !== link._id)});
+                        })
                     });
 
                     geolocationsChannel.bind('geolocation-updated', (data) => {
-                        // Make sure user is sharing their location publicly
-                        if (data.user.settings.shareLocation) {
-                            // Check if this user is already displayed on the map
-                            if (this.state.usersOnMap.includes(data.user.username)) {
-                                console.log("Marker already exists :)")
-                                let userMarkers = this.state.userMarkers;
-                                userMarkers.forEach(marker => {
-                                    if (marker.username === data.user.username) {
-                                        marker.setLngLat([data.geolocation.longitude, data.geolocation.latitude]);
-                                    }
-                                })
-                                this.setState({userMarkers:userMarkers});
-                            } else {
-                                let userMarkers = [...this.state.userMarkers, addMarker(data.geolocation.longitude, data.geolocation.latitude, data.user)];
-                                userMarkers[userMarkers.length - 1].username = data.user.username;
-                                this.setState({
-                                    usersOnMap: [...this.state.usersOnMap, data.user.username],
-                                    userMarkers: userMarkers
-                                })
-                            }
+                        // Rate limiter - check to see if last geolocation update was more than 30 seconds ago
+                        let timeSinceLastUpdate;
+                        if (this.state.userMarkers !== undefined) {
+                            let lastUpdateTimestamp = this.state.userMarkers.find(m => m.username === data.user.username).updated;
+                            timeSinceLastUpdate = data.geolocation.updated - lastUpdateTimestamp;
+                            console.log(data.geolocation.updated)
+                            console.log(lastUpdateTimestamp);
+                        } else {
+                            timeSinceLastUpdate = 30001;
                         }
+                        console.log("timeSinceLastUpdate",timeSinceLastUpdate);
+                        if (timeSinceLastUpdate > 30000) {
+                            // Make sure user is sharing their location publicly
+                            if (data.user.settings.shareLocation) {
+                                // Check if this user is already displayed on the map
+                                if (this.state.usersOnMap.includes(data.user.username)) {
+                                    console.log("Marker already exists :)")
+                                    let userMarkers = this.state.userMarkers;
+                                    userMarkers.forEach(marker => {
+                                        if (marker.username === data.user.username) {
+                                            marker.setLngLat([data.geolocation.longitude, data.geolocation.latitude]);
+                                            marker.updated = data.geolocation.updated;
+                                            // Check links to see if any are coming from or going to this marker, and update them
+                                            this.state.currentLinks.forEach(link => {
+                                                if (link.fromUsername === data.user.username || link.toUsername === data.user.username) {
+                                                    fetch('/api/link/upsert', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Accept': 'application/json',
+                                                            'Content-Type': 'application/json',
+                                                        },
+                                                        body: JSON.stringify({
+                                                            fromUsername: link.fromUsername,
+                                                            toUsername: link.toUsername
+                                                        })
+                                                    });
+                                                }
+                                            })
+                                        }
+                                    })
+                                    this.setState({userMarkers:userMarkers});
+                                } else {
+                                    let userMarkers = [...this.state.userMarkers, addMarker(data.geolocation.longitude, data.geolocation.latitude, data.user)];
+                                    userMarkers[userMarkers.length - 1].username = data.user.username;
+                                    userMarkers[userMarkers.length - 1].updated = data.geolocation.updated;
+                                    this.setState({
+                                        usersOnMap: [...this.state.usersOnMap, data.user.username],
+                                        userMarkers: userMarkers
+                                    })
+                                }
+                            }
+                        } else {
+                            // Updating too quickly
+                            console.log("Rate limit: waiting 30 seconds between geolocation updates");
+                        }
+
                     });
                     geolocationsChannel.bind('link-created', (data) => {
-                        if (data.linkFrom === this.props.user.username) {
-                            this.createLink(data.linkTo, map);
-                        }
-                        if (data.linkTo === this.props.user.username) {
-                            this.createLink(data.linkFrom, map);
-                        }
+                        this.createLink(data.link, this.state.map);
                     })
                     geolocationsChannel.bind('link-expired', (data) => {
-                        if (data.linkFrom === this.props.user.username) {
-                            this.removeLink(data.linkTo, map);
-                        }
-                        if (data.linkTo === this.props.user.username) {
-                            this.removeLink(data.linkFrom, map);
-                        }
+                        this.removeLink(data.id, this.state.map);
                     })
                 });
         }
     }
 
-    componentDidUpdate(prevProps) {
-        if (this.props.locationPermission) {
-            navigator.permissions.query({ name: 'geolocation' }).then(function (status) {
-                // console.log(status);
-            });
+    resize() {
+        this.state.map.resize();
+    }
+
+    createLink = (link, map) => {
+        console.log("Make it link gurl",link)
+        // Check if both markers exist on the map.
+        // If this function is being called at map boot, the user's own marker won't yet exist,
+        // so markers for that user need to be stored and called again when they are geolocated
+        if (link.fromUsername === this.props.user.username || link.toUsername === this.props.user.username && !this.state.userPosition) {
+            console.log("Saving link for later")
+            this.setState({linksForUser: [...this.state.linksForUser, link]});
+        }
+        let allMarkersOnMap = this.state.userMarkers.map(m => m.username);
+        if (allMarkersOnMap.includes(link.fromUsername) && allMarkersOnMap.includes(link.toUsername)) {
+            // Check if the geolocations saved in the database need updating (only run this once - checked with
+            // revision flag supplied by backend when the upsert is only a revision)
+            let fromMarker = this.state.userMarkers.find(m => m.username === link.fromUsername);
+            let toMarker = this.state.userMarkers.find(m => m.username === link.toUsername);
+            console.log("Is this a revision?", link.revision)
+            if ((link.revision === true) || (fromMarker._lngLat.lng === link.fromCoordinates[0] &&
+                fromMarker._lngLat.lat === link.fromCoordinates[1] &&
+                toMarker._lngLat.lng === link.toCoordinates[0] &&
+                toMarker._lngLat.lat === link.toCoordinates[1])) {
+                    this.removeLink(link._id, this.state.map);
+                    // Create the line!
+                    this.state.map.addLayer({
+                        "id": link._id,
+                        "type": "line",
+                        "source": {
+                            "type": "geojson",
+                            "lineMetrics": true,
+                            "data": {
+                                "type": "Feature",
+                                "properties": {},
+                                "geometry": {
+                                    "type": "LineString",
+                                    "coordinates": [
+                                        [link.fromCoordinates[0], link.fromCoordinates[1]],
+                                        [link.toCoordinates[0], link.toCoordinates[1]]
+                                    ]
+                                }
+                            }
+                        },
+                        "layout": {
+                            "line-join": "round",
+                            "line-cap": "round"
+                        },
+                        "paint": {
+                            "line-color": "rgba(189,23,203,0.3)",
+                            "line-width": 2,
+                            'line-gradient': [
+                                'interpolate',
+                                ['linear'],
+                                ['line-progress'],
+                                0, "rgba(255,255,255,0.3)",
+                                1, "rgba(189,23,203,0.3)"
+                            ]
+                        }
+                    });
+                    let currentLinks = this.state.currentLinks;
+                    currentLinks.forEach(existingLink => {
+                        if (existingLink._id === link._id) {
+                            existingLink = {...existingLink, ...link}
+                        }
+                    })
+                    this.setState({currentLinks: currentLinks});
+                    // Let the people know the good news
+                    if (link.revision === false) {
+                        // if (!haveNotified.includes(link.fromUsername)) {
+                            fetch('/api/user/send-notification', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    user: link.fromUsername,
+                                    notification: {
+                                        sender: link.toUsername,
+                                        type: 'link-created',
+                                        text: link.toUsername + ' has linked with you on the map.',
+                                    }
+                                })
+                            })
+                        //     haveNotified.push(link.fromUsername);
+                        // }
+                        fetch('/api/user/send-notification', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                user: link.toUsername,
+                                notification: {
+                                    sender: link.fromUsername,
+                                    type: 'link-created',
+                                    text: link.fromUsername + ' has linked with you on the map.',
+                                }
+                            })
+                        })
+                    }
+            } else {
+                // Coordinates differ
+                console.log("Error: coordinates differ.");
+                this.removeLink(link._id, this.state.map);
+                fetch('/api/link/upsert', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fromUsername: link.fromUsername,
+                        toUsername: link.toUsername,
+                        fromCoordinates: [fromMarker._lngLat.lng,fromMarker._lngLat.lat],
+                        toCoordinates: [toMarker._lngLat.lng,toMarker._lngLat.lat],
+                        revision: true
+                    })
+                });
+            }
+        } else {
+            console.log("Error: markers don't exist on map; aborting.")
         }
     }
 
-    createLink = (username, map) => {
-        console.log("Creating layer",username)
-        let otherMarker = this.state.userMarkers.find(m => m.username === username);
-        if (map.getLayer(username)) {
-            map.removeLayer(username);
+    removeLink = (id, map) => {
+        if (this.state.map.getLayer(id)) {
+            this.state.map.removeLayer(id);
+            let currentLinks = this.state.currentLinks.filter(l => l._id !== id);
+            this.setState({currentLinks: currentLinks});
         }
-        map.addLayer({
-            "id": username,
-            "type": "line",
-            "source": {
-                "type": "geojson",
-                "data": {
-                    "type": "Feature",
-                    "properties": {},
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [
-                            this.state.userPosition,
-                            [otherMarker._lngLat.lng, otherMarker._lngLat.lat]
-                        ]
-                    }
-                }
-            },
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round"
-            },
-            "paint": {
-                "line-color": "rgba(189,23,203,0.3)",
-                "line-width": 2
-            }
-        });
-    }
-    removeLink = (username, map) => {
-        console.log("Removing layer",username)
-        map.removeLayer(username);
-        if (map.getSource(sourceName)){
-            map.removeSource(sourceName);
+        if (this.state.map.getSource(id)){
+            this.state.map.removeSource(id);
         }
-        map.addSource(sourceName, {
-            type: 'geojson',
-            data: data
-        });
     }
     sendLinkNotification = (username) => {
         fetch('/api/user/send-notification', {
@@ -248,11 +387,13 @@ export default class Map extends Component {
                 notification: {
                     sender: this.props.user.username,
                     type: 'link-request',
-                    text: this.props.user.username + ' wants to link with you on the map. Click below to accept or deny this request.',
+                    text: this.props.user.username + ' wants to link with you on the map.',
                     buttonText: 'Create link'
                 }
             })
         })
+        var popup = this.state.userMarkers.find(m => m.username === username)._popup;
+        if (popup && popup.isOpen()) popup.remove();
     }
 
     render() {
@@ -263,7 +404,6 @@ export default class Map extends Component {
             <div
                 id="map"
                 style={style}>
-
             </div>
         )
     }

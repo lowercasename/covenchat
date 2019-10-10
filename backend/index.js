@@ -34,7 +34,10 @@ Room = require('./database/room');
 User = require('./database/user');
 Altar = require('./database/altar');
 Link = require('./database/link');
-
+Image = require('./database/image');
+Post = require('./database/post');
+const mongoSanitize = require('express-mongo-sanitize');
+app.use(mongoSanitize());
 
 // ROUTER
 const router = require('./router');

@@ -11,11 +11,11 @@ import Pusher from 'pusher-js';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH} from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH)
 
 toast.configure()
 
@@ -23,7 +23,7 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            visibleModule: 'map',
+            visibleModule: 'loader',
             user: this.props.user,
             altarUser: this.props.user
         }
@@ -35,9 +35,50 @@ class Dashboard extends Component {
     }
 
     componentDidMount() {
+        // Module to show a particular user's altar if an /altar/:username URL is supplied
+        if (this.props.match.params[0]) {
+            if (this.props.match.params[0] === this.props.user.username) {
+                this.setState({
+                    visibleModule: 'altar',
+                    user: this.props.user,
+                    altarUser: this.props.user
+                })
+            } else {
+                fetch('/api/user/fetch-by-username/'+this.props.match.params[0])
+                .then(res => {
+                    if (res.status === 200) {
+                        return res.json();
+                    } else {
+                        this.props.history.push('/');
+                    }
+                })
+                .then(res => {
+                    this.setState({
+                        visibleModule: 'altar',
+                        user: this.props.user,
+                        altarUser: res.user[0]
+                    })
+                })
+            }
+        } else {
+            this.setState({visibleModule: 'map'}, () => {
+                this.refs.map.resize();
+            });
+        }
 
-        const NotificationToast = ({ notificationText, buttonText, notificationID, notificationSender, username, closeToast }) => {
+        const NotificationToast = ({ notification, username, closeToast }) => {
             function handleClick(){
+                fetch('/api/link/upsert', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fromUsername: notification.sender,
+                        toUsername: username,
+                    })
+                });
                 fetch('/api/user/delete-notification', {
                     method: 'POST',
                     headers: {
@@ -45,28 +86,32 @@ class Dashboard extends Component {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        response: "yes",
                         username: username,
-                        notificationSender: notificationSender,
-                        notificationID: notificationID
+                        notificationID: notification._id
                     })
                 })
-                closeToast();
+                .then(res => {
+                    if (res.status === 200) {
+                        closeToast();
+                    }
+                })
             }
 
             return (
                 <div>
-                    {notificationText}
-                    <button
-                        onClick={handleClick}
-                    >
-                        {buttonText}
-                    </button>
+                    {notification.text}
+                    {notification.buttonText &&
+                        <button
+                            onClick={handleClick}
+                        >
+                            {notification.buttonText}
+                        </button>
+                    }
                 </div>
             )
         };
 
-        const CloseButton = ({ notificationID, username, closeToast }) => {
+        const CloseButton = ({ notification, username, closeToast }) => {
             function handleClick(){
                 fetch('/api/user/delete-notification', {
                     method: 'POST',
@@ -75,12 +120,15 @@ class Dashboard extends Component {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        response: "no",
                         username: username,
-                        notificationID: notificationID
+                        notificationID: notification._id
                     })
                 })
-                closeToast();
+                .then(res => {
+                    if (res.status === 200) {
+                        closeToast();
+                    }
+                })
             }
 
             return (
@@ -97,11 +145,30 @@ class Dashboard extends Component {
         .then(res => res.json())
         .then(res => {
             res.notifications.forEach(notification => {
-                toast(<NotificationToast notificationText={notification.text} notificationID={notification._id} notificationSender={notification.sender} buttonText={notification.buttonText} username={res.username}/>, {
-                    autoClose: false,
-                    className: 'green-toast',
-                    closeButton: <CloseButton notificationID={notification._id} username={res.username} />
-                });
+                if (notification.buttonText) {
+                    // User has to interact with this notification
+                    toast(<NotificationToast notification={notification} username={res.username}/>, {
+                        autoClose: false,
+                        className: 'green-toast',
+                        closeButton: <CloseButton notification={notification} username={res.username} />
+                    });
+                } else {
+                    // Just an update
+                    toast(<NotificationToast notification={notification} username={res.username}/>, {
+                        className: 'green-toast',
+                    });
+                    fetch('/api/user/delete-notification', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: res.username,
+                            notificationID: notification._id
+                        })
+                    })
+                }
             })
         })
         fetch('api/pusher/getkey')
@@ -117,11 +184,31 @@ class Dashboard extends Component {
             var notificationsChannel = pusher.subscribe('notifications');
             notificationsChannel.bind('notification-sent', data => {
                 if (data.username === this.props.user.username) {
-                    toast(<NotificationToast notificationText={data.notification.text} notificationID={data.notification._id} buttonText={data.notification.buttonText} username={this.props.user.username} notificationSender={data.notification.sender}/>, {
-                        autoClose: false,
-                        className: 'green-toast',
-                        closeButton: <CloseButton notificationID={data.notification._id} username={this.props.user.username} />
-                    });
+                    if (data.notification.buttonText) {
+                        // User has to interact with this notification
+                        toast(<NotificationToast notification={data.notification} username={this.props.user.username}/>, {
+                            autoClose: false,
+                            className: 'green-toast',
+                            closeButton: <CloseButton notification={data.notification} username={this.props.user.username} />
+                        });
+                    } else {
+                        // Just an update
+                        toast(<NotificationToast notification={data.notification} username={this.props.user.username}/>, {
+                            className: 'green-toast'
+                        });
+                        fetch('/api/user/delete-notification', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: this.props.user.username,
+                                notificationID: data.notification._id
+                            })
+                        })
+                    }
+
                 }
             })
         });
@@ -131,7 +218,12 @@ class Dashboard extends Component {
     toggleView(module) {
         this.setState({
             visibleModule: module
+        }, () => {
+            if (module === "map") {
+                this.refs.map.resize();
+            }
         })
+        window.history.replaceState({}, null, '/');
     }
 
     changeAltarUser(user) {
@@ -222,7 +314,7 @@ class Dashboard extends Component {
         return (
             <div className="App">
                 <nav className="sideNav"><i class="fas fa-compass"></i>
-                    <img src="magic-ball-alt.svg" className="navLogo" />
+                    <img src="/magic-ball-alt.svg" className="navLogo" />
                     <div className={["navIcon", (this.state.visibleModule == "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
                         <FontAwesomeIcon icon={['far', 'compass']} />
                     </div>
@@ -237,10 +329,15 @@ class Dashboard extends Component {
                     </div>
                 </nav>
                 <main className="content">
+                    <div id="loader" style={{display: (this.state.visibleModule === "loader" ? "flex" : "none")}}>
+                        <div class="lds-dual-ring"></div>
+                    </div>
                     <Map
+                        ref="map"
                         user={this.state.user}
                         isVisible={this.state.visibleModule === "map" ? true : false}
                         locationPermission={this.state.user.settings.shareLocation}
+                        changeAltarUser={this.changeAltarUser}
                     />
                     <ChatDrawer
                         isVisible={this.state.visibleModule === "chat" ? true : false}

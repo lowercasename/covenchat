@@ -30,6 +30,24 @@ class UserFlair extends Component {
 }
 
 class MessageList extends Component {
+    constructor() {
+        super();
+        this.messageList = React.createRef();
+    }
+
+    onScroll = () => {
+        let timesFetched = 0;
+        let messages = document.querySelector('#chatWindow .simplebar-content-wrapper');
+        let scrollTop = messages.scrollTop;
+        console.log(scrollTop)
+        if (scrollTop === 0) {
+            if (document.querySelector('#chatWindow .messageContainer')) {
+                let lastMessage = document.querySelector('#chatWindow .messageContainer').id;
+                this.props.infiniteScroll(lastMessage);
+            }
+        }
+    };
+
     render() {
         function displayTimestamp(timestamp) {
             function addZero(i) {
@@ -77,7 +95,7 @@ class MessageList extends Component {
             }
         }
         return (
-            <div className="chatWindow" id="chatWindow" data-simplebar>
+            <div className="chatWindow" id="chatWindow" data-simplebar ref={this.messageList} onScroll={this.onScroll}>
                 <ul className="messageList">
                     {this.props.messages.map((message, i, arr) => {
                         let lastTimestamp = arr[i-1] ? arr[i-1].timestamp : false;
@@ -86,7 +104,7 @@ class MessageList extends Component {
                         return (
                             <>
                                 {dayMessage(message.timestamp, lastTimestamp)}
-                                <li key={message._id} className="messageContainer">
+                                <li key={message._id} className="messageContainer" id={message._id}>
                                     <div key={message._id} className={message.type}>
                                         <span className={["messageMetadata", (message.user.username === lastAuthor) && (lastType === "message") ? "hidden" : ""].join(' ')}>
                                             <span className="messageTimestamp">
@@ -200,7 +218,7 @@ class RoomList extends Component {
                                     popperOptions={{modifiers: {
                                         preventOverflow: {
                                           escapeWithReference: true
-                                        }    
+                                        }
                                     }}}
                                 >
                                     <li
@@ -230,7 +248,7 @@ class RoomList extends Component {
                                     popperOptions={{modifiers: {
                                         preventOverflow: {
                                           escapeWithReference: true
-                                        }    
+                                        }
                                     }}}
                                 >
                                     <li
@@ -333,7 +351,7 @@ class UserBadge extends Component {
             <div className="userTooltip">
                 <strong><UserFlair user={user} />{user.username} {userBadge}</strong>
                 <br/>
-                {this.props.online && <span><FontAwesomeIcon className={userStatus} icon="circle"/> {userStatusText}</span>}
+                {this.props.online && <span style={{marginTop:"0.25rem",fontSize:"0.8rem"}}><FontAwesomeIcon className={userStatus} icon="circle"/> {userStatusText}</span>}
                 <br/>
                 {!this.props.isYou ?
                     <>
@@ -885,6 +903,29 @@ class ChatDrawer extends Component {
         }
     }
 
+    infiniteScroll = (lastMessage) => {
+        fetch('/api/chat/room/fetch-messages', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                room: this.state.currentRoom._id,
+                earlierThan: lastMessage
+            })
+        })
+        .then(res => res.json())
+        .then(payload => {
+            let messages = this.state.messages;
+            messages.unshift(...payload.messages);
+            console.log(messages)
+            this.setState({
+                messages: messages
+            });
+        })
+    }
+
     render() {
         var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
         var isMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoom.slug) || this.state.directMessages.some(r => r.slug === this.state.currentRoom.slug));
@@ -917,7 +958,7 @@ class ChatDrawer extends Component {
                             currentRoom={this.state.currentRoom}
                         />
                     }
-                    {!isDirectMessage && 
+                    {!isDirectMessage &&
                         <JoinLeaveRoomControls
                             joinRoom={this.joinRoom.bind(this)}
                             leaveRoom={this.leaveRoom.bind(this)}
@@ -926,7 +967,7 @@ class ChatDrawer extends Component {
                             user={this.props.user}
                         />
                     }
-                    {isDirectMessage && 
+                    {isDirectMessage &&
                         <HideRoomControls
                             currentRoom={this.state.currentRoom}
                             hideRoom={this.hideRoom.bind(this)}
@@ -942,7 +983,7 @@ class ChatDrawer extends Component {
                             </button>
                         </aside>
                     }
-                    <MessageList messages={this.state.messages} currentRoom={this.state.currentRoom} />
+                    <MessageList messages={this.state.messages} currentRoom={this.state.currentRoom} infiniteScroll={this.infiniteScroll}/>
                     {isMember &&
                         <form
                             className="chatForm"

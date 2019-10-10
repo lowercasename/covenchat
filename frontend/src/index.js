@@ -96,6 +96,7 @@ class App extends Component {
                     <PublicRoute path="/login" layout={PublicLayout} component={Login} />
                     <PublicRoute path="/register" layout={PublicLayout} component={Register} />
                     <Route exact path="/" component={withAuth(Dashboard)}/>
+                    <Route exact path="/altar/*" component={withAuth(Dashboard)}/>
                     <PublicRoute layout={PublicLayout} component={NotFound}/>
                 </Switch>
             </Router>
