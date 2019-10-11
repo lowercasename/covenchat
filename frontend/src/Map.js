@@ -293,8 +293,8 @@ export default class Map extends Component {
                                 'interpolate',
                                 ['linear'],
                                 ['line-progress'],
-                                0, "rgba(255,255,255,0.3)",
-                                1, "rgba(189,23,203,0.3)"
+                                0, "rgba(0, 255, 200, 1)",
+                                1, "rgba(0, 255, 200, 1)"
                             ]
                         }
                     });
