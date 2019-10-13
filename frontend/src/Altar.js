@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { RIEToggle, RIEInput, RIETextArea, RIENumber, RIETags, RIESelect } from 'riek';
-import _ from 'lodash';
+import { RIETextArea } from 'riek';
 
 import './Altar.css';
 
@@ -15,7 +14,7 @@ import FontIconPicker from '@fonticonpicker/react-fonticonpicker';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.base-theme.react.css';
 import '@fonticonpicker/react-fonticonpicker/dist/fonticonpicker.material-theme.react.css';
 
-import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
+import ReactHtmlParser from 'react-html-parser';
 
 import Editor from './Editor.js';
 
@@ -208,9 +207,9 @@ class CellEditingTools extends Component {
                     </div>
                     <input type="checkbox" className="dropdown-input" />
                     <ul className="dropdown-menu">
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type == "empty" && "selected")}><EmptyIcon /> Empty</li>
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type == "image" && "selected")}><FontAwesomeIcon icon="shapes" /> Image</li>
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type == "text" && "selected")}><FontAwesomeIcon icon="paragraph" /> Text</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type === "empty" && "selected")}><EmptyIcon /> Empty</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type === "image" && "selected")}><FontAwesomeIcon icon="shapes" /> Image</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type === "text" && "selected")}><FontAwesomeIcon icon="paragraph" /> Text</li>
                     </ul>
                 </label>
                 <ColorPickerButton
@@ -329,7 +328,7 @@ export default class Altar extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.user != this.props.user) {
+        if (prevProps.user !== this.props.user) {
             fetch('/api/altar/fetch/' + this.props.user._id)
                 .then(res => {
                     if (res.status === 200) return res.json();
@@ -677,7 +676,7 @@ export default class Altar extends Component {
         return (
             <div id="altar" style={style}>
                 <nav id="altarNav">
-                    <span class="altarUsername">
+                    <span className="altarUsername">
                         <span>
                             <img src={this.props.user.settings.flair} className="altarFlair" />&nbsp;{this.props.user.username}
                         </span>
@@ -690,24 +689,24 @@ export default class Altar extends Component {
                             </button>
                         }
                     </span>
-                    <ul class="altarNavLinks">
+                    <ul className="altarNavLinks">
                         <li
-                            className={this.state.selectedTab === "altar" && "selected"}
+                            className={this.state.selectedTab === "altar" ? "selected" : ""}
                             onClick={() => this.toggleTab("altar")}>
                             Altar
                         </li>
                         <li
-                            className={this.state.selectedTab === "journal" && "selected"}
+                            className={this.state.selectedTab === "journal" ? "selected" : ""}
                             onClick={() => this.toggleTab("journal")}>
                             <span>Journal</span><span className="badge">{journalPosts.length}</span>
                         </li>
                         <li
-                            className={this.state.selectedTab === "spellbook" && "selected"}
+                            className={this.state.selectedTab === "spellbook" ? "selected" : ""}
                             onClick={() => this.toggleTab("spellbook")}>
                             <span>Spellbook</span><span className="badge">{spellbookPosts.length}</span>
                         </li>
                         <li
-                            className={this.state.selectedTab === "lore" && "selected"}
+                            className={this.state.selectedTab === "lore" ? "selected" : ""}
                             onClick={() => this.toggleTab("lore")}>
                             <span>Lore</span><span className="badge">{lorePosts.length}</span>
                         </li>
@@ -789,7 +788,7 @@ export default class Altar extends Component {
                     {this.state.cells.map((cell, index) => {
                         let cellNumber = index + 1;
                         return (
-                            <div class={["cell", "cell-" + cellNumber, "cell-" + cell.type].join(" ")}>
+                            <div key={"cell-" + cellNumber} className={["cell", "cell-" + cellNumber, "cell-" + cell.type].join(" ")}>
                                 {this.state.editingMode && this.props.user === this.state.originalUser && (
                                     <CellEditingTools
                                         cell={cell}
@@ -812,7 +811,7 @@ export default class Altar extends Component {
                 >
                     {journalPosts.map(post => {
                         return (
-                            <article className="post">
+                            <article className="post" key={post._id}>
                                 <header>
                                     <h2>{post.title}</h2>
                                 </header>
@@ -831,7 +830,7 @@ export default class Altar extends Component {
                 >
                     {spellbookPosts.map(post => {
                         return (
-                            <article className="post">
+                            <article className="post" key={post._id}>
                                 <header>
                                     <h2>{post.title}</h2>
                                 </header>
@@ -850,7 +849,7 @@ export default class Altar extends Component {
                 >
                     {lorePosts.map(post => {
                         return (
-                            <article className="post">
+                            <article className="post" key={post._id}>
                                 <header>
                                     <h2>{post.title}</h2>
                                 </header>

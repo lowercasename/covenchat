@@ -15,8 +15,8 @@ function slugify(string) {
     .replace(/\s+/g, '-') // Replace spaces with -
     .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
     .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/[^\w-]+/g, '') // Remove all non-word characters
+    .replace(/--+/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
 }
@@ -324,7 +324,7 @@ class EditRoomControls extends Component {
     handleDelete = (i) => {
         // Can't delete yourself
         const roomAdmins = this.state.roomAdmins.slice(0);
-        if (roomAdmins[i].name != this.props.user.username) {
+        if (roomAdmins[i].name !== this.props.user.username) {
             roomAdmins.splice(i, 1);
             this.setState({ roomAdmins });
         }
@@ -393,7 +393,7 @@ class EditRoomControls extends Component {
         }
     }
     render() {
-        var isAdministrator = (this.props.currentRoomMembers.some(m => m.user.username === this.props.user.username && m.role === "administrator"));
+        // var isAdministrator = (this.props.currentRoomMembers.some(m => m.user.username === this.props.user.username && m.role === "administrator"));
         return (
             <>
                 <button

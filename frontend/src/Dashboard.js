@@ -66,6 +66,70 @@ class Dashboard extends Component {
             });
         }
 
+        function urlBase64ToUint8Array(base64String) {
+          const padding = '='.repeat((4 - base64String.length % 4) % 4);
+          const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+
+          for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        }
+
+        navigator.serviceWorker.register('webpush-service-worker.js');
+
+        navigator.serviceWorker.ready
+        .then((registration) => {
+
+          return registration.pushManager.getSubscription()
+          .then(async (subscription) => {
+
+            if (subscription) {
+                console.log("Haz subscription")
+              return subscription;
+            }
+
+            const response = await fetch('/api/webpush/get-key');
+            const vapidPublicKey = await response.text();
+
+            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+            return registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: convertedVapidKey
+            });
+          });
+      }).then((subscription) => {
+          fetch('/api/webpush/register', {
+            method: 'post',
+            headers: {
+              'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                userID: this.state.user._id,
+                subscription: subscription
+            }),
+          });
+
+          fetch('/api/webpush/send', {
+            method: 'post',
+            headers: {
+              'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                subscription: subscription,
+                userID: this.state.user._id,
+                payload: "You have successfully subscribed to notifications!"
+            }),
+          });
+
+        });
+
         const NotificationToast = ({ notification, username, closeToast }) => {
             function handleClick(){
                 fetch('/api/link/upsert', {
@@ -313,24 +377,24 @@ class Dashboard extends Component {
     render() {
         return (
             <div className="App">
-                <nav className="sideNav"><i class="fas fa-compass"></i>
-                    <img src="/magic-ball-alt.svg" className="navLogo" />
-                    <div className={["navIcon", (this.state.visibleModule == "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
+                <nav className="sideNav">
+                    <img alt="CovenChat logo" src="/magic-ball-alt.svg" className="navLogo" />
+                    <div className={["navIcon", (this.state.visibleModule === "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
                         <FontAwesomeIcon icon={['far', 'compass']} />
                     </div>
-                    <div className={["navIcon", (this.state.visibleModule == "chat" ? "active" : "")].join(" ")} onClick={() => this.toggleView('chat')}>
+                    <div className={["navIcon", (this.state.visibleModule === "chat" ? "active" : "")].join(" ")} onClick={() => this.toggleView('chat')}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
                     </div>
-                    <div className={["navIcon", (this.state.visibleModule == "altar" ? "active" : "")].join(" ")} onClick={() => this.toggleView('altar')}>
+                    <div className={["navIcon", (this.state.visibleModule === "altar" ? "active" : "")].join(" ")} onClick={() => this.toggleView('altar')}>
                         <span className="hermetica-F032-pentacle" style={{ fontSize: "40px" }} />
                     </div>
-                    <div className={["navIcon", (this.state.visibleModule == "settings" ? "active" : "")].join(" ")} onClick={() => this.toggleView('settings')}>
+                    <div className={["navIcon", (this.state.visibleModule === "settings" ? "active" : "")].join(" ")} onClick={() => this.toggleView('settings')}>
                         <FontAwesomeIcon icon="cog" />
                     </div>
                 </nav>
                 <main className="content">
                     <div id="loader" style={{display: (this.state.visibleModule === "loader" ? "flex" : "none")}}>
-                        <div class="lds-dual-ring"></div>
+                        <div className="lds-dual-ring"></div>
                     </div>
                     <Map
                         ref="map"

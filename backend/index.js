@@ -19,7 +19,6 @@ app.use(cookieParser());
 
 app.use(cors());
 
-
 // DATABASE
 const configDatabase = require('./database.js');
 mongoose.connect(configDatabase.url, {useNewUrlParser: true, useUnifiedTopology: true});

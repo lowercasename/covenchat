@@ -28,6 +28,49 @@ const pusher = new Pusher({
 	useTLS: true
 });
 
+// NOTIFICATIONS API
+const webpush = require("web-push");
+
+webpush.setVapidDetails(
+  "mailto:support@coven.chat",
+  process.env.VAPID_PUBLIC,
+  process.env.VAPID_SECRET
+)
+
+router.get('/api/webpush/get-key', function(req, res) {
+	res.send(process.env.VAPID_PUBLIC);
+})
+
+router.post('/api/webpush/register', function(req, res) {
+	User.update({_id: req.body.userID}, {webpushSubscription: JSON.stringify(req.body.subscription)})
+	.then(response => {
+		console.log(response);
+		res.status(201);
+	})
+})
+
+router.post('/api/webpush/send', function(req, res) {
+	console.log(req.body.subscription);
+	User.findById(req.body.userID)
+	.then(user => {
+		if (user.webpushSubscription) {
+			let subscription = req.body.subscription || JSON.parse(user.webpushSubscription);
+			webpush.sendNotification(subscription, req.body.payload)
+			  .then(function() {
+			    res.sendStatus(201);
+			  })
+			  .catch(function(error) {
+			    console.log(error);
+			    res.sendStatus(500);
+			  });
+		} else {
+			console.log("No subscription")
+			res.status(500)
+		}
+	})
+});
+
+
 router.post('/api/user/authenticate', function(req, res) {
 	const { username, password } = req.body;
 	User.findOne({ username }, function(err, user) {

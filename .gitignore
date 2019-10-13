@@ -4,6 +4,7 @@
 
 backend/database.js
 uploads/*
+.DS_Store
 
 ### Node ###
 # Logs

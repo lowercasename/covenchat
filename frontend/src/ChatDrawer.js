@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 import { Tooltip } from 'react-tippy';
@@ -79,11 +79,11 @@ class MessageList extends Component {
                 var dateObject = new Date(d1);
                 if (isToday(dateObject)) {
                     return (
-                        <li className="dateMessage"><span>Today</span></li>
+                        <li className="dateMessage" key={d1}><span>Today</span></li>
                     )
                 } else {
                     return (
-                        <li className="dateMessage">
+                        <li className="dateMessage" key={d1}>
                             <span>
                                 {dateObject.getDate() + " " + dateObject.toLocaleString('default', { month: 'long' }) + " " + dateObject.getFullYear()}
                             </span>
@@ -102,7 +102,7 @@ class MessageList extends Component {
                         let lastAuthor = arr[i-1] ? arr[i-1].user.username : false;
                         let lastType = arr[i-1] ? arr[i-1].type : false;
                         return (
-                            <>
+                            <Fragment key={message._id}>
                                 {dayMessage(message.timestamp, lastTimestamp)}
                                 <li key={message._id} className="messageContainer" id={message._id}>
                                     <div key={message._id} className={message.type}>
@@ -123,6 +123,7 @@ class MessageList extends Component {
                                                 {message.tarot.map((card, index) => {
                                                     return (
                                                         <Tooltip
+                                                            key={message._id + "_image_" + index}
                                                             title={"<strong>" + card.name + "</strong><br><hr>" + (card.keywords ? card.keywords : "")}
                                                             position="bottom"
                                                             trigger="mouseenter"
@@ -144,9 +145,10 @@ class MessageList extends Component {
                                         )}
                                         { message.type === "runes" && (
                                             <div className="spread">
-                                                {message.runes.map(rune => {
+                                                {message.runes.map((rune, index) => {
                                                     return (
                                                         <Tooltip
+                                                            key={message._id + "_image_" + index}
                                                             title={"<strong>" + rune.name + "</strong><br><hr>" + (rune.meaning ? rune.meaning : "")}
                                                             position="bottom"
                                                             trigger="mouseenter"
@@ -166,7 +168,7 @@ class MessageList extends Component {
                                         )}
                                     </div>
                                 </li>
-                            </>
+                            </Fragment>
                         )
                     })}
                 </ul>
@@ -210,6 +212,7 @@ class RoomList extends Component {
                         {this.props.joinedRooms.map(room => {
                             return (
                                 <Tooltip
+                                    key={room._id}
                                     title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + (room.public ? "Public" : "Private") + " Coven, " + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
                                     position="right"
                                     trigger="mouseenter"
@@ -222,12 +225,11 @@ class RoomList extends Component {
                                     }}}
                                 >
                                     <li
-                                        key={room._id}
                                         className={(room.slug === this.props.currentRoom.slug ? "active" : "")}
                                         onClick={() => {this.props.switchRoom(room.slug)}}
                                     >
                                         {room.name}
-                                        {room.slug != this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
+                                        {room.slug !== this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
                                     </li>
                                 </Tooltip>
                             )
@@ -275,13 +277,13 @@ class RoomList extends Component {
                                     onClick={() => {this.props.switchRoom(room.slug)}}
                                 >
                                     <span><UserFlair user={otherUser.user} />{otherUser.user.username}</span>
-                                    {room.slug != this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
+                                    {room.slug !== this.props.currentRoom.slug && unreadIndicator(room.unreadMessages)}
                                 </li>
                             )
                         })}
                     </ul>
                 </div>
-                <nav class="roomControls">
+                <nav className="roomControls">
                     {this.props.children}
                 </nav>
             </nav>
@@ -623,7 +625,7 @@ class ChatDrawer extends Component {
             });
             generalChannel.bind('visitor-left-room', data => {
                 if (this.state.currentRoom.slug === data.room.slug) {
-                    this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() != data.user._id.toString())})
+                    this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() !== data.user._id.toString())})
                 }
             });
             generalChannel.bind('user-joined-room', data => {
@@ -637,14 +639,14 @@ class ChatDrawer extends Component {
                         })
                     }
                     // Remove member from visitors array
-                    var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username != data.user.username);
+                    var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username !== data.user.username);
                     this.setState({
                         currentRoomVisitors: currentRoomVisitors
                     })
                 }
             });
             generalChannel.bind('user-left-room', data => {
-                if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public == true) {
+                if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public === true) {
                     // Add user to visitors array
                     if (!this.state.currentRoomVisitors.some(v => v.username === data.user.username)) {
                         var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
@@ -656,7 +658,7 @@ class ChatDrawer extends Component {
                 }
                 if (this.state.currentRoom.slug === data.room.slug) {
                     // Remove user from members array
-                    var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() != data.user._id.toString());
+                    var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() !== data.user._id.toString());
                     this.setState({
                         currentRoomMembers: currentRoomMembers
                     })
@@ -748,7 +750,7 @@ class ChatDrawer extends Component {
     handleSubmit(e) {
         e.preventDefault()
         var messageContent = this.state.message.trim();
-        if (messageContent != '' && messageContent != '/me') {
+        if (messageContent !== '' && messageContent !== '/me') {
             this.sendMessage(messageContent)
             this.setState({
                 message: ''
@@ -757,10 +759,10 @@ class ChatDrawer extends Component {
     }
 
     onEnterPress = (e) => {
-        if(e.keyCode == 13 && e.shiftKey == false) {
+        if(e.keyCode === 13 && e.shiftKey === false) {
             e.preventDefault();
             var messageContent = this.state.message.trim();
-            if (messageContent != '' && messageContent != '/me') {
+            if (messageContent !== '' && messageContent !== '/me') {
                 this.sendMessage(messageContent)
                 this.setState({
                     message: ''
@@ -840,7 +842,7 @@ class ChatDrawer extends Component {
         })
         .then(res => {
             if (res.status === 200) {
-                if (this.state.currentRoom.public == false) {
+                if (this.state.currentRoom.public === false) {
                     this.reloadRoom('global-coven');
                 } else {
                     this.reloadRoom(room);
@@ -976,7 +978,7 @@ class ChatDrawer extends Component {
                 </RoomList>
                 <section className="chatInterface">
                     {this.state.currentRoom.welcomeMessage && this.state.showWelcomeMessage &&
-                        <aside class="welcomeMessage">
+                        <aside className="welcomeMessage">
                             <span style={{flex:1}}>{this.state.currentRoom.welcomeMessage}</span>
                             <button className="welcomeMessageClose" onClick={this.hideWelcomeMessage}>
                                 <FontAwesomeIcon icon="times" />

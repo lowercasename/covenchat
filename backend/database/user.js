@@ -25,6 +25,7 @@ var userSchema = new mongoose.Schema({
     lastRoom: { type: String, default: 'global-coven' }
   },
   notifications: [notificationSchema],
+  webpushSubscription: String,
   settings: {
     status: { type: String, default: 'available' },
     flair: String,

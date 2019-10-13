@@ -9,6 +9,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.11.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@svgr/webpack": "^4.3.3",
+    "cra-append-sw": "^2.6.1",
     "directory-tree": "^2.2.4",
     "immutable": "^4.0.0-rc.12",
     "js-cookie": "^2.2.1",
@@ -37,7 +38,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && cra-append-sw --skip-compile ./public/webpush-service-worker.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

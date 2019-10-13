@@ -60,7 +60,7 @@ class FlairSelector extends Component {
             <div id="flairSelector">
                 {this.icons.map(icon => {
                     return (
-                        <label htmlFor={icon}>
+                        <label key={icon} htmlFor={icon}>
                             <input
                                 onChange={this.props.handleSettingsInputChange}
                                 type="radio"
@@ -72,7 +72,7 @@ class FlairSelector extends Component {
                                 className="icon"
                                 src={icon}/>
                         </label>
-                        
+
                     )
                 })}
             </div>
@@ -155,7 +155,7 @@ export default class Settings extends Component {
                 <h2>Status bar modules</h2>
                 {Object.keys(modules).map(key => {
                     return (
-                        <label htmlFor={modules[key].slug}>
+                        <label key={modules[key].slug} htmlFor={modules[key].slug}>
                             <input
                                 id={modules[key].slug}
                                 type="checkbox"
