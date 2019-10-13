@@ -486,7 +486,7 @@ class ChatDrawer extends Component {
                     showWelcomeMessage: payload.showWelcomeMessage
                 });
                 scrollToBottom();
-                if (this.messageInput) {
+                if (this.messageInput.current) {
                     this.messageInput.current.focus();
                 }
         });

@@ -82,12 +82,6 @@ class FlairSelector extends Component {
 }
 
 export default class Settings extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-        }
-    }
-
     render() {
         let style = {
             display: this.props.isVisible ? 'block' : 'none'
@@ -107,6 +101,16 @@ export default class Settings extends Component {
                     /> Share my current location on the map
                 </label>
                 <small>Your location is shown on the map for one hour after you close the app, and is then hidden until you next use it.</small>
+                <h2>Notifications</h2>
+                <label htmlFor="allowNotifications">
+                    <input
+                        id="allowNotifications"
+                        type="checkbox"
+                        name="allowNotifications"
+                        checked={this.props.user.settings.allowNotifications}
+                        onChange={this.props.handleSettingsInputChange}
+                    /> Receive push notifications
+                </label>
                 <h2>Chat</h2>
                 <p><strong>Status</strong></p>
                 <div id="statusSelector">

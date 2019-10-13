@@ -50,24 +50,27 @@ router.post('/api/webpush/register', function(req, res) {
 })
 
 function sendPush(userID, payload) {
-	console.log("Doin a notify")
-	console.log(userID)
-	console.log(payload)
 	User.findById(userID)
 	.then(user => {
-		if (user.webpushSubscription) {
-			let subscription = JSON.parse(user.webpushSubscription);
-			webpush.sendNotification(subscription, payload)
-			  .then(function() {
-			    return {result: "success"};
-			  })
-			  .catch(function(error) {
-				  return {result: "error", error: error};
-			  });
+		if (user.settings.allowNotifications) {
+			if (user.webpushSubscription) {
+				let subscription = JSON.parse(user.webpushSubscription);
+				webpush.sendNotification(subscription, payload)
+				  .then(function() {
+				    return {result: "success"};
+				  })
+				  .catch(function(error) {
+					  return {result: "error", error: error};
+				  });
+			} else {
+				console.log("No subscription")
+				return {result: "error", error: "No subscription"};
+			}
 		} else {
-			console.log("No subscription")
+			console.log("Not allowed to send notifications to user");
 			return {result: "error", error: "No subscription"};
 		}
+
 	})
 }
 
@@ -79,6 +82,19 @@ router.post('/api/webpush/send', async function(req, res) {
 		console.log(error);
 		res.sendStatus(500);
 	}
+});
+
+router.post('/api/permission/update/:permission', authorizeUser, async function(req, res) {
+	let permission = req.params.permission === "webpush" ? "webpushPermissionRequested" : "geolocationPermissionRequested";
+	User.update({_id: req.user._id}, {[`${permission}`]: true})
+	.then(response => {
+		if (response.ok) {
+			res.sendStatus(200);
+		} else {
+			console.log(response.error);
+			res.sendStatus(500);
+		}
+	})
 });
 
 

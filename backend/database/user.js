@@ -26,10 +26,13 @@ var userSchema = new mongoose.Schema({
   },
   notifications: [notificationSchema],
   webpushSubscription: String,
+  webpushPermissionRequested: {type: Boolean, default: false},
+  geolocationPermissionRequested: {type: Boolean, default: false},
   settings: {
     status: { type: String, default: 'available' },
     flair: String,
     shareLocation: {type: Boolean, default: true},
+    allowNotifications: {type: Boolean, default: true},
     statusBarModules: {
         moonPhase: {
           slug: {type: String, default: 'moonPhase'},

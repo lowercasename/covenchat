@@ -19,19 +19,34 @@ library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayi
 
 toast.configure()
 
+const Modal = ({ handleClose, show, children }) => {
+    var showHideClassName = show ? "modal display-block" : "modal display-none";
+
+    return (
+      <div className={showHideClassName}>
+        <section className="modal-main">
+            <button className="modalClose" onClick={handleClose}><FontAwesomeIcon icon="times" /></button>
+            {children}
+        </section>
+      </div>
+    );
+};
+
 class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
             visibleModule: 'loader',
             user: this.props.user,
-            altarUser: this.props.user
+            altarUser: this.props.user,
+            permissionsModalVisible: false,
+            askForWebPushNotifications: false,
+            askForGeolocationNotifications: false
         }
         this.logOut = this.logOut.bind(this);
         this.changeAltarUser = this.changeAltarUser.bind(this);
         this.handleStatusBarUpdate = this.handleStatusBarUpdate.bind(this);
         this.handleSettingsInputChange = this.handleSettingsInputChange.bind(this);
-
     }
 
     componentDidMount() {
@@ -66,6 +81,21 @@ class Dashboard extends Component {
             });
         }
 
+        if (this.props.user.webpushPermissionRequested === false && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            this.setState({permissionsModalVisible: true, askForWebPushNotifications: true})
+            Notification.requestPermission();
+            fetch('/api/permission/update/webpush', { method: 'POST' });
+        };
+        const checkGeolocationPermission = async () => {
+            let geolocationPermission = await navigator.permissions.query({name:'geolocation'}).then(result => {return result.state});
+            console.log(geolocationPermission);
+            if (this.props.user.geolocationPermissionRequested === false && geolocationPermission !== "granted" && geolocationPermission !== "denied") {
+                this.setState({permissionsModalVisible: true, askForGeolocationNotifications: true})
+                fetch('/api/permission/update/geolocation', { method: 'POST' });
+            };
+        }
+        checkGeolocationPermission();
+
         function urlBase64ToUint8Array(base64String) {
           const padding = '='.repeat((4 - base64String.length % 4) % 4);
           const base64 = (base64String + padding)
@@ -90,7 +120,6 @@ class Dashboard extends Component {
           .then(async (subscription) => {
 
             if (subscription) {
-                console.log("Haz subscription")
               return subscription;
             }
 
@@ -361,6 +390,11 @@ class Dashboard extends Component {
             })
     }
 
+    hideModal = () => {
+        this.setState({permissionsModalVisible: false})
+    }
+
+
     render() {
         return (
             <div className="App">
@@ -411,6 +445,21 @@ class Dashboard extends Component {
                         modules={this.state.user.settings.statusBarModules}
                     />
                 </main>
+                <Modal show={this.state.permissionsModalVisible} handleClose={this.hideModal}>
+                    {this.state.askForWebPushNotifications &&
+                        <>
+                            <h2 style={{marginBottom:"1rem"}}>Location</h2>
+                            <p style={{marginBottom:"1rem"}}>Allow CovenChat to access your current location in the popup above to show your marker on the map.</p>
+                        </>
+                    }
+                    {this.state.askForGeolocationNotifications &&
+                        <>
+                            <h2 style={{marginBottom:"1rem"}}>Notifications</h2>
+                            <p style={{marginBottom:"1rem"}}>Allow CovenChat to send you notifications in the popup above to receive notifications when the app isn't open.</p>
+                        </>
+                    }
+                    <p>You can change these permissions on your Settings page.</p>
+                </Modal>
             </div>
         );
     }

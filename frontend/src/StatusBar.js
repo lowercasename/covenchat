@@ -192,19 +192,16 @@ class StatusBar extends Component {
                     <
                     span className = "statusItem" >
                     <
-                    span className = "hermetica-F006-wheel_of_the_year" / > & nbsp; {
+                    span className = "hermetica-F006-wheel_of_the_year" / >&nbsp;{
                     this.getFestival(today)
                 } <
                 /span>
             } {
                 this.props.modules.astrologicalSeason.set &&
-                    <
-                    span className = "statusItem" > {
+                    <span className = "statusItem" > {
                         this.getZodiacSign(today)
-                    } & nbsp;
-                season
-                    <
-                    /span>
+                    }&nbsp;season
+                    </span>
             } {
                 this.props.modules.mercuryRetrograde.set &&
                     <
