@@ -11,6 +11,7 @@
     "@svgr/webpack": "^4.3.3",
     "cra-append-sw": "^2.6.1",
     "directory-tree": "^2.2.4",
+    "emoji-mart": "^2.11.1",
     "immutable": "^4.0.0-rc.12",
     "js-cookie": "^2.2.1",
     "mapbox-gl": "^1.4.0",

@@ -49,25 +49,36 @@ router.post('/api/webpush/register', function(req, res) {
 	})
 })
 
-router.post('/api/webpush/send', function(req, res) {
-	console.log(req.body.subscription);
-	User.findById(req.body.userID)
+function sendPush(userID, payload) {
+	console.log("Doin a notify")
+	console.log(userID)
+	console.log(payload)
+	User.findById(userID)
 	.then(user => {
 		if (user.webpushSubscription) {
-			let subscription = req.body.subscription || JSON.parse(user.webpushSubscription);
-			webpush.sendNotification(subscription, req.body.payload)
+			let subscription = JSON.parse(user.webpushSubscription);
+			webpush.sendNotification(subscription, payload)
 			  .then(function() {
-			    res.sendStatus(201);
+			    return {result: "success"};
 			  })
 			  .catch(function(error) {
-			    console.log(error);
-			    res.sendStatus(500);
+				  return {result: "error", error: error};
 			  });
 		} else {
 			console.log("No subscription")
-			res.status(500)
+			return {result: "error", error: "No subscription"};
 		}
 	})
+}
+
+router.post('/api/webpush/send', async function(req, res) {
+	let push = await sendPush(req.body.userID, req.body.payload)
+	if (push.result && push.result === "success") {
+		res.sendStatus(201);
+	} else {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 
@@ -333,6 +344,7 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 		content: parsedMessage.content,
 		tarot: parsedMessage.tarot,
 		runes: parsedMessage.runes,
+		mentions: parsedMessage.mentions,
 		readBy: [req.user._id]
 	});
 	message.save()
@@ -341,6 +353,18 @@ router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
 		.populate('user')
 		.populate('room')
 		.then(retrievedMessage => {
+			if (parsedMessage.mentions) {
+				parsedMessage.mentions.forEach(async (mention) => {
+					let user = await User.find({username: mention})
+					let joinedRooms = await Room.find({members: {$elemMatch: {user:user[0]._id}}, hiddenBy: {$ne: user[0]._id}})
+					if (user && joinedRooms.some(r => r.slug === retrievedMessage.room.slug)) {
+						let roomName = retrievedMessage.room.name || "a private message";
+						sendPush(user[0]._id, req.user.username + " has mentioned you in " + roomName + ".");
+					} else {
+						console.log("No such user:", mention)
+					}
+				})
+			}
 			pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
 		})
 	})

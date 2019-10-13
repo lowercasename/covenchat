@@ -6,10 +6,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Pusher from 'pusher-js';
 import './Map.css';
 
-const ID = function () {
-  return '_' + Math.random().toString(36).substr(2, 9);
-};
-
 export default class Map extends Component {
     constructor(props) {
         super(props);
@@ -27,10 +23,6 @@ export default class Map extends Component {
     }
 
     componentDidMount() {
-
-        const userMarkers = {};
-
-        const haveNotified = [];
 
         mapboxgl.accessToken = 'pk.eyJ1IjoicmFwaGFlbGthYm8iLCJhIjoiY2swcGhlbjVuMDBseDNibDQ5b25zbHNpcyJ9.ezfbQZXwGDYA6kAGez3v3A';
 
@@ -52,7 +44,7 @@ export default class Map extends Component {
             let html = (
                 <>
                     <h2>
-                        <img src={user.settings.flair} className="userFlair" /> {user.username}
+                        <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> {user.username}
                     </h2>
                     {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
                         <div>
@@ -116,8 +108,6 @@ export default class Map extends Component {
                     var geolocationsChannel = pusher.subscribe('geolocations');
 
                     var positionMarkerRendered = false;
-                    var positionReady = false;
-                    var pusherSubscribed = true;
 
                     const geolocate = new mapboxgl.GeolocateControl({
                         positionOptions: {
@@ -140,7 +130,7 @@ export default class Map extends Component {
                     geolocate.on('geolocate', (e) => {
                         var lng = e.coords.longitude;
                         var lat = e.coords.latitude
-                        this.state.userPosition = [lng, lat];
+                        this.setState({userPosition: [lng, lat]});
 
                         if (positionMarkerRendered === false) {
                             let userMarkers = [...this.state.userMarkers, addMarker(lng, lat, this.props.user)];
@@ -247,7 +237,7 @@ export default class Map extends Component {
         // Check if both markers exist on the map.
         // If this function is being called at map boot, the user's own marker won't yet exist,
         // so markers for that user need to be stored and called again when they are geolocated
-        if (link.fromUsername === this.props.user.username || link.toUsername === this.props.user.username && !this.state.userPosition) {
+        if ((link.fromUsername === this.props.user.username) || (link.toUsername === this.props.user.username && !this.state.userPosition)) {
             console.log("Saving link for later")
             this.setState({linksForUser: [...this.state.linksForUser, link]});
         }

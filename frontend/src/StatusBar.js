@@ -1,9 +1,13 @@
-import React, { Component } from 'react';
+import React, {
+    Component
+} from 'react';
 
 class StatusBar extends Component {
     constructor() {
         super();
-        this.state = { mercuryRetrograde: false }
+        this.state = {
+            mercuryRetrograde: false
+        }
     }
 
     componentDidMount() {
@@ -11,7 +15,9 @@ class StatusBar extends Component {
             .then(res => res.json())
             .then(result => {
                 console.log(result);
-                this.setState({ mercuryRetrograde: result.is_retrograde })
+                this.setState({
+                    mercuryRetrograde: result.is_retrograde
+                })
             });
     }
 
@@ -19,7 +25,7 @@ class StatusBar extends Component {
         // Original Snippet: https://gist.github.com/endel/dfe6bb2fbe679781948c
 
         var Moon = {
-            phase: function (year, month, day) {
+            phase: function(year, month, day) {
                 let c, e, jd, b = 0;
 
                 if (month < 3) {
@@ -40,29 +46,23 @@ class StatusBar extends Component {
 
                 switch (b) {
                     case 0:
-                        return <span><span className="hermetica-B027-moon_phase_new" /> New Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B027-moon_phase_new" / > New Moon < /span>;
                     case 1:
-                        return <span><span className="hermetica-B020-moon_phase_waxing_crescent" /> Waxing Crescent Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B020-moon_phase_waxing_crescent" / > Waxing Crescent Moon < /span>;
                     case 2:
-                        return <span><span className="hermetica-B021-moon_phase_waxing_half" /> First Quarter Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B021-moon_phase_waxing_half" / > First Quarter Moon < /span>;
                     case 3:
-                        return <span><span className="hermetica-B022-moon_phase_waxing_gibbous" /> Waxing Gibbous Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B022-moon_phase_waxing_gibbous" / > Waxing Gibbous Moon < /span>;
                     case 4:
-                        return <span><span className="hermetica-B023-moon_phase_full" /> Full Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B023-moon_phase_full" / > Full Moon < /span>;
                     case 5:
-                        return <span><span className="hermetica-B024-moon_phase_waning_gibbous" /> Waning Gibbous Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B024-moon_phase_waning_gibbous" / > Waning Gibbous Moon < /span>;
                     case 6:
-                        return <span><span className="hermetica-B025-moon_phase_waning_half" /> Last Quarter Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B025-moon_phase_waning_half" / > Last Quarter Moon < /span>;
                     case 7:
-                        return <span><span className="hermetica-B026-moon_phase_waning_crescent" /> Waning Crescent Moon</span>;
-                        break;
+                        return <span > < span className = "hermetica-B026-moon_phase_waning_crescent" / > Waning Crescent Moon < /span>;
+                    default:
+                        return false;
                 }
             }
         };
@@ -73,18 +73,18 @@ class StatusBar extends Component {
     getZodiacSign(today) {
 
         var zodiacSigns = {
-            'capricorn': <span><span className="hermetica-A009-capricorn" /> Capricorn </span>,
-            'aquarius': <span><span className="hermetica-A010-aquarius" /> Aquarius </span>,
-            'pisces': <span><span className="hermetica-A011-pisces" /> Pisces </span>,
-            'aries': <span><span className="hermetica-A000-aries" /> Aries </span>,
-            'taurus': <span><span className="hermetica-A001-taurus" /> Taurus </span>,
-            'gemini': <span><span className="hermetica-A002-gemini" /> Gemini </span>,
-            'cancer': <span><span className="hermetica-A003-cancer" /> Cancer </span>,
-            'leo': <span><span className="hermetica-A004-leo" /> Leo </span>,
-            'virgo': <span><span className="hermetica-A005-virgo" /> Virgo </span>,
-            'libra': <span><span className="hermetica-A006-libra" /> Libra </span>,
-            'scorpio': <span><span className="hermetica-A007-scorpio" /> Scorpio </span>,
-            'sagittarius': <span><span className="hermetica-A008-sagittarius" /> Saggitarius </span>,
+            'capricorn': < span > < span className = "hermetica-A009-capricorn" / > Capricorn < /span>,
+            'aquarius': < span > < span className = "hermetica-A010-aquarius" / > Aquarius < /span>,
+            'pisces': < span > < span className = "hermetica-A011-pisces" / > Pisces < /span>,
+            'aries': < span > < span className = "hermetica-A000-aries" / > Aries < /span>,
+            'taurus': < span > < span className = "hermetica-A001-taurus" / > Taurus < /span>,
+            'gemini': < span > < span className = "hermetica-A002-gemini" / > Gemini < /span>,
+            'cancer': < span > < span className = "hermetica-A003-cancer" / > Cancer < /span>,
+            'leo': < span > < span className = "hermetica-A004-leo" / > Leo < /span>,
+            'virgo': < span > < span className = "hermetica-A005-virgo" / > Virgo < /span>,
+            'libra': < span > < span className = "hermetica-A006-libra" / > Libra < /span>,
+            'scorpio': < span > < span className = "hermetica-A007-scorpio" / > Scorpio < /span>,
+            'sagittarius': < span > < span className = "hermetica-A008-sagittarius" / > Saggitarius < /span>,
         }
 
         var month = today.getMonth() + 1;
@@ -118,28 +118,55 @@ class StatusBar extends Component {
     }
 
     getFestival(today) {
-        var festivals = [
-            { name: 'Imbolc', date: new Date(today.getFullYear(), 1, 2) },
-            { name: 'Ostara', date: new Date(today.getFullYear(), 2, 21) },
-            { name: 'Beltane', date: new Date(today.getFullYear(), 4, 1) },
-            { name: 'Litha', date: new Date(today.getFullYear(), 5, 21) },
-            { name: 'Lughnasadh', date: new Date(today.getFullYear(), 7, 1) },
-            { name: 'Mabon', date: new Date(today.getFullYear(), 8, 21) },
-            { name: 'Samhain', date: new Date(today.getFullYear(), 9, 31) },
-            { name: 'Yule', date: new Date(today.getFullYear(), 11, 21) }
+        var festivals = [{
+                name: 'Imbolc',
+                date: new Date(today.getFullYear(), 1, 2)
+            },
+            {
+                name: 'Ostara',
+                date: new Date(today.getFullYear(), 2, 21)
+            },
+            {
+                name: 'Beltane',
+                date: new Date(today.getFullYear(), 4, 1)
+            },
+            {
+                name: 'Litha',
+                date: new Date(today.getFullYear(), 5, 21)
+            },
+            {
+                name: 'Lughnasadh',
+                date: new Date(today.getFullYear(), 7, 1)
+            },
+            {
+                name: 'Mabon',
+                date: new Date(today.getFullYear(), 8, 21)
+            },
+            {
+                name: 'Samhain',
+                date: new Date(today.getFullYear(), 9, 31)
+            },
+            {
+                name: 'Yule',
+                date: new Date(today.getFullYear(), 11, 21)
+            }
         ];
 
         var festivalIsToday = festivals.find(e => e.date.getMonth() === today.getMonth() && e.date.getDate() === today.getDate());
         let message;
         if (festivalIsToday) {
-            message = "Happy " + festivalIsToday.name + "! " + " (" + festivalIsToday.date.getDate() + " " + festivalIsToday.date.toLocaleString('default', { month: 'long' }) + ")";
+            message = "Happy " + festivalIsToday.name + "! (" + festivalIsToday.date.getDate() + " " + festivalIsToday.date.toLocaleString('default', {
+                month: 'long'
+            }) + ")";
         } else {
-            var nextFestival = festivals.filter(function (f) {
+            var nextFestival = festivals.filter(function(f) {
                 return f.date - today > 0;
             }).slice(0, 1);
             var one_day = 1000 * 60 * 60 * 24;
             var daysUntil = Math.ceil((nextFestival[0].date.getTime() - today.getTime()) / (one_day));
-            message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', { month: 'long' }) + ")";
+            message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', {
+                month: 'long'
+            }) + ")";
         }
         return message;
     }
@@ -148,33 +175,45 @@ class StatusBar extends Component {
         var today = new Date();
         let mercuryMessage;
         if (this.state.mercuryRetrograde === false) {
-            mercuryMessage = <span><span className='hermetica-B002-mercury' /> Mercury not retrograde</span>;
+            mercuryMessage = < span > < span className = 'hermetica-B002-mercury' / > Mercury not retrograde < /span>;
         } else {
-            mercuryMessage = <span><span className='hermetica-B002-mercury' /> Mercury is retrograde</span>;
+            mercuryMessage = < span > < span className = 'hermetica-B002-mercury' / > Mercury is retrograde < /span>;
         }
-        return (
-            <aside className="statusBar">
-                {this.props.modules.moonPhase.set &&
-                    <span className="statusItem">
-                        {this.getMoonPhase(today)}
-                    </span>
-                }
-                {this.props.modules.wheelOfTheYear.set &&
-                    <span className="statusItem">
-                        <span className="hermetica-F006-wheel_of_the_year" />&nbsp;{this.getFestival(today)}
-                    </span>
-                }
-                {this.props.modules.astrologicalSeason.set &&
-                    <span className="statusItem">
-                        {this.getZodiacSign(today)}&nbsp;season
-                    </span>
-                }
-                {this.props.modules.mercuryRetrograde.set &&
-                    <span className="statusItem">
-                        {mercuryMessage}
-                    </span>
-                }
-            </aside>
+        return ( <
+            aside className = "statusBar" > {
+                this.props.modules.moonPhase.set &&
+                <
+                span className = "statusItem" > {
+                    this.getMoonPhase(today)
+                } <
+                /span>
+            } {
+                this.props.modules.wheelOfTheYear.set &&
+                    <
+                    span className = "statusItem" >
+                    <
+                    span className = "hermetica-F006-wheel_of_the_year" / > & nbsp; {
+                    this.getFestival(today)
+                } <
+                /span>
+            } {
+                this.props.modules.astrologicalSeason.set &&
+                    <
+                    span className = "statusItem" > {
+                        this.getZodiacSign(today)
+                    } & nbsp;
+                season
+                    <
+                    /span>
+            } {
+                this.props.modules.mercuryRetrograde.set &&
+                    <
+                    span className = "statusItem" > {
+                        mercuryMessage
+                    } <
+                    /span>
+            } <
+            /aside>
         );
     }
 }

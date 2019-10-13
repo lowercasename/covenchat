@@ -22,6 +22,7 @@ var messageSchema = new mongoose.Schema({
     content: String,
     tarot: [tarotSchema],
     runes: [runeSchema],
+    mentions: [String],
     readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 

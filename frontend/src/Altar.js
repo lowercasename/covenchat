@@ -163,7 +163,7 @@ class ColorPickerButton extends Component {
             <Tooltip
                 trigger="click"
                 interactive
-                theme="colorPicker"
+                theme="light"
                 arrow="true"
                 html={(
                     <ChromePicker
@@ -184,10 +184,6 @@ class ColorPickerButton extends Component {
 }
 
 class CellEditingTools extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         let typeIcon = () => {
             switch (this.props.cell.type) {
@@ -196,7 +192,9 @@ class CellEditingTools extends Component {
                 case "image":
                     return <FontAwesomeIcon icon="shapes" style={{ marginRight: '25px' }} />;
                 case "text":
-                    return <FontAwesomeIcon icon="paragraph" style={{ marginRight: '25px' }} />
+                    return <FontAwesomeIcon icon="paragraph" style={{ marginRight: '25px' }} />;
+                default:
+                    return <EmptyIcon style={{ marginRight: '25px' }} />;
             }
         }
         return (
@@ -482,7 +480,7 @@ export default class Altar extends Component {
             .then(res => res.json())
             .then(res => {
                 let cells = this.state.cells;
-                cells.map((cell, index) => {
+                cells.forEach((cell, index) => {
                     if (index === res.index) {
                         cell.contents = res.value;
                     }
@@ -504,7 +502,7 @@ export default class Altar extends Component {
             .then(res => {
                 console.log(res);
                 let cells = this.state.cells;
-                cells.map((cell, index) => {
+                cells.forEach((cell, index) => {
                     if (index === res.index) {
                         cell.type = res.type;
                         cell.contents = '';
@@ -530,7 +528,7 @@ export default class Altar extends Component {
             .then(res => {
                 console.log(res);
                 let cells = this.state.cells;
-                cells.map((cell, index) => {
+                cells.forEach((cell, index) => {
                     if (index === res.index) {
                         cell.color = res.color;
                     }
@@ -581,6 +579,8 @@ export default class Altar extends Component {
                 case 'lore':
                     this.setState({lorePosts: [...this.state.lorePosts, post]});
                     break;
+                default:
+                    return false;
             }
         } else if (this.state.postMode === 'edit') {
             console.log(post)
@@ -618,6 +618,8 @@ export default class Altar extends Component {
                         }
                     })
                     break;
+                default:
+                    return false;
             }
         }
         this.setState({
@@ -647,10 +649,15 @@ export default class Altar extends Component {
                 switch(post.category) {
                     case 'journal':
                         this.setState({journalPosts: this.state.journalPosts.filter(p => p._id !== post._id)});
+                        break;
                     case 'spellbook':
                         this.setState({spellbookPosts: this.state.spellbookPosts.filter(p => p._id !== post._id)});
+                        break;
                     case 'lore':
                         this.setState({lorePosts: this.state.lorePosts.filter(p => p._id !== post._id)});
+                        break;
+                    default:
+                        return false;
                 }
             })
         }
@@ -678,7 +685,7 @@ export default class Altar extends Component {
                 <nav id="altarNav">
                     <span className="altarUsername">
                         <span>
-                            <img src={this.props.user.settings.flair} className="altarFlair" />&nbsp;{this.props.user.username}
+                            <img src={this.props.user.settings.flair} className="altarFlair" alt={"Flair icon for " + this.props.user.username} />&nbsp;{this.props.user.username}
                         </span>
                         {this.props.user !== this.state.originalUser &&
                             <button
@@ -691,24 +698,27 @@ export default class Altar extends Component {
                     </span>
                     <ul className="altarNavLinks">
                         <li
-                            className={this.state.selectedTab === "altar" ? "selected" : ""}
+                            className={["listHeader",(this.state.selectedTab === "altar" ? "selected" : "")].join(" ")}
                             onClick={() => this.toggleTab("altar")}>
                             Altar
                         </li>
+                        <li className="listHeader">
+                            Grimoire
+                        </li>
                         <li
-                            className={this.state.selectedTab === "journal" ? "selected" : ""}
+                            className={["listSubItem",(this.state.selectedTab === "journal" ? "selected" : "")].join(" ")}
                             onClick={() => this.toggleTab("journal")}>
-                            <span>Journal</span><span className="badge">{journalPosts.length}</span>
+                            <span>Journal</span><span className="badge">{journalPosts.length > 0 && journalPosts.length}</span>
                         </li>
                         <li
-                            className={this.state.selectedTab === "spellbook" ? "selected" : ""}
+                            className={["listSubItem",(this.state.selectedTab === "spellbook" ? "selected" : "")].join(" ")}
                             onClick={() => this.toggleTab("spellbook")}>
-                            <span>Spellbook</span><span className="badge">{spellbookPosts.length}</span>
+                            <span>Spells</span><span className="badge">{spellbookPosts.length > 0 && spellbookPosts.length}</span>
                         </li>
                         <li
-                            className={this.state.selectedTab === "lore" ? "selected" : ""}
+                            className={["listSubItem",(this.state.selectedTab === "lore" ? "selected" : "")].join(" ")}
                             onClick={() => this.toggleTab("lore")}>
-                            <span>Lore</span><span className="badge">{lorePosts.length}</span>
+                            <span>Notes</span><span className="badge">{lorePosts.length > 0 && lorePosts.length}</span>
                         </li>
                     </ul>
                     {this.props.user === this.state.originalUser && this.state.selectedTab === "altar" &&
@@ -716,7 +726,7 @@ export default class Altar extends Component {
                             <Tooltip
                                 trigger="click"
                                 interactive
-                                theme="colorPicker"
+                                theme="light"
                                 arrow="true"
                                 html={(
                                     <ul className="candle-dropdown">

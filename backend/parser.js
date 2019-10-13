@@ -1,6 +1,10 @@
 const express = require('express');
 const tarotCards = require('./data/tarot.json');
 const runes = require('./data/runes.json');
+const linkify = require('linkifyjs');
+const linkifyStr = require('linkifyjs/string');
+require('linkifyjs/plugins/mention')(linkify);
+
 
 function drawTarot(number = 1) {
     let tarotArray = [];
@@ -34,7 +38,7 @@ function castRunes(number = 1) {
 
 function parseMessage(text) {
     text = text.trim();
-    let messageType, messageContent, messageTarot, messageRunes;
+    let messageType, messageContent, messageTarot, messageRunes, mentions = [];
     let messageIsValid = true;
     if (text.startsWith('/me ')) {
         messageType = 'action';
@@ -56,14 +60,22 @@ function parseMessage(text) {
         messageContent = 'casts ' + (number > 1 ? number + ' runes' : 'a rune') + '.';
     } else {
         messageType = 'message';
-        messageContent = text;
+        messageContent = text.linkify({
+            formatHref: {
+                mention: function (href) {
+                    mentions.push(href.slice(1))
+                    return '/altar' + href;
+                },
+            }
+        });
     }
     var payload = {
         isValid: messageIsValid,
         type: messageType,
         content: messageContent,
         tarot: messageTarot,
-        runes: messageRunes
+        runes: messageRunes,
+        mentions: mentions
     }
     return payload;
 }

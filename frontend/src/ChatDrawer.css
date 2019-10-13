@@ -150,6 +150,7 @@
     padding: 2px 0;
     border-radius: 6px;
     transition: 300ms;
+    margin-bottom: 2px;
 }
 /*.messageList .messageContainer .message,
 .messageList .messageContainer .tarot,
@@ -274,6 +275,16 @@ the previous day's message */
     background: #37204233;
 }
 
+.messageContainer.mentionMessage {
+    background: rgba(255, 247, 0, 0.1);
+}
+
+.messageContainer.mentionMessage:hover {
+    background: rgba(255, 247, 0, 0.15);
+}
+
+
+
 .message .messageContent,
 .action .messageContent,
 .tarot .messageContent,
@@ -289,6 +300,16 @@ the previous day's message */
 .messageList .alert .messageContent,
 .messageList .alert .messageAuthor {
     font-style: italic;
+}
+
+.messageContent a {
+    opacity: .7;
+    color: var(--green);
+    transition: 150ms;
+}
+
+.messageContent a:hover {
+    color: var(--bright-green);
 }
 
 .messageList .alert {

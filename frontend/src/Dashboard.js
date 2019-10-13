@@ -11,11 +11,11 @@ import Pusher from 'pusher-js';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile} from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH)
+library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
 
 toast.configure()
 
@@ -115,19 +115,6 @@ class Dashboard extends Component {
                 subscription: subscription
             }),
           });
-
-          fetch('/api/webpush/send', {
-            method: 'post',
-            headers: {
-              'Content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                subscription: subscription,
-                userID: this.state.user._id,
-                payload: "You have successfully subscribed to notifications!"
-            }),
-          });
-
         });
 
         const NotificationToast = ({ notification, username, closeToast }) => {

@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch, NavLink } from 'react-router-dom';
-
 
 export default class Login extends Component {
     constructor(props) {

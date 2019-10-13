@@ -8,6 +8,8 @@ import Pusher from 'pusher-js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import 'emoji-mart/css/emoji-mart.css'
+import { Picker } from 'emoji-mart'
 import './ChatDrawer.css';
 
 import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
@@ -24,7 +26,7 @@ class UserFlair extends Component {
     }
     render() {
         return (
-            <span className="userFlair"><img src={this.props.user.settings.flair} />&nbsp;</span>
+            <span className="userFlair"><img src={this.props.user.settings.flair} alt={"Flair icon for " + this.props.user.username} />&nbsp;</span>
         )
     }
 }
@@ -36,7 +38,6 @@ class MessageList extends Component {
     }
 
     onScroll = () => {
-        let timesFetched = 0;
         let messages = document.querySelector('#chatWindow .simplebar-content-wrapper');
         let scrollTop = messages.scrollTop;
         console.log(scrollTop)
@@ -101,10 +102,11 @@ class MessageList extends Component {
                         let lastTimestamp = arr[i-1] ? arr[i-1].timestamp : false;
                         let lastAuthor = arr[i-1] ? arr[i-1].user.username : false;
                         let lastType = arr[i-1] ? arr[i-1].type : false;
+                        let messageMentionsYou = message.mentions.includes(this.props.user.username);
                         return (
                             <Fragment key={message._id}>
                                 {dayMessage(message.timestamp, lastTimestamp)}
-                                <li key={message._id} className="messageContainer" id={message._id}>
+                                <li key={message._id} className={["messageContainer", (messageMentionsYou ? "mentionMessage" : "")].join(" ")} id={message._id}>
                                     <div key={message._id} className={message.type}>
                                         <span className={["messageMetadata", (message.user.username === lastAuthor) && (lastType === "message") ? "hidden" : ""].join(' ')}>
                                             <span className="messageTimestamp">
@@ -115,9 +117,7 @@ class MessageList extends Component {
                                             </span>
                                         </span>
 
-                                        <span className="messageContent">
-                                            {message.content}
-                                        </span>
+                                        <span className="messageContent" dangerouslySetInnerHTML={{__html: message.content}}></span>
                                         { message.type === "tarot" && (
                                             <div className="spread">
                                                 {message.tarot.map((card, index) => {
@@ -292,16 +292,13 @@ class RoomList extends Component {
 }
 
 class UserBadge extends Component {
-    constructor() {
-        super();
-    }
     render() {
         let user = (this.props.member.user ? this.props.member.user : this.props.member);
-        const lessThanOneDayAgo = (date) => {
-            const oneDay = 1000 * 60 * 60 * 24;
-            const aDayAgo = Date.now() - oneDay;
-            return date > aDayAgo;
-        }
+        // const lessThanOneDayAgo = (date) => {
+        //     const oneDay = 1000 * 60 * 60 * 24;
+        //     const aDayAgo = Date.now() - oneDay;
+        //     return date > aDayAgo;
+        // }
         let userStatus, userStatusText;
         switch (user.settings.status) {
             case "available":
@@ -325,18 +322,6 @@ class UserBadge extends Component {
                 userStatusText = "Available";
                 break;
         }
-        let userColor;
-        switch (this.props.role) {
-            case "administrator":
-                userColor = "orange";
-                break;
-            case "moderator":
-                userColor = "lightblue";
-                break;
-            case "member":
-                userColor = "var(--white)";
-                break
-        }
         let userBadge;
         switch (this.props.role) {
             case "administrator":
@@ -348,6 +333,8 @@ class UserBadge extends Component {
             case "member":
                 userBadge = "";
                 break
+            default:
+                userBadge = "";
         }
         let userTooltip = (
             <div className="userTooltip">
@@ -385,10 +372,6 @@ class UserBadge extends Component {
 }
 
 class UserList extends Component {
-    constructor() {
-        super();
-    }
-
     render() {
         const lessThanOneHourAgo = (date) => {
             const oneHour = 1000 * 60 * 60;
@@ -486,14 +469,13 @@ class ChatDrawer extends Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.messageInput = React.createRef();
     }
 
     reloadRoom = (slug) => {
-        console.log("Fetchin'", slug)
         fetch('/api/chat/room/fetch/' + slug)
             .then(res => res.json())
             .then(payload => {
-                console.log("Done fetched", payload)
                 var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
                 var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
                 this.setState({
@@ -504,6 +486,9 @@ class ChatDrawer extends Component {
                     showWelcomeMessage: payload.showWelcomeMessage
                 });
                 scrollToBottom();
+                if (this.messageInput) {
+                    this.messageInput.current.focus();
+                }
         });
     }
 
@@ -555,11 +540,11 @@ class ChatDrawer extends Component {
             messagesChannel.bind('message-sent', data => {
                 if (this.state.currentRoom.slug === data.room.slug) {
                     if (data.type === "tarot") {
-                        var audio = new Audio('/card.mp3');
+                        let audio = new Audio('/card.mp3');
                         audio.play();
                     }
                     if (data.type === "runes") {
-                        var audio = new Audio('/runes.mp3');
+                        let audio = new Audio('/runes.mp3');
                         audio.play();
                     }
                     this.setState({
@@ -577,6 +562,12 @@ class ChatDrawer extends Component {
                         this.setState({
                             joinedRooms: joinedRooms
                         })
+                        // Check for mentions
+                        if (data.mentions.includes(this.props.user.username)) {
+                            toast(data.user.username + " has mentioned you in " + data.room.name + ".", {
+                                className: 'green-toast',
+                            });
+                        }
                     } else if (this.state.directMessages.some(r => r.slug === data.room.slug)) {
                         var directMessages = [...this.state.directMessages];
                         directMessages.forEach(r => {
@@ -587,6 +578,12 @@ class ChatDrawer extends Component {
                         this.setState({
                             directMessages: directMessages
                         })
+                        // Check for mentions
+                        if (data.mentions.includes(this.props.user.username)) {
+                            toast(data.user.username + " has mentioned you in a private message.", {
+                                className: 'green-toast',
+                            });
+                        }
                     }
                 }
             });
@@ -699,6 +696,7 @@ class ChatDrawer extends Component {
                         directMessages.map(r => {
                             let otherUser = r.members.find(m => m.user.username !== this.props.user.username);
                             r.otherUser = otherUser.user.username;
+                            return r;
                         })
                         directMessages.sort((a, b) => a.otherUser.localeCompare( b.otherUser ))
                         this.setState({
@@ -928,6 +926,16 @@ class ChatDrawer extends Component {
         })
     }
 
+    addEmoji = (e) => {
+        let emoji = e.native;
+        let currentMessage = this.state.message;
+        let withEmoji = currentMessage.substring(0, this.messageInput.current.selectionStart) + emoji + currentMessage.substring(this.messageInput.current.selectionStart);
+        this.setState({
+            message: withEmoji
+        })
+        this.messageInput.current.focus();
+    }
+
     render() {
         var style = this.props.isVisible ? {display: 'flex'} : {display: 'none'};
         var isMember = (this.state.joinedRooms.some(r => r.slug === this.state.currentRoom.slug) || this.state.directMessages.some(r => r.slug === this.state.currentRoom.slug));
@@ -985,13 +993,18 @@ class ChatDrawer extends Component {
                             </button>
                         </aside>
                     }
-                    <MessageList messages={this.state.messages} currentRoom={this.state.currentRoom} infiniteScroll={this.infiniteScroll}/>
+                    <MessageList
+                        user={this.props.user}
+                        messages={this.state.messages}
+                        currentRoom={this.state.currentRoom}
+                        infiniteScroll={this.infiniteScroll}/>
                     {isMember &&
                         <form
                             className="chatForm"
                             onSubmit={this.handleSubmit}
                         >
                             <Textarea
+                                inputRef={this.messageInput}
                                 id="message"
                                 autoComplete="off"
                                 placeholder={"Message " + textareaPlaceholder}
@@ -1001,6 +1014,17 @@ class ChatDrawer extends Component {
                                 minRows={1}
                                 maxRows={10}
                             />
+                            <Tooltip
+                                trigger="click"
+                                interactive
+                                theme="light"
+                                arrow="true"
+                                html={(
+                                    <Picker onSelect={this.addEmoji} />
+                                )}
+                            >
+                                <button><FontAwesomeIcon icon="smile" /></button>
+                            </Tooltip>
                             <button><FontAwesomeIcon icon="chevron-right"/></button>
                         </form>
                     }

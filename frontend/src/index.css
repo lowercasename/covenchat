@@ -598,6 +598,7 @@ input[type="submit"]:hover {
     background: var(--green) !important;
     color: var(--dark-purple) !important;
     font-size: 0.9rem;
+    border-radius: 6px !important;
 }
 
 .editable:empty:after, .editable span:first-child:empty:after {
@@ -609,12 +610,15 @@ input[type="submit"]:hover {
   padding-right: 5px;
 }
 
-.green-toast button
- {
-  display: block;
+.green-toast button {
+  /* display: block; */
   background: var(--purple);
   color: var(--white);
   font-size: small;
+}
+
+.green-toast button:hover {
+  background: var(--dark-purple);
 }
 
 #loader {
@@ -648,4 +652,38 @@ input[type="submit"]:hover {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.tippy-popper .tippy-tooltip.light-theme {
+    padding: 0;
+}
+
+.emoji-mart {
+    text-align: left;
+}
+
+.emoji-mart input,
+.chrome-picker input {
+    background: initial;
+    margin-bottom: initial;
+}
+
+.emoji-mart button {
+    border-radius: initial;
+    transition: initial;
+    cursor: initial;
+    color: initial;
+    font-family: initial;
+}
+
+.emoji-mart button:hover,
+.emoji-mart input:focus {
+    outline: initial;
+    box-shadow: initial;
+    background: initial;
+}
+
+.emoji-mart-search-icon {
+    top: 0px !important;
+    background: none !important;
 }

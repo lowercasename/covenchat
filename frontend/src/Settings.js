@@ -69,6 +69,7 @@ class FlairSelector extends Component {
                                 value={icon}
                                 checked={this.props.user.settings.flair === icon}/>
                             <img
+                                alt={"Flair icon: " + icon}
                                 className="icon"
                                 src={icon}/>
                         </label>

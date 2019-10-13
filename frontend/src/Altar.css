@@ -33,8 +33,16 @@
     padding: 10px;
     font-weight: normal;
     font-family: 'Fira Sans', sans-serif;
-    transition: 150ms;
     cursor: pointer;
+}
+
+.altarNavLinks li.listHeader {
+    font-family: 'Gabriela', sans-serif !important;
+}
+
+.altarNavLinks li.listSubItem {
+    font-size: 1.2rem;
+    padding-left: 30px;
 }
 
 .altarNavLinks li:hover {
