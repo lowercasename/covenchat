@@ -25,9 +25,13 @@ class UserFlair extends Component {
         }
     }
     render() {
-        return (
-            <span className="userFlair"><img src={this.props.user.settings.flair} alt={"Flair icon for " + this.props.user.username} />&nbsp;</span>
-        )
+        if (this.props.user.settings.flair) {
+            return (
+                <span className="userFlair"><img src={this.props.user.settings.flair} alt={"Flair icon for " + this.props.user.username} />&nbsp;</span>
+            )
+        } else {
+            return false;
+        }
     }
 }
 
@@ -711,37 +715,14 @@ class ChatDrawer extends Component {
                 }
             });
 
-            generalChannel.bind('messages-read', data => {
-                console.log("Clearing unread messages!", data)
-                if (this.state.currentRoom.slug === data.room) {
-                    console.log("Unread messages being cleared from current room!")
-                    if (data.roomType === "direct-message") {
-                        console.log("It's a DM room!")
-                        var directMessages = [...this.state.directMessages];
-                        directMessages.forEach(r => {
-                            if (r.slug === data.room) {
-                                console.log("Found matching DM room, setting unread messages!")
-                                r.unreadMessages = 0;
-                            }
-                        })
-                        this.setState({
-                            directMessages: directMessages
-                        }, () => {console.log("Set new state.")})
-                    } else {
-                        console.log("It's a normal room!")
-                        var joinedRooms = [...this.state.joinedRooms];
-                        joinedRooms.forEach(r => {
-                            if (r.slug === data.room) {
-                                console.log("Found matching room, setting unread messages!")
-                                r.unreadMessages = 0;
-                            }
-                        })
-                        this.setState({
-                            joinedRooms: joinedRooms
-                        }, () => {console.log("Set new state.")})
-                    }
-                }
-            });
+            // generalChannel.bind('messages-read', data => {
+            //     console.log("Clearing unread messages!", data)
+            //     console.log(this.state.currentRoom.slug)
+            //     if (this.state.currentRoom.slug === data.room) {
+            //         console.log("Unread messages being cleared from current room!")
+            //
+            //     }
+            // });
         });
     }
 
@@ -805,6 +786,27 @@ class ChatDrawer extends Component {
                     console.log(res)
                     if (res.status === 200) {
                         this.reloadRoom(roomSlug)
+                        // Clear unread messages from frontend (handled async on backend)
+                        let directMessages = [...this.state.directMessages];
+                        directMessages.forEach(r => {
+                            if (r.slug === roomSlug) {
+                                console.log("Found matching DM room, setting unread messages!")
+                                r.unreadMessages = 0;
+                                this.setState({
+                                    directMessages: directMessages
+                                }, () => {console.log("Set new state.")})
+                            }
+                        })
+                        let joinedRooms = [...this.state.joinedRooms];
+                        joinedRooms.forEach(r => {
+                            if (r.slug === roomSlug) {
+                                console.log("Found matching room, setting unread messages!")
+                                r.unreadMessages = 0;
+                                this.setState({
+                                    joinedRooms: joinedRooms
+                                }, () => {console.log("Set new state.")})
+                            }
+                        })
                     } else {
                         console.log("Failed to enter room")
                     }

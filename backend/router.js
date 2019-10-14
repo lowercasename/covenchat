@@ -460,7 +460,6 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	}
 	let room = await Room.findOne({
 		slug: targetSlug
-
 	})
 	.populate('members.user')
 	.populate('visitors');
@@ -488,7 +487,7 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	{ $push: { readBy: req.user._id } }, {multi: true})
 	.then(response => {
 		console.log(response)
-		pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug, roomType: room.type})
+		// pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug, roomType: room.type})
 		res.status(200)
 		.json({
 			messages: messages,
