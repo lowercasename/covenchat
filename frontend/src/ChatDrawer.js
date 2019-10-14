@@ -712,27 +712,33 @@ class ChatDrawer extends Component {
             });
 
             generalChannel.bind('messages-read', data => {
+                console.log("Clearing unread messages!", data)
                 if (this.state.currentRoom.slug === data.room) {
+                    console.log("Unread messages being cleared from current room!")
                     if (data.roomType === "direct-message") {
+                        console.log("It's a DM room!")
                         var directMessages = [...this.state.directMessages];
                         directMessages.forEach(r => {
                             if (r.slug === data.room) {
+                                console.log("Found matching DM room, setting unread messages!")
                                 r.unreadMessages = 0;
                             }
                         })
                         this.setState({
                             directMessages: directMessages
-                        })
+                        }, () => {console.log("Set new state.")})
                     } else {
+                        console.log("It's a normal room!")
                         var joinedRooms = [...this.state.joinedRooms];
                         joinedRooms.forEach(r => {
                             if (r.slug === data.room) {
+                                console.log("Found matching room, setting unread messages!")
                                 r.unreadMessages = 0;
                             }
                         })
                         this.setState({
                             joinedRooms: joinedRooms
-                        })
+                        }, () => {console.log("Set new state.")})
                     }
                 }
             });
@@ -927,6 +933,7 @@ class ChatDrawer extends Component {
     }
 
     addEmoji = (e) => {
+        e.preventDefault();
         let emoji = e.native;
         let currentMessage = this.state.message;
         let withEmoji = currentMessage.substring(0, this.messageInput.current.selectionStart) + emoji + currentMessage.substring(this.messageInput.current.selectionStart);

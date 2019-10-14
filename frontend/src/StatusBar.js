@@ -1,6 +1,5 @@
-import React, {
-    Component
-} from 'react';
+import React, { Component } from 'react';
+const lune = require('lune')
 
 class StatusBar extends Component {
     constructor() {
@@ -69,6 +68,16 @@ class StatusBar extends Component {
         var phase = Moon.phase(today.getFullYear(), today.getMonth() + 1, today.getDate());
         return phase;
     }
+
+    // getMoonPhase(today) {
+    //     let date = new Date('2019-10-14T00:00')
+    //     var currentPhase = lune.phase(date);
+    //     let majorPhases = ["waxing crescent","waxing gibbous","waning gibbous","waning crescent"];
+    //     let minorPhases = ["new","first quarter","full","last quarter"]
+    //     let majorIndex = Math.floor(currentPhase.phase * 10)/2 - 1;
+    //     console.log(majorIndex);
+    //     return currentPhase.phase;
+    // }
 
     getZodiacSign(today) {
 
