@@ -790,21 +790,19 @@ class ChatDrawer extends Component {
                         let directMessages = [...this.state.directMessages];
                         directMessages.forEach(r => {
                             if (r.slug === roomSlug) {
-                                console.log("Found matching DM room, setting unread messages!")
                                 r.unreadMessages = 0;
                                 this.setState({
                                     directMessages: directMessages
-                                }, () => {console.log("Set new state.")})
+                                })
                             }
                         })
                         let joinedRooms = [...this.state.joinedRooms];
                         joinedRooms.forEach(r => {
                             if (r.slug === roomSlug) {
-                                console.log("Found matching room, setting unread messages!")
                                 r.unreadMessages = 0;
                                 this.setState({
                                     joinedRooms: joinedRooms
-                                }, () => {console.log("Set new state.")})
+                                })
                             }
                         })
                     } else {
@@ -935,7 +933,6 @@ class ChatDrawer extends Component {
     }
 
     addEmoji = (e) => {
-        e.preventDefault();
         let emoji = e.native;
         let currentMessage = this.state.message;
         let withEmoji = currentMessage.substring(0, this.messageInput.current.selectionStart) + emoji + currentMessage.substring(this.messageInput.current.selectionStart);
@@ -1032,9 +1029,9 @@ class ChatDrawer extends Component {
                                     <Picker onSelect={this.addEmoji} />
                                 )}
                             >
-                                <button><FontAwesomeIcon icon="smile" /></button>
+                                <button type="button"><FontAwesomeIcon icon="smile" /></button>
                             </Tooltip>
-                            <button><FontAwesomeIcon icon="chevron-right"/></button>
+                            <button type="submit"><FontAwesomeIcon icon="chevron-right"/></button>
                         </form>
                     }
                 </section>

@@ -44,7 +44,7 @@ export default class Map extends Component {
             let html = (
                 <>
                     <h2>
-                        <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> {user.username}
+                        {user.settings.flair && <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> }{user.username}
                     </h2>
                     {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
                         <div>
