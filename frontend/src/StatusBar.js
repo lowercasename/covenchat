@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-const lune = require('lune')
+// const lune = require('lune')
 
 class StatusBar extends Component {
     constructor() {

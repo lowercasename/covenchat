@@ -381,7 +381,7 @@ label {
 }
 
 .statusBar {
-    font-family: 'Fira Sans Condensed', monospace;
+    font-family: 'Fira Sans Condensed', sans-serif;
     background: var(--dark-purple);
     border-top: 1px solid rgba(0,0,0,0.5);
     height: 40px;

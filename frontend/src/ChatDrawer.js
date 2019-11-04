@@ -925,10 +925,14 @@ class ChatDrawer extends Component {
         .then(payload => {
             let messages = this.state.messages;
             messages.unshift(...payload.messages);
-            console.log(messages)
             this.setState({
                 messages: messages
             });
+            console.log("LOMG:",payload.messages.length)
+            if (payload.messages.length !== 0) {
+                document.getElementById(lastMessage).scrollIntoView();
+
+            }
         })
     }
 
