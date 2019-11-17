@@ -446,13 +446,13 @@ class Dashboard extends Component {
                     />
                 </main>
                 <Modal show={this.state.permissionsModalVisible} handleClose={this.hideModal}>
-                    {this.state.askForWebPushNotifications &&
+                    {this.state.askForGeolocationNotifications &&
                         <>
                             <h2 style={{marginBottom:"1rem"}}>Location</h2>
                             <p style={{marginBottom:"1rem"}}>Allow CovenChat to access your current location in the popup above to show your marker on the map.</p>
                         </>
                     }
-                    {this.state.askForGeolocationNotifications &&
+                    {this.state.askForWebPushNotifications &&
                         <>
                             <h2 style={{marginBottom:"1rem"}}>Notifications</h2>
                             <p style={{marginBottom:"1rem"}}>Allow CovenChat to send you notifications in the popup above to receive notifications when the app isn't open.</p>

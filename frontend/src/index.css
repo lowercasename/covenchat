@@ -401,6 +401,11 @@ label {
     white-space: nowrap;
 }
 
+.statusItem span {
+  display: flex;
+  align-items: center;
+}
+
 .statusBar .statusItem:not(:last-child) {
     border-right: 1px solid rgb(252,252,252,0.2);
 }

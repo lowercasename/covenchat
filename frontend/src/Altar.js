@@ -680,6 +680,8 @@ export default class Altar extends Component {
         let journalPosts = this.state.journalPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
         let spellbookPosts = this.state.spellbookPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
         let lorePosts = this.state.lorePosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
+        let noPosts = <article className="post"><main style={{textAlign:"center"}}>No posts.</main>
+    </article>
         return (
             <div id="altar" style={style}>
                 <nav id="altarNav">
@@ -819,57 +821,69 @@ export default class Altar extends Component {
                     id="journal"
                     className="postViewer"
                 >
-                    {journalPosts.map(post => {
-                        return (
-                            <article className="post" key={post._id}>
-                                <header>
-                                    <h2>{post.title}</h2>
-                                </header>
-                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                <main>
-                                    { ReactHtmlParser(post.content) }
-                                </main>
-                            </article>
-                        )
-                    })}
+                    {journalPosts.length == 0 ?
+                       noPosts
+                    :
+                        journalPosts.map(post => {
+                            return (
+                                <article className="post" key={post._id}>
+                                    <header>
+                                        <h2>{post.title}</h2>
+                                    </header>
+                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                    <main>
+                                        { ReactHtmlParser(post.content) }
+                                    </main>
+                                </article>
+                            )
+                        })
+                    }
                 </div>
                 <div
                     style={{display:(this.state.selectedTab === "spellbook" ? "flex" : "none")}}
                     id="spellbook"
                     className="postViewer"
                 >
-                    {spellbookPosts.map(post => {
-                        return (
-                            <article className="post" key={post._id}>
-                                <header>
-                                    <h2>{post.title}</h2>
-                                </header>
-                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                <main>
-                                    { ReactHtmlParser(post.content) }
-                                </main>
-                            </article>
-                        )
-                    })}
+                    {spellbookPosts.length == 0 ?
+                       noPosts
+                    :
+                        spellbookPosts.map(post => {
+                            return (
+                                <article className="post" key={post._id}>
+                                    <header>
+                                        <h2>{post.title}</h2>
+                                    </header>
+                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                    <main>
+                                        { ReactHtmlParser(post.content) }
+                                    </main>
+                                </article>
+                            )
+                        })
+                    }
                 </div>
                 <div
                     style={{display:(this.state.selectedTab === "lore" ? "flex" : "none")}}
                     id="journal"
                     className="postViewer"
                 >
-                    {lorePosts.map(post => {
-                        return (
-                            <article className="post" key={post._id}>
-                                <header>
-                                    <h2>{post.title}</h2>
-                                </header>
-                                <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                <main>
-                                    { ReactHtmlParser(post.content) }
-                                </main>
-                            </article>
-                        )
-                    })}
+                    {lorePosts.length == 0 ?
+                       noPosts
+                    :
+                        lorePosts.map(post => {
+                            return (
+                                <article className="post" key={post._id}>
+                                    <header>
+                                        <h2>{post.title}</h2>
+                                    </header>
+                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                    <main>
+                                        { ReactHtmlParser(post.content) }
+                                    </main>
+                                </article>
+                            )
+                        })
+                    }
                 </div>
                 {!this.state.editingMode && this.state.selectedTab === "altar" &&
                     <div id="candleHolder">

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-const lune = require('lune')
+const lune = require('lune');
+const moment = require('moment');
 
 class StatusBar extends Component {
     constructor() {
@@ -20,80 +21,155 @@ class StatusBar extends Component {
             });
     }
 
-    getMoonPhase(today) {
-        // Original Snippet: https://gist.github.com/endel/dfe6bb2fbe679781948c
-
-        var Moon = {
-            phase: function(year, month, day) {
-                let c, e, jd, b = 0;
-
-                if (month < 3) {
-                    year--;
-                    month += 12;
-                }
-
-                ++month;
-                c = 365.25 * year;
-                e = 30.6 * month;
-                jd = c + e + day - 694039.09; // jd is total days elapsed
-                jd /= 29.5305882; // divide by the moon cycle
-                b = parseInt(jd); // int(jd) -> b, take integer part of jd
-                jd -= b; // subtract integer part to leave fractional part of original jd
-                b = Math.round(jd * 8); // scale fraction from 0-8 and round
-
-                if (b >= 8) b = 0; // 0 and 8 are the same so turn 8 into 0
-
-                switch (b) {
-                    case 0:
-                        return <span > < span className = "hermetica-B027-moon_phase_new" / > New Moon < /span>;
-                    case 1:
-                        return <span > < span className = "hermetica-B020-moon_phase_waxing_crescent" / > Waxing Crescent Moon < /span>;
-                    case 2:
-                        return <span > < span className = "hermetica-B021-moon_phase_waxing_half" / > First Quarter Moon < /span>;
-                    case 3:
-                        return <span > < span className = "hermetica-B022-moon_phase_waxing_gibbous" / > Waxing Gibbous Moon < /span>;
-                    case 4:
-                        return <span > < span className = "hermetica-B023-moon_phase_full" / > Full Moon < /span>;
-                    case 5:
-                        return <span > < span className = "hermetica-B024-moon_phase_waning_gibbous" / > Waning Gibbous Moon < /span>;
-                    case 6:
-                        return <span > < span className = "hermetica-B025-moon_phase_waning_half" / > Last Quarter Moon < /span>;
-                    case 7:
-                        return <span > < span className = "hermetica-B026-moon_phase_waning_crescent" / > Waning Crescent Moon < /span>;
-                    default:
-                        return false;
-                }
-            }
-        };
-        var phase = Moon.phase(today.getFullYear(), today.getMonth() + 1, today.getDate());
-        return phase;
-    }
-
     // getMoonPhase(today) {
-    //     let date = new Date('2019-10-14T00:00')
-    //     var currentPhase = lune.phase(date);
-    //     let majorPhases = ["waxing crescent","waxing gibbous","waning gibbous","waning crescent"];
-    //     let minorPhases = ["new","first quarter","full","last quarter"]
-    //     let majorIndex = Math.floor(currentPhase.phase * 10)/2 - 1;
-    //     console.log(majorIndex);
-    //     return currentPhase.phase;
+    //     // Original Snippet: https://gist.github.com/endel/dfe6bb2fbe679781948c
+
+    //     var Moon = {
+    //         phase: function(year, month, day) {
+    //             let c, e, jd, b = 0;
+
+    //             if (month < 3) {
+    //                 year--;
+    //                 month += 12;
+    //             }
+
+    //             ++month;
+    //             c = 365.25 * year;
+    //             e = 30.6 * month;
+    //             jd = c + e + day - 694039.09; // jd is total days elapsed
+    //             jd /= 29.5305882; // divide by the moon cycle
+    //             b = parseInt(jd); // int(jd) -> b, take integer part of jd
+    //             jd -= b; // subtract integer part to leave fractional part of original jd
+    //             b = Math.round(jd * 8); // scale fraction from 0-8 and round
+
+    //             if (b >= 8) b = 0; // 0 and 8 are the same so turn 8 into 0
+
+    //             switch (b) {
+    //                 case 0:
+    //                     return <span > <span className="hermetica-B027-moon_phase_new"/> New Moon </span>;
+    //                 case 1:
+    //                     return <span > <span className="hermetica-B020-moon_phase_waxing_crescent"/> Waxing Crescent Moon </span>;
+    //                 case 2:
+    //                     return <span > <span className="hermetica-B021-moon_phase_waxing_half"/> First Quarter Moon </span>;
+    //                 case 3:
+    //                     return <span > <span className="hermetica-B022-moon_phase_waxing_gibbous"/> Waxing Gibbous Moon </span>;
+    //                 case 4:
+    //                     return <span > <span className="hermetica-B023-moon_phase_full"/> Full Moon </span>;
+    //                 case 5:
+    //                     return <span > <span className="hermetica-B024-moon_phase_waning_gibbous"/> Waning Gibbous Moon </span>;
+    //                 case 6:
+    //                     return <span > <span className="hermetica-B025-moon_phase_waning_half"/> Last Quarter Moon </span>;
+    //                 case 7:
+    //                     return <span > <span className="hermetica-B026-moon_phase_waning_crescent"/> Waning Crescent Moon </span>;
+    //                 default:
+    //                     return false;
+    //             }
+    //         }
+    //     };
+    //     var phase = Moon.phase(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    //     return phase;
     // }
+
+    getMoonPhase(now) {
+        let nextMonth = new Date(moment(now).add(1, 'months'));
+        var current_phase = lune.phase(now);
+        let direction, illumination, minorPhase, majorPhase, nextPhase;
+        let phase = current_phase.phase;
+        let nextFullMoon = lune.phase_range(
+            now,
+            nextMonth,
+            lune.PHASE_FULL
+        );
+        let nextNewMoon = lune.phase_range(
+            now,
+            nextMonth,
+            lune.PHASE_NEW
+        );
+        let daysUntilFull = moment(nextFullMoon[0]).diff(now, 'days', true);
+        let daysUntilNew = moment(nextNewMoon[0]).diff(now, 'days', true);
+        if (daysUntilFull <= 7) {
+            if (daysUntilFull < 1) {
+                //hoursToGo = Math.round(moment.duration(daysUntilFull, "days").asHours())
+                //nextPhase = "Full in " + hoursToGo + (hoursToGo <= 1 ? " hour" : " hours");
+                //console.log(nextPhase)
+                nextPhase = <span> (Full tonight)</span>;
+            } else if (Math.floor(daysUntilFull) == 1) {
+                nextPhase = <span> (Full in {Math.floor(daysUntilFull)} day)</span>;
+            } else {
+                nextPhase = <span> (Full in {Math.floor(daysUntilFull)} days)</span>;
+            }
+        } else if (daysUntilNew <= 7) {
+            if (daysUntilNew < 1) {
+                nextPhase = <span> (New tonight)</span>;
+            } else if (Math.floor(daysUntilNew) == 1) {
+                nextPhase = <span> (New in {Math.floor(daysUntilNew)} day)</span>;
+            } else {
+                nextPhase = <span> (New in {Math.floor(daysUntilNew)} days)</span>;
+            }
+        }
+        illumination = Math.round(current_phase.illuminated*1000) / 10
+        if (phase > 0.5) {
+            if (illumination >= 0 && illumination <= 50) {
+                minorPhase = <span><span className="hermetica-B022-moon_phase_waxing_gibbous"/>&nbsp;Waning Crescent</span>;
+            } else if (illumination >= 51 && illumination <= 100) {
+                minorPhase = <span><span className="hermetica-B020-moon_phase_waxing_crescent"/>&nbsp;Waning Gibbous</span>;
+            }
+        } else {
+            if (illumination >= 0 && illumination <= 50) {
+                minorPhase = <span><span className="hermetica-B024-moon_phase_waning_gibbous"/>&nbsp;Waxing Crescent</span>;
+            } else if (illumination >= 51 && illumination <= 100) {
+                minorPhase = <span><span className="hermetica-B026-moon_phase_waning_crescent"/>&nbsp;Waxing Gibbous</span>;
+            }
+        }
+
+        // if (illumination >= 0 && illumination <= 50) {
+        //     phaseName = "Crescent";
+        // } else if (illumination >= 51 && illumination <= 100) {
+        //     phaseName = "Gibbous";
+        // }
+
+        // This calculation comes out to a major phase length of about 24 hours (0.5% of the full cycle)
+        if (illumination >= 0 && illumination <= 0.25) {
+            majorPhase = <span><span className="hermetica-B023-moon_phase_full"/>&nbsp;New Moon</span>;
+        } else if (illumination >= 49.75 && illumination <= 50.25 && direction == "Waning") {
+            majorPhase = <span><span className="hermetica-B021-moon_phase_waxing_half"/>&nbsp;Last Quarter</span>
+        } else if (illumination >= 49.75 && illumination <= 50.25 && direction == "Waxing") {
+            majorPhase = <span><span className="hermetica-B025-moon_phase_waning_half"/>&nbsp;First Quarter</span>
+        } else if (illumination >= 99.75 && illumination <= 100) {
+            majorPhase = <span><span className="hermetica-B027-moon_phase_new"/>&nbsp;Full Moon</span>
+        }
+
+        //console.log((majorPhase ? majorPhase : direction + " " + phaseName) + " (" + illumination + "%" + (majorPhase ? ")" : (nextPhase ? ", "+nextPhase+")" : ")")))
+        // return <span>{(majorPhase ? majorPhase : minorPhase) + (majorPhase ? "" : nextPhase ? " (" + nextPhase + ")" : "")}</span>
+        return (
+            <span>
+                {majorPhase ?
+                    majorPhase
+                :
+                    minorPhase
+                }
+                {!majorPhase &&
+                    nextPhase
+                }
+            </span>
+        )
+    }
 
     getZodiacSign(today) {
 
         var zodiacSigns = {
-            'capricorn': < span > < span className = "hermetica-A009-capricorn" / > Capricorn < /span>,
-            'aquarius': < span > < span className = "hermetica-A010-aquarius" / > Aquarius < /span>,
-            'pisces': < span > < span className = "hermetica-A011-pisces" / > Pisces < /span>,
-            'aries': < span > < span className = "hermetica-A000-aries" / > Aries < /span>,
-            'taurus': < span > < span className = "hermetica-A001-taurus" / > Taurus < /span>,
-            'gemini': < span > < span className = "hermetica-A002-gemini" / > Gemini < /span>,
-            'cancer': < span > < span className = "hermetica-A003-cancer" / > Cancer < /span>,
-            'leo': < span > < span className = "hermetica-A004-leo" / > Leo < /span>,
-            'virgo': < span > < span className = "hermetica-A005-virgo" / > Virgo < /span>,
-            'libra': < span > < span className = "hermetica-A006-libra" / > Libra < /span>,
-            'scorpio': < span > < span className = "hermetica-A007-scorpio" / > Scorpio < /span>,
-            'sagittarius': < span > < span className = "hermetica-A008-sagittarius" / > Saggitarius < /span>,
+            'capricorn': <span> <span className="hermetica-A009-capricorn"/>&nbsp;Capricorn </span>,
+            'aquarius': <span> <span className="hermetica-A010-aquarius"/>&nbsp;Aquarius </span>,
+            'pisces': <span> <span className="hermetica-A011-pisces"/>&nbsp;Pisces </span>,
+            'aries': <span> <span className="hermetica-A000-aries"/>&nbsp;Aries </span>,
+            'taurus': <span> <span className="hermetica-A001-taurus"/>&nbsp;Taurus </span>,
+            'gemini': <span> <span className="hermetica-A002-gemini"/>&nbsp;Gemini </span>,
+            'cancer': <span> <span className="hermetica-A003-cancer"/>&nbsp;Cancer </span>,
+            'leo': <span> <span className="hermetica-A004-leo"/>&nbsp;Leo </span>,
+            'virgo': <span> <span className="hermetica-A005-virgo"/>&nbsp;Virgo </span>,
+            'libra': <span> <span className="hermetica-A006-libra"/>&nbsp;Libra </span>,
+            'scorpio': <span> <span className="hermetica-A007-scorpio"/>&nbsp;Scorpio </span>,
+            'sagittarius': <span> <span className="hermetica-A008-sagittarius"/>&nbsp;Saggitarius </span>,
         }
 
         var month = today.getMonth() + 1;
@@ -184,42 +260,25 @@ class StatusBar extends Component {
         var today = new Date();
         let mercuryMessage;
         if (this.state.mercuryRetrograde === false) {
-            mercuryMessage = < span > < span className = 'hermetica-B002-mercury' / > Mercury not retrograde < /span>;
+            mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury not retrograde</span>;
         } else {
-            mercuryMessage = < span > < span className = 'hermetica-B002-mercury' / > Mercury is retrograde < /span>;
+            mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury is retrograde</span>;
         }
-        return ( <
-            aside className = "statusBar" > {
+        return ( <aside className="statusBar" > {
                 this.props.modules.moonPhase.set &&
-                <
-                span className = "statusItem" > {
-                    this.getMoonPhase(today)
-                } <
-                /span>
+                <span className="statusItem">{this.getMoonPhase(today)}</span>
             } {
                 this.props.modules.wheelOfTheYear.set &&
-                    <
-                    span className = "statusItem" >
-                    <
-                    span className = "hermetica-F006-wheel_of_the_year" / >&nbsp;{
-                    this.getFestival(today)
-                } <
-                /span>
+                <span className="statusItem">
+                    <span className="hermetica-F006-wheel_of_the_year"/>&nbsp;{this.getFestival(today)
+                } </span>
             } {
                 this.props.modules.astrologicalSeason.set &&
-                    <span className = "statusItem" > {
-                        this.getZodiacSign(today)
-                    }&nbsp;season
-                    </span>
+                    <span className="statusItem">{this.getZodiacSign(today)}&nbsp;season</span>
             } {
                 this.props.modules.mercuryRetrograde.set &&
-                    <
-                    span className = "statusItem" > {
-                        mercuryMessage
-                    } <
-                    /span>
-            } <
-            /aside>
+                    <span className="statusItem">{mercuryMessage}</span>
+            } </aside>
         );
     }
 }
