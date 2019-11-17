@@ -131,7 +131,7 @@ router.post('/api/user/authenticate', function(req, res) {
 					// Issue token
 					const payload = { user };
 					const token = jwt.sign(payload, secret, {
-						expiresIn: '1d'
+						expiresIn: '7d'
 					});
 					res.cookie('token', token, { httpOnly: true })
 					.status(200)
@@ -291,7 +291,7 @@ router.post('/api/link/upsert', authorizeUser, async function(req, res) {
 		console.log("Using supplied coords")
 	}
 	if (fromCoordinates && toCoordinates) {
-		let linkDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
+		let linkDuration = 60 * 60 * 1000; // 1 hour in milliseconds
 		let now = new Date().getTime();
 		let upsertLink = Link.findOneAndUpdate({fromUsername: req.body.fromUsername, toUsername: req.body.toUsername},
 		{
@@ -470,7 +470,7 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 		// timestamp: {$gte: startOfToday}
 	})
 	.sort('-timestamp')
-	.limit(100)
+	.limit(30)
 	.populate('user');
 
 	messages.reverse();
@@ -503,7 +503,7 @@ router.post('/api/chat/room/fetch-messages', authorizeUser, function(req,res) {
 		_id: {$lt: req.body.earlierThan}
 	})
 	.sort('-timestamp')
-	.limit(100)
+	.limit(30)
 	.populate('user')
 	.then(messages => {
 		messages.reverse();
