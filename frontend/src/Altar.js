@@ -827,9 +827,11 @@ export default class Altar extends Component {
                         journalPosts.map(post => {
                             return (
                                 <article className="post" key={post._id}>
-                                    <header>
-                                        <h2>{post.title}</h2>
-                                    </header>
+                                    {post.title &&
+                                        <header>
+                                            <h2>{post.title}</h2>
+                                        </header>
+                                    }
                                     <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
                                     <main>
                                         { ReactHtmlParser(post.content) }
@@ -850,9 +852,11 @@ export default class Altar extends Component {
                         spellbookPosts.map(post => {
                             return (
                                 <article className="post" key={post._id}>
-                                    <header>
-                                        <h2>{post.title}</h2>
-                                    </header>
+                                    {post.title &&
+                                        <header>
+                                            <h2>{post.title}</h2>
+                                        </header>
+                                    }
                                     <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
                                     <main>
                                         { ReactHtmlParser(post.content) }
@@ -873,9 +877,11 @@ export default class Altar extends Component {
                         lorePosts.map(post => {
                             return (
                                 <article className="post" key={post._id}>
-                                    <header>
-                                        <h2>{post.title}</h2>
-                                    </header>
+                                    {post.title &&
+                                        <header>
+                                            <h2>{post.title}</h2>
+                                        </header>
+                                    }
                                     <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
                                     <main>
                                         { ReactHtmlParser(post.content) }

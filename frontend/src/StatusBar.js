@@ -14,7 +14,6 @@ class StatusBar extends Component {
         fetch('https://mercuryretrogradeapi.com/')
             .then(res => res.json())
             .then(result => {
-                console.log(result);
                 this.setState({
                     mercuryRetrograde: result.is_retrograde
                 })
@@ -72,7 +71,8 @@ class StatusBar extends Component {
 
     getMoonPhase(now) {
         let nextMonth = new Date(moment(now).add(1, 'months'));
-        var current_phase = lune.phase(now);
+        let current_phase = lune.phase(now);
+        let current_illumination = Math.floor(current_phase.illuminated * 100);
         let direction, illumination, minorPhase, majorPhase, nextPhase;
         let phase = current_phase.phase;
         let nextFullMoon = lune.phase_range(
@@ -91,9 +91,8 @@ class StatusBar extends Component {
             if (daysUntilFull < 1) {
                 //hoursToGo = Math.round(moment.duration(daysUntilFull, "days").asHours())
                 //nextPhase = "Full in " + hoursToGo + (hoursToGo <= 1 ? " hour" : " hours");
-                //console.log(nextPhase)
                 nextPhase = <span> (Full tonight)</span>;
-            } else if (Math.floor(daysUntilFull) == 1) {
+            } else if (Math.floor(daysUntilFull) === 1) {
                 nextPhase = <span> (Full in {Math.floor(daysUntilFull)} day)</span>;
             } else {
                 nextPhase = <span> (Full in {Math.floor(daysUntilFull)} days)</span>;
@@ -101,7 +100,7 @@ class StatusBar extends Component {
         } else if (daysUntilNew <= 7) {
             if (daysUntilNew < 1) {
                 nextPhase = <span> (New tonight)</span>;
-            } else if (Math.floor(daysUntilNew) == 1) {
+            } else if (Math.floor(daysUntilNew) === 1) {
                 nextPhase = <span> (New in {Math.floor(daysUntilNew)} day)</span>;
             } else {
                 nextPhase = <span> (New in {Math.floor(daysUntilNew)} days)</span>;
@@ -131,9 +130,9 @@ class StatusBar extends Component {
         // This calculation comes out to a major phase length of about 24 hours (0.5% of the full cycle)
         if (illumination >= 0 && illumination <= 0.25) {
             majorPhase = <span><span className="hermetica-B023-moon_phase_full"/>&nbsp;New Moon</span>;
-        } else if (illumination >= 49.75 && illumination <= 50.25 && direction == "Waning") {
+        } else if (illumination >= 49.75 && illumination <= 50.25 && direction === "Waning") {
             majorPhase = <span><span className="hermetica-B021-moon_phase_waxing_half"/>&nbsp;Last Quarter</span>
-        } else if (illumination >= 49.75 && illumination <= 50.25 && direction == "Waxing") {
+        } else if (illumination >= 49.75 && illumination <= 50.25 && direction === "Waxing") {
             majorPhase = <span><span className="hermetica-B025-moon_phase_waning_half"/>&nbsp;First Quarter</span>
         } else if (illumination >= 99.75 && illumination <= 100) {
             majorPhase = <span><span className="hermetica-B027-moon_phase_new"/>&nbsp;Full Moon</span>
@@ -150,7 +149,7 @@ class StatusBar extends Component {
                 }
                 {!majorPhase &&
                     nextPhase
-                }
+                }&nbsp;({current_illumination}%)
             </span>
         )
     }

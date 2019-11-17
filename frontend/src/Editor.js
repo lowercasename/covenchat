@@ -23,12 +23,12 @@ const Modal = ({
         </div>
         );
 };
-        
+
 export default class Editor extends Component {
                     constructor(props) {
                     super(props)
         this.state = {
-                    id: '',
+                id: '',
                 text: this.props.editTarget.content || '',
                 title: this.props.editTarget.title || '',
                 privacy: this.props.editTarget ? (this.props.editTarget.public ? 'public' : 'private') : 'private',
@@ -41,7 +41,7 @@ export default class Editor extends Component {
             this.uploadFile = this.uploadFile.bind(this)
             this.imageHandler = this.imageHandler.bind(this)
         }
-    
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.modalVisible !== this.props.modalVisible) {
                     this.setState({
@@ -54,7 +54,7 @@ export default class Editor extends Component {
                     })
                 }
                 }
-            
+
     handleChange(content, delta, source, editor) {
                     this.setState({
                         text: content,
@@ -63,37 +63,37 @@ export default class Editor extends Component {
 
                 imageHandler = () => {
         const input = document.createElement('input');
-        
+
                 input.setAttribute('type', 'file');
                 input.setAttribute('accept', 'image/*');
                 input.click();
-        
+
         input.onchange = async () => {
                     this.setState({ uploadingImage: true })
             const file = input.files[0];
                 const formData = new FormData();
-    
+
                 formData.append('image', file);
-    
+
                 // Save current cursor state
                 const range = this.quillRef.getEditor().getSelection(true);
-    
+
                 // Insert temporary loading placeholder image
             // this.quillRef.getEditor().insertEmbed(range.index, 'image', `${window.location.origin}/images/loaders/placeholder.gif`);
-    
+
                 // Move cursor to right side of image (easier to continue typing)
                 this.quillRef.getEditor().setSelection(range.index + 1);
-    
+
                 const res = await this.uploadFile(formData); // API post, returns image location as string e.g. 'http://www.example.com/images/foo.png'
-    
+
                 // Remove placeholder image
                 // this.quillRef.getEditor().deleteText(range.index, 1);
-    
+
                 // Insert uploaded image
                 this.quillRef.getEditor().insertEmbed(range.index, 'image', '/uploads/' + res.filename);
             }
         }
-    
+
     modules = {
                     toolbar: {
                     container: [
@@ -131,14 +131,14 @@ export default class Editor extends Component {
         this.setState({uploadingImage: false})
                 return result;
             }
-        
+
     handleInputChange = (event) => {
         const target = event.target;
                 const value = target.type === 'checkbox' ? target.checked : target.value;
                 const name = target.name;
         this.setState({[name]:value});
             }
-        
+
     handleSubmit = (event) => {
                     event.preventDefault();
         if (this.state.text && this.state.uploadingImage === false) {
@@ -201,7 +201,7 @@ export default class Editor extends Component {
                 }
                 }
             }
-        
+
     render() {
                     let postPrivacy, postCategory;
         // if (this.props.mode === "edit") {
@@ -231,11 +231,10 @@ export default class Editor extends Component {
                                 value={this.state.id}
                             />
                             <input
-                                required
                                 type="text"
                                 className="full-width"
                                 name="title"
-                                placeholder="Title"
+                                placeholder="Title (optional)"
                                 value={this.state.title}
                                 onChange={this.handleInputChange}
                             />
@@ -294,7 +293,7 @@ export default class Editor extends Component {
                                                 id="category_spellbook"
                                                 value="spellbook"
                                                 checked={this.state.category === "spellbook"} />
-                                            <span>Spellbook</span>
+                                            <span>Spells</span>
                                         </label>
                                         <label htmlFor="category_lore">
                                             <input
