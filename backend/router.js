@@ -814,6 +814,8 @@ router.get('/api/altar/fetch/:userID', authorizeUser, async function(req,res) {
 	})
 	let posts = await Post.find({user: req.params.userID}).populate('user');
 	if (altar) {
+		console.log(altar);
+		console.log(posts);
 		res.status(200).json({
 			altar: altar,
 			posts: posts
