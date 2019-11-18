@@ -80,7 +80,7 @@
 }
 
 .welcomeMessage {
-    overflow-y: scroll;
+    overflow-y: auto;
     background: #805a93;
     z-index: 100;
     max-height: 60px;

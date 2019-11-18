@@ -309,7 +309,7 @@ export default class Editor extends Component {
                                                 id="category_lore"
                                                 value="lore"
                                                 checked={this.state.category === "lore"} />
-                                            <span>Lore</span>
+                                            <span>Notes</span>
                                         </label>
                                     </>
                                 }
