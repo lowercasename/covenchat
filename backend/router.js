@@ -808,6 +808,7 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 });
 
 router.get('/api/altar/fetch/:userID', authorizeUser, async function(req,res) {
+	console.log("Fetching altar for",req.params.userID)
 	let altar = await Altar.findOne({
 		user: req.params.userID
 	})

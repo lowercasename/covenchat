@@ -122,15 +122,15 @@ export default class Editor extends Component {
     ]
 
     uploadFile = async (file) => {
-                    let result = await fetch('/api/image/upload', {
-                    method: 'POST',
-                body: file
-            })
-            .then(res => (res.ok ? res : Promise.reject(res)))
-            .then(res => res.json())
+        let result = await fetch('/api/image/upload', {
+            method: 'POST',
+            body: file
+        })
+        .then(res => (res.ok ? res : Promise.reject(res)))
+        .then(res => res.json())
         this.setState({uploadingImage: false})
-                return result;
-            }
+        return result;
+    }
 
     handleInputChange = (event) => {
         const target = event.target;

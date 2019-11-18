@@ -304,10 +304,14 @@ export default class Altar extends Component {
     }
 
     componentDidMount() {
-
         fetch('/api/altar/fetch/' + this.state.user._id)
             .then(res => {
-                if (res.status === 200) return res.json();
+                if (res.status === 200) {
+                    return res.json();
+                } else {
+                    console.error("Failed to fetch altar!");
+                    return false;
+                }
             })
             .then(res => {
                 let journalPosts = res.posts.filter(p => p.category === "journal");
