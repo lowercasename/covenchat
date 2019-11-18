@@ -306,6 +306,7 @@ export default class Altar extends Component {
     componentDidMount() {
         fetch('/api/altar/fetch/' + this.state.user._id)
             .then(res => {
+                console.log(res);
                 if (res.status === 200) {
                     return res.json();
                 } else {
@@ -314,6 +315,7 @@ export default class Altar extends Component {
                 }
             })
             .then(res => {
+                console.log(res);
                 let journalPosts = res.posts.filter(p => p.category === "journal");
                 let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
                 let lorePosts = res.posts.filter(p => p.category === "lore");
