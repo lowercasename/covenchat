@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'react-quill/dist/quill.snow.css';
 import './Editor.css';
 import Dropdown from 'react-dropdown';
+import { toast } from 'react-toastify';
 
 const Modal = ({
     handleClose,
@@ -44,33 +45,37 @@ export default class Editor extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.modalVisible !== this.props.modalVisible) {
-                    this.setState({
-                        id: nextProps.editTarget._id || '',
-                        text: nextProps.editTarget.content || '',
-                        title: nextProps.editTarget.title || '',
-                        privacy: nextProps.editTarget ? (nextProps.editTarget.public ? 'public' : 'private') : 'private',
-                        category: nextProps.editTarget.category || 'journal',
-                        message: '',
-                    })
-                }
-                }
+            this.setState({
+                id: nextProps.editTarget._id || '',
+                text: nextProps.editTarget.content || '',
+                title: nextProps.editTarget.title || '',
+                privacy: nextProps.editTarget ? (nextProps.editTarget.public ? 'public' : 'private') : 'private',
+                category: nextProps.editTarget.category || 'journal',
+                message: '',
+            })
+        }
+    }
 
     handleChange(content, delta, source, editor) {
-                    this.setState({
-                        text: content,
-                    })
-                }
+        this.setState({
+            text: content,
+        })
+    }
 
-                imageHandler = () => {
+    imageHandler = () => {
         const input = document.createElement('input');
-
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
 
         input.onchange = async () => {
-                    this.setState({ uploadingImage: true })
+            this.setState({ uploadingImage: true })
             const file = input.files[0];
+            if (file.size / 1024 / 1024 > 2) { // in MB
+                toast("Due to server limitations we can't accept images over 2MB in size. Please resize your image and try again.", {
+                    className: 'green-toast',
+                });
+            } else {
                 const formData = new FormData();
 
                 formData.append('image', file);
@@ -78,8 +83,8 @@ export default class Editor extends Component {
                 // Save current cursor state
                 const range = this.quillRef.getEditor().getSelection(true);
 
-                // Insert temporary loading placeholder image
-            // this.quillRef.getEditor().insertEmbed(range.index, 'image', `${window.location.origin}/images/loaders/placeholder.gif`);
+                //Insert temporary loading placeholder image
+                this.quillRef.getEditor().insertEmbed(range.index, 'image', `${window.location.origin}/spinner.gif`);
 
                 // Move cursor to right side of image (easier to continue typing)
                 this.quillRef.getEditor().setSelection(range.index + 1);
@@ -87,12 +92,13 @@ export default class Editor extends Component {
                 const res = await this.uploadFile(formData); // API post, returns image location as string e.g. 'http://www.example.com/images/foo.png'
 
                 // Remove placeholder image
-                // this.quillRef.getEditor().deleteText(range.index, 1);
+                this.quillRef.getEditor().deleteText(range.index, 1);
 
                 // Insert uploaded image
                 this.quillRef.getEditor().insertEmbed(range.index, 'image', '/uploads/' + res.filename);
             }
         }
+    }
 
     modules = {
                     toolbar: {

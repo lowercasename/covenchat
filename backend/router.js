@@ -808,13 +808,10 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 });
 
 router.get('/api/altar/fetch/:userID', authorizeUser, async function(req,res) {
-	console.log("Fetching altar for",req.params.userID)
 	let altar = await Altar.findOne({
 		user: req.params.userID
 	})
 	let posts = await Post.find({user: req.params.userID}).populate('user');
-	console.log(altar);
-	console.log(posts);
 	if (altar) {
 		res.status(200).json({
 			altar: altar,
