@@ -317,7 +317,36 @@ router.post('/api/user/sendresetpasswordlink', function(req,res) {
 			.json({success: true})
 		}
 	})
-})
+});
+
+router.post('/api/user/resetpassword', async function(req, res) {
+	const { password, passwordRepeat, token } = req.body;
+	if (password === passwordRepeat) {
+		// Check token again
+		User.findOne({resetPasswordToken: token, resetPasswordTokenExpiry: { $gt: Date.now()}})
+		.then(user => {
+			if (user) {
+				user.password = password;
+				user.resetPasswordToken = '';
+				user.resetPasswordTokenExpiry = '';
+				user.save()
+				.then(result => {
+					if (result) {
+						res.status(200);
+					} else {
+						res.status(500)
+						.json({message: "Error resetting password. Please try again."});
+					}
+				})
+			} else {
+				res.redirect('/forgotpassword');
+			}
+		})
+	} else {
+		res.status(500)
+		.json({message: "The supplied passwords do not match."});
+	}
+});
 
 router.post('/api/user/settings/update', authorizeUser, async function(req, res) {
 	let subValue = req.body.type == "statusBar" ? ".set" : "";

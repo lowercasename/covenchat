@@ -7,6 +7,7 @@ export default class ResetPassword extends Component {
         this.state = {
             password: '',
             passwordRepeat: '',
+            token: '',
             redirectToLogin: false,
             message: false
         };
@@ -32,18 +33,19 @@ export default class ResetPassword extends Component {
             if (res.status !== 200) {
                 this.props.history.push({
                     pathname: '/forgot-password',
-                    state: 'The reset password token you provided is invalid or has expired. Please request a new token.'
+                    state: 'The reset password token you provided is invalid or has expired. Please request a new token below.'
                 });
             } else {
-                console.log("Token is valid!")
+                // Token is valid
+                this.setState({token: token})
             }
         })
         .catch(err => {
           console.error(err);
-        //   this.props.history.push({
-        //     pathname: '/forgot-password',
-        //     state: 'The reset password token you provided is invalid or has expired. Please request a new token.'
-        //     });
+          this.props.history.push({
+            pathname: '/forgot-password',
+            state: 'The reset password token you provided is invalid or has expired. Please request a new token below.'
+            });
         });
     }
 
@@ -80,7 +82,7 @@ export default class ResetPassword extends Component {
         if (this.state.redirectToLogin) {
             this.props.history.push({
                 pathname: '/login',
-                state: 'You have successfully reset your password - you can now log in with the new passsword.'
+                state: 'You have successfully reset your password. You can now log in with the new passsword.'
             });
         }
         return (

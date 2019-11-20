@@ -43,7 +43,7 @@ export default class ForgotPassword extends Component {
         if (this.state.redirectToLogin) {
             this.props.history.push({
                 pathname: '/login',
-                state: "A password reset link has been sent to "+ this.state.email +". If the email hasn't arrived after an hour, check that you supplied the correct email you used to register this account."
+                state: "A password reset link has been sent to <strong>"+ this.state.email +"</strong>. If the email hasn't arrived after an hour, check that you supplied the correct email used to register this account."
             });
         }
         return (

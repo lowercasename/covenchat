@@ -40,7 +40,7 @@ export default class Login extends Component {
     render() {
         return (
             <form onSubmit={this.onSubmit} className="publicForm">
-                <h1>Let's chat!</h1>
+                <h1>Let's make some magick!</h1>
                 {this.state.message && <div className="formMessage">{this.state.message}</div>}
                 <label htmlFor="username">Username</label>
                 <input
