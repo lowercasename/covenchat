@@ -38,7 +38,8 @@
     "serve": "^11.1.0",
     "simplebar": "^4.2.3",
     "slate": "^0.47.8",
-    "slate-react": "^0.22.9"
+    "slate-react": "^0.22.9",
+    "socket.io-client": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

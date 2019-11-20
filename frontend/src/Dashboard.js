@@ -9,8 +9,9 @@ import Settings from './Settings';
 import { toast } from 'react-toastify';
 import Pusher from 'pusher-js';
 
+import openSocket from 'socket.io-client';
+
 import { library } from '@fortawesome/fontawesome-svg-core'
-// import { fab } from '@fortawesome/free-brands-svg-icons'
 import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile} from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,6 +19,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
 
 toast.configure()
+
+const socket = openSocket('http://localhost:8899');
 
 const Modal = ({ handleClose, show, children }) => {
     var showHideClassName = show ? "modal display-block" : "modal display-none";

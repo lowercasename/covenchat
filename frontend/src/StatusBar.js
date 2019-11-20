@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 const lune = require('lune');
 const moment = require('moment');
+const mercuryRetrograde = require('./data/mercuryretrograde.json');
 
 class StatusBar extends Component {
     constructor() {
@@ -11,13 +12,13 @@ class StatusBar extends Component {
     }
 
     componentDidMount() {
-        fetch('https://mercuryretrogradeapi.com/')
-            .then(res => res.json())
-            .then(result => {
-                this.setState({
-                    mercuryRetrograde: result.is_retrograde
-                })
-            });
+        // fetch('https://mercuryretrogradeapi.com/')
+        //     .then(res => res.json())
+        //     .then(result => {
+        //         this.setState({
+        //             mercuryRetrograde: result.is_retrograde
+        //         })
+        //     });
     }
 
     // getMoonPhase(today) {
@@ -154,6 +155,20 @@ class StatusBar extends Component {
         )
     }
 
+    getMercuryRetrograde(today) {
+        let dateString = today.toISOString().slice(0,10);
+        let todayMoment = moment(dateString);
+        let daysRemaining, mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury not retrograde</span>;
+        mercuryRetrograde.segments.forEach(segment => {
+            if (todayMoment.isBetween(segment.from, segment.to, null, '[]')) {
+                daysRemaining = moment(segment.to).diff(todayMoment, 'days');
+                mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury is retrograde ({daysRemaining+1} {daysRemaining <= 1 ? 'day' : 'days'} left)</span>;
+
+            }
+        })
+        return mercuryMessage;
+    }
+
     getZodiacSign(today) {
 
         var zodiacSigns = {
@@ -257,12 +272,6 @@ class StatusBar extends Component {
 
     render() {
         var today = new Date();
-        let mercuryMessage;
-        if (this.state.mercuryRetrograde === false) {
-            mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury not retrograde</span>;
-        } else {
-            mercuryMessage = <span><span className='hermetica-B002-mercury'/>&nbsp;Mercury is retrograde</span>;
-        }
         return ( <aside className="statusBar" > {
                 this.props.modules.moonPhase.set &&
                 <span className="statusItem">{this.getMoonPhase(today)}</span>
@@ -276,7 +285,7 @@ class StatusBar extends Component {
                     <span className="statusItem">{this.getZodiacSign(today)}&nbsp;season</span>
             } {
                 this.props.modules.mercuryRetrograde.set &&
-                    <span className="statusItem">{mercuryMessage}</span>
+                    <span className="statusItem">{this.getMercuryRetrograde(today)}</span>
             } </aside>
         );
     }
