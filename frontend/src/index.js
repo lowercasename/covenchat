@@ -5,6 +5,8 @@ import './index.css';
 import withAuth from './withAuth';
 import Login from './Login';
 import Register from './Register';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 import Dashboard from './Dashboard';
 import * as serviceWorker from './serviceWorker';
 
@@ -105,6 +107,8 @@ class App extends Component {
                     <PublicRoute exact path="/welcome" layout={PublicLayout} component={LandingPage} />
                     <PublicRoute path="/login" layout={PublicLayout} component={Login} />
                     <PublicRoute path="/register" layout={PublicLayout} component={Register} />
+                    <PublicRoute path="/forgot-password" layout={PublicLayout} component={ForgotPassword} />
+                    <PublicRoute path="/reset-password" layout={PublicLayout} component={ResetPassword} />
                     <Route exact path="/" component={withAuth(Dashboard)}/>
                     <Route exact path="/altar/*" component={withAuth(Dashboard)}/>
                     <PublicRoute layout={PublicLayout} component={NotFound}/>

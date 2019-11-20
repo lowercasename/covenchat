@@ -46,11 +46,7 @@ export default class Register extends Component {
             this.props.history.push({
                 pathname: '/login',
                 state: 'You have successfully registered - you can now log in.'
-            })
-            // return <Redirect to={{
-            //     pathname: "/login",
-            //     state: 'You have successfully registered - you can now log in.'
-            // }} />;
+            });
         }
         return (
             <form onSubmit={this.onSubmit} className="publicForm">

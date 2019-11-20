@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Redirect } from 'react-router-dom';
 
-export default class Login extends Component {
+export default class ForgotPassword extends Component {
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
-            username : '',
-            password: '',
+            email : '',
+            redirectToLogin: false,
             message: this.props.location.state
         };
     }
@@ -17,7 +18,7 @@ export default class Login extends Component {
     }
     onSubmit = (event) => {
         event.preventDefault();
-        fetch('/api/user/authenticate', {
+        fetch('/api/user/sendresetpasswordlink', {
             method: 'POST',
             body: JSON.stringify(this.state),
             headers: {
@@ -29,43 +30,42 @@ export default class Login extends Component {
             if (res.message) {
                 this.setState({message: res.message})
             } else {
-                this.props.history.push('/');
+                console.log("Reset password email sent!")
+                this.setState({ redirectToLogin: true });
             }
         })
         .catch(err => {
-            console.error(err);
-            this.setState({ message: 'Error logging in! Please try again.' });
+          console.error(err);
+          this.setState({ message: 'Error sending email! Please try again.' });
         });
     }
     render() {
+        if (this.state.redirectToLogin) {
+            this.props.history.push({
+                pathname: '/login',
+                state: "A password reset link has been sent to "+ this.state.email +". If the email hasn't arrived after an hour, check that you supplied the correct email you used to register this account."
+            });
+        }
         return (
             <form onSubmit={this.onSubmit} className="publicForm">
-                <h1>Let's chat!</h1>
+                <h1>Forgot Password</h1>
                 {this.state.message && <div className="formMessage">{this.state.message}</div>}
-                <label htmlFor="username">Username</label>
+                <p style={{marginBottom:'1rem'}}>Enter the email you used to register and a link to reset your password will be sent to you.</p>
+                <label htmlFor="email">Email</label>
                 <input
-                    type="text"
-                    name="username"
-                    value={this.state.username}
+                    type="email"
+                    name="email"
+                    placeholder="badasswitch@example.com"
+                    className="full-width"
+                    value={this.state.email}
                     onChange={this.handleInputChange}
                     required
-                    className="full-width"
-                />
-                <label htmlFor="password">Password</label>
-                <input
-                    type="password"
-                    name="password"
-                    value={this.state.password}
-                    onChange={this.handleInputChange}
-                    required
-                    className="full-width"
                 />
                 <input
                     type="submit"
-                    value="Submit"
+                    value="Send password reset link"
                     className="full-width"
                 />
-                <a className="form-link" href="/forgot-password">Forgot password?</a>
             </form>
         );
     }

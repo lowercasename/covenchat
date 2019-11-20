@@ -50,6 +50,8 @@ h2, h3, h4, h5, h6  {
   font-size: 0.9rem;
 }
 
+/* Forms */
+
 input,
 textarea {
   font-family: 'Fira Sans', sans-serif;
@@ -113,6 +115,17 @@ button[disabled] {
     background: #c6c6c6;
     color: #6f6f6f;
     cursor: default;
+}
+
+a.form-link {
+  color: var(--white);
+  text-decoration: none;
+  font-size: smaller;
+  transition: 150ms;
+}
+
+a.form-link:hover {
+  text-decoration: underline;
 }
 
 .dropdown {

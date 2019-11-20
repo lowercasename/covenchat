@@ -18,6 +18,26 @@ const parser = require('./parser');
 const jwt = require('jsonwebtoken');
 const secret = process.env.SECRET;
 const authorizeUser = require('./authorizer');
+const crypto = require('crypto');
+
+// NODEMAILER
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+	host: process.env.EMAIL_SERVER,
+	port: 587,
+	secure: false, // upgrade later with STARTTLS
+	auth: {
+		user: process.env.EMAIL_USERNAME,
+		pass: process.env.EMAIL_PASSWORD
+	}
+});
+transporter.verify(function(error, success) {
+	if (error) {
+		console.log(error);
+	} else {
+		console.log("Email server is ready to take our messages");
+	}
+});
 
 // WEBSOCKETS
 const pusher = new Pusher({
@@ -176,6 +196,17 @@ router.get('/api/user/fetch-by-username/:username', authorizeUser, function(req,
 	})
 });
 
+router.get('/api/user/checkresetpasswordtoken/:token', function(req, res) {
+	User.findOne({resetPasswordToken: req.params.token, resetPasswordTokenExpiry: { $gt: Date.now()}})
+	.then(user => {
+		if (user) {
+			res.sendStatus(200);
+		} else {
+			res.sendStatus(400);
+		}
+	})
+});
+
 router.post('/api/user/logout', authorizeUser, function(req, res) {
 	res.clearCookie('token').sendStatus(200);
 });
@@ -225,6 +256,58 @@ router.post('/api/user/register', async function(req, res) {
 		});
 	}
 });
+
+router.post('/api/user/sendresetpasswordlink', function(req,res) {
+	User.findOne({
+		email: req.body.email
+	})
+	.then(user => {
+		if (user) {
+			// Create the random token
+			let token = crypto.randomBytes(20).toString('hex');
+	
+			User.findByIdAndUpdate(
+				{ _id: user._id },
+				{
+					resetPasswordToken: token,
+					resetPasswordTokenExpiry: Date.now() + 86400000
+				},
+				{ upsert: true, new: true }
+			)
+			.then(response => {
+				if (response) {
+					// Send the email!
+					let resetEmail = {
+						from: 'support@coven.chat',
+						to: user.email,
+						subject: 'We heard you forgot your password',
+						html: '<p>Hi ' + user.username + '!</p><p>Someone (hopefully you!) just requested a password reset link for this account on CovenChat.</p><p>If this was you, follow this link to reset your password: <a href="https://localhost:3000/reset-password?token=' + token + '">https://localhost:3000/reset-password?token=' + token + '</a>.</p><p>If this wasn\'t you, chances are someone put your email in by mistake. Don\'t worry, your account is safe and this link will expire in 24 hours.</p><p>Love,</p><p>CovenChat Support</p>'
+					};
+					transporter.sendMail(resetEmail, function(err, info) {
+						console.log(info)
+						if (err) {
+							console.log(err)
+							res.status(500)
+							.json({message: "Error sending email! Please try again."});
+						} else {
+							res.status(200)
+							.json({success: true})
+						}
+					})
+				} else {
+					console.log(response)
+					res.status(500)
+					.json({message: "Error sending email! Please try again."});
+				}
+			})
+		} else {
+			// A user with this email does not exist - fail silently.
+			console.log("No user with specified email for password reset")
+			res.status(200)
+			.json({success: true})
+		}
+	})
+})
 
 router.post('/api/user/settings/update', authorizeUser, async function(req, res) {
 	let subValue = req.body.type == "statusBar" ? ".set" : "";
