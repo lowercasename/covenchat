@@ -5,14 +5,16 @@ import { Tooltip } from 'react-tippy';
 import 'react-tippy/dist/tippy.css'
 import Textarea from 'react-textarea-autosize';
 import Pusher from 'pusher-js';
+import openSocket from 'socket.io-client';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker } from 'emoji-mart'
 import './ChatDrawer.css';
-
 import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
+
+const socket = openSocket('http://localhost:8899');
 
 function scrollToBottom() {
     var messages = document.querySelector('#chatWindow .simplebar-content-wrapper'); messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
@@ -763,18 +765,22 @@ class ChatDrawer extends Component {
     }
 
     sendMessage(text) {
-        fetch('/api/chat/message/new', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                content: text,
-                room: this.state.currentRoom._id
-            })
-        })
-        .catch(err => console.error(err))
+        socket.emit('sent-chat-message', {
+            content: text,
+            room: this.state.currentRoom._id
+        });
+        // fetch('/api/chat/message/new', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         content: text,
+        //         room: this.state.currentRoom._id
+        //     })
+        // })
+        // .catch(err => console.error(err))
     }
 
     switchRoom(roomSlug) {

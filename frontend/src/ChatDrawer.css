@@ -306,10 +306,12 @@ the previous day's message */
     opacity: .7;
     color: var(--green);
     transition: 150ms;
+    text-decoration: none;
 }
 
 .messageContent a:hover {
     color: var(--bright-green);
+    text-decoration: underline;
 }
 
 .messageList .alert {
