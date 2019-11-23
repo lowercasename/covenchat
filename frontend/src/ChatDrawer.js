@@ -5,7 +5,7 @@ import { Tooltip } from 'react-tippy';
 import 'react-tippy/dist/tippy.css'
 import Textarea from 'react-textarea-autosize';
 import Pusher from 'pusher-js';
-import openSocket from 'socket.io-client';
+import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +14,7 @@ import { Picker } from 'emoji-mart'
 import './ChatDrawer.css';
 import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
 
-const socket = openSocket('http://localhost:8899');
+const socket = io('http://localhost:8899');
 
 function scrollToBottom() {
     var messages = document.querySelector('#chatWindow .simplebar-content-wrapper'); messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
@@ -46,8 +46,7 @@ class MessageList extends Component {
     onScroll = () => {
         let messages = document.querySelector('#chatWindow .simplebar-content-wrapper');
         let scrollTop = messages.scrollTop;
-        console.log(scrollTop)
-        if (scrollTop === 0) {
+        if (scrollTop <= 0) {
             if (document.querySelector('#chatWindow .messageContainer')) {
                 let lastMessage = document.querySelector('#chatWindow .messageContainer').id;
                 this.props.infiniteScroll(lastMessage);
@@ -530,202 +529,257 @@ class ChatDrawer extends Component {
             .then(payload => {
                 this.setState({ publicRooms: payload });
         });
-
-        fetch('api/pusher/getkey')
-        .then(res => res.json())
-        .then(payload => {
-            var pusher = new Pusher(payload.key, {
-                cluster: 'eu',
-                forceTLS: true
-            });
-            pusher.connection.bind('connected', () => {
-                this.setState({socketId: pusher.connection.socket_id});
-            });
-            var messagesChannel = pusher.subscribe('messages');
-            var generalChannel = pusher.subscribe('general');
-            messagesChannel.bind('message-sent', data => {
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    if (data.type === "tarot") {
-                        let audio = new Audio('/card.mp3');
-                        audio.play();
-                    }
-                    if (data.type === "runes") {
-                        let audio = new Audio('/runes.mp3');
-                        audio.play();
-                    }
-                    this.setState({
-                        messages: [...this.state.messages, data]
-                    });
-                    scrollToBottom();
-                } else {
-                    if (this.state.joinedRooms.some(r => r.slug === data.room.slug)) {
-                        var joinedRooms = [...this.state.joinedRooms];
-                        joinedRooms.forEach(r => {
-                            if (r.slug === data.room.slug) {
-                                r.unreadMessages++;
-                            }
-                        })
-                        this.setState({
-                            joinedRooms: joinedRooms
-                        })
-                        // Check for mentions
-                        if (data.mentions.includes(this.props.user.username)) {
-                            toast(data.user.username + " has mentioned you in " + data.room.name + ".", {
-                                className: 'green-toast',
-                            });
+        socket.on('connect', () => {
+            console.log("Connected Him");
+            socket.emit('user-online', this.props.user);
+        })
+        socket.on('message-sent', payload => {
+            if (this.state.currentRoom.slug === payload.room.slug) {
+                if (payload.type === "tarot") {
+                    let audio = new Audio('/card.mp3');
+                    audio.play();
+                }
+                if (payload.type === "runes") {
+                    let audio = new Audio('/runes.mp3');
+                    audio.play();
+                }
+                this.setState({
+                    messages: [...this.state.messages, payload]
+                });
+                scrollToBottom();
+            } else {
+                if (this.state.joinedRooms.some(r => r.slug === payload.room.slug)) {
+                    var joinedRooms = [...this.state.joinedRooms];
+                    joinedRooms.forEach(r => {
+                        if (r.slug === payload.room.slug) {
+                            r.unreadMessages++;
                         }
-                    } else if (this.state.directMessages.some(r => r.slug === data.room.slug)) {
-                        var directMessages = [...this.state.directMessages];
-                        directMessages.forEach(r => {
-                            if (r.slug === data.room.slug) {
-                                r.unreadMessages++;
-                            }
-                        })
-                        this.setState({
-                            directMessages: directMessages
-                        })
-                        // Check for mentions
-                        if (data.mentions.includes(this.props.user.username)) {
-                            toast(data.user.username + " has mentioned you in a private message.", {
-                                className: 'green-toast',
-                            });
-                        }
-                    }
-                }
-            });
-            generalChannel.bind('room-created', data => {
-                if (data.user.username === this.props.user.username) {
-                    fetch('/api/chat/room/fetch/' + data.room.slug)
-                    .then(res => res.json())
-                    .then(payload => {
-                        var joinedRooms = [...this.state.joinedRooms, payload.room]
-                        joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
-                        this.setState({
-                            joinedRooms: joinedRooms,
-                            messages: payload.messages,
-                            currentRoom: payload.room,
-                            currentRoomMembers: payload.room.members,
-                            currentRoomVisitors: payload.room.visitors,
-                        });
-                        scrollToBottom();
-                    });
-                }
-            });
-            generalChannel.bind('room-edited', data => {
-                this.reloadRoomList();
-                if (data._id === this.state.currentRoom._id) {
-                    this.reloadRoom(data.slug)
-                }
-            });
-            generalChannel.bind('visitor-entered-room', data => {
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
-                        var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                        currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                        this.setState({currentRoomVisitors: currentRoomVisitors})
-                    }
-                }
-            });
-            generalChannel.bind('visitor-left-room', data => {
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() !== data.user._id.toString())})
-                }
-            });
-            generalChannel.bind('user-joined-room', data => {
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    // Add user to members array
-                    if (!this.state.currentRoomMembers.some(v => v.user.username === data.user.username)) {
-                        var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
-                        currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
-                        this.setState({
-                            currentRoomMembers: currentRoomMembers
-                        })
-                    }
-                    // Remove member from visitors array
-                    var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username !== data.user.username);
-                    this.setState({
-                        currentRoomVisitors: currentRoomVisitors
                     })
-                }
-            });
-            generalChannel.bind('user-left-room', data => {
-                if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public === true) {
-                    // Add user to visitors array
-                    if (!this.state.currentRoomVisitors.some(v => v.username === data.user.username)) {
-                        var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
-                        currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
-                        this.setState({
-                            currentRoomVisitors: currentRoomVisitors
-                        })
-                    }
-                }
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    // Remove user from members array
-                    var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() !== data.user._id.toString());
-                    this.setState({
-                        currentRoomMembers: currentRoomMembers
-                    })
-                }
-            });
-            generalChannel.bind('user-invited-to-room', data => {
-                if (this.props.user._id === data.user._id) {
-                    // Add room to user's rooms
-                    var joinedRooms = [...this.state.joinedRooms, data.room]
-                    joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
                     this.setState({
                         joinedRooms: joinedRooms
-                    });
-                    toast("You have been invited to a private Coven: " + data.room.name + ".", {
-                        className: 'green-toast',
-                    });
-                }
-                if (this.state.currentRoom.slug === data.room.slug) {
-                    // Add user to members array
-                    if (!this.state.currentRoomMembers.some(m => m.user.username === data.user.username)) {
-                        var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
-                        currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
-                        this.setState({
-                            currentRoomMembers: currentRoomMembers
-                        })
-                    }
-                    toast('A new member has joined this Coven.', {
-                        className: 'green-toast',
-                    });
-                }
-            });
-            generalChannel.bind('direct-message-room-created', data => {
-                if (data.sender.username === this.props.user.username || data.recipient.username === this.props.user.username) {
-                    fetch('/api/chat/room/fetch/' + data.room.slug)
-                    .then(res => res.json())
-                    .then(payload => {
-                        var directMessages = [...this.state.directMessages, payload.room]
-                        directMessages.map(r => {
-                            let otherUser = r.members.find(m => m.user.username !== this.props.user.username);
-                            r.otherUser = otherUser.user.username;
-                            return r;
-                        })
-                        directMessages.sort((a, b) => a.otherUser.localeCompare( b.otherUser ))
-                        this.setState({
-                            directMessages: directMessages,
-                            messages: payload.messages,
-                            currentRoom: payload.room,
-                            currentRoomMembers: payload.room.members,
-                            currentRoomVisitors: payload.room.visitors,
+                    })
+                    // Check for mentions
+                    if (payload.mentions.includes(this.props.user.username)) {
+                        toast(payload.user.username + " has mentioned you in " + payload.room.name + ".", {
+                            className: 'green-toast',
                         });
-                        scrollToBottom();
-                    });
+                    }
+                } else if (this.state.directMessages.some(r => r.slug === payload.room.slug)) {
+                    var directMessages = [...this.state.directMessages];
+                    directMessages.forEach(r => {
+                        if (r.slug === payload.room.slug) {
+                            r.unreadMessages++;
+                        }
+                    })
+                    this.setState({
+                        directMessages: directMessages
+                    })
+                    // Check for mentions
+                    if (payload.mentions.includes(this.props.user.username)) {
+                        toast(payload.user.username + " has mentioned you in a private message.", {
+                            className: 'green-toast',
+                        });
+                    }
                 }
-            });
+            }
+        })
 
-            // generalChannel.bind('messages-read', data => {
-            //     console.log("Clearing unread messages!", data)
-            //     console.log(this.state.currentRoom.slug)
-            //     if (this.state.currentRoom.slug === data.room) {
-            //         console.log("Unread messages being cleared from current room!")
-            //
-            //     }
-            // });
-        });
+
+    //     fetch('api/pusher/getkey')
+    //     .then(res => res.json())
+    //     .then(payload => {
+    //         var pusher = new Pusher(payload.key, {
+    //             cluster: 'eu',
+    //             forceTLS: true
+    //         });
+    //         pusher.connection.bind('connected', () => {
+    //             this.setState({socketId: pusher.connection.socket_id});
+    //         });
+    //         var messagesChannel = pusher.subscribe('messages');
+    //         var generalChannel = pusher.subscribe('general');
+    //         messagesChannel.bind('message-sent', data => {
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 if (data.type === "tarot") {
+    //                     let audio = new Audio('/card.mp3');
+    //                     audio.play();
+    //                 }
+    //                 if (data.type === "runes") {
+    //                     let audio = new Audio('/runes.mp3');
+    //                     audio.play();
+    //                 }
+    //                 this.setState({
+    //                     messages: [...this.state.messages, data]
+    //                 });
+    //                 scrollToBottom();
+    //             } else {
+    //                 if (this.state.joinedRooms.some(r => r.slug === data.room.slug)) {
+    //                     var joinedRooms = [...this.state.joinedRooms];
+    //                     joinedRooms.forEach(r => {
+    //                         if (r.slug === data.room.slug) {
+    //                             r.unreadMessages++;
+    //                         }
+    //                     })
+    //                     this.setState({
+    //                         joinedRooms: joinedRooms
+    //                     })
+    //                     // Check for mentions
+    //                     if (data.mentions.includes(this.props.user.username)) {
+    //                         toast(data.user.username + " has mentioned you in " + data.room.name + ".", {
+    //                             className: 'green-toast',
+    //                         });
+    //                     }
+    //                 } else if (this.state.directMessages.some(r => r.slug === data.room.slug)) {
+    //                     var directMessages = [...this.state.directMessages];
+    //                     directMessages.forEach(r => {
+    //                         if (r.slug === data.room.slug) {
+    //                             r.unreadMessages++;
+    //                         }
+    //                     })
+    //                     this.setState({
+    //                         directMessages: directMessages
+    //                     })
+    //                     // Check for mentions
+    //                     if (data.mentions.includes(this.props.user.username)) {
+    //                         toast(data.user.username + " has mentioned you in a private message.", {
+    //                             className: 'green-toast',
+    //                         });
+    //                     }
+    //                 }
+    //             }
+    //         });
+    //         generalChannel.bind('room-created', data => {
+    //             if (data.user.username === this.props.user.username) {
+    //                 fetch('/api/chat/room/fetch/' + data.room.slug)
+    //                 .then(res => res.json())
+    //                 .then(payload => {
+    //                     var joinedRooms = [...this.state.joinedRooms, payload.room]
+    //                     joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+    //                     this.setState({
+    //                         joinedRooms: joinedRooms,
+    //                         messages: payload.messages,
+    //                         currentRoom: payload.room,
+    //                         currentRoomMembers: payload.room.members,
+    //                         currentRoomVisitors: payload.room.visitors,
+    //                     });
+    //                     scrollToBottom();
+    //                 });
+    //             }
+    //         });
+    //         generalChannel.bind('room-edited', data => {
+    //             this.reloadRoomList();
+    //             if (data._id === this.state.currentRoom._id) {
+    //                 this.reloadRoom(data.slug)
+    //             }
+    //         });
+    //         generalChannel.bind('visitor-entered-room', data => {
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 if (!this.state.currentRoomVisitors.some(v => v._id.toString() === data.user._id.toString())) {
+    //                     var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+    //                     currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+    //                     this.setState({currentRoomVisitors: currentRoomVisitors})
+    //                 }
+    //             }
+    //         });
+    //         generalChannel.bind('visitor-left-room', data => {
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 this.setState({currentRoomVisitors: this.state.currentRoomVisitors.filter(m => m._id.toString() !== data.user._id.toString())})
+    //             }
+    //         });
+    //         generalChannel.bind('user-joined-room', data => {
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 // Add user to members array
+    //                 if (!this.state.currentRoomMembers.some(v => v.user.username === data.user.username)) {
+    //                     var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+    //                     currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+    //                     this.setState({
+    //                         currentRoomMembers: currentRoomMembers
+    //                     })
+    //                 }
+    //                 // Remove member from visitors array
+    //                 var currentRoomVisitors = this.state.currentRoomVisitors.filter(m => m.username !== data.user.username);
+    //                 this.setState({
+    //                     currentRoomVisitors: currentRoomVisitors
+    //                 })
+    //             }
+    //         });
+    //         generalChannel.bind('user-left-room', data => {
+    //             if (this.state.currentRoom.slug === data.room.slug && this.state.currentRoom.public === true) {
+    //                 // Add user to visitors array
+    //                 if (!this.state.currentRoomVisitors.some(v => v.username === data.user.username)) {
+    //                     var currentRoomVisitors = [...this.state.currentRoomVisitors, data.user];
+    //                     currentRoomVisitors.sort((a, b) => a.username.localeCompare( b.username ));
+    //                     this.setState({
+    //                         currentRoomVisitors: currentRoomVisitors
+    //                     })
+    //                 }
+    //             }
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 // Remove user from members array
+    //                 var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() !== data.user._id.toString());
+    //                 this.setState({
+    //                     currentRoomMembers: currentRoomMembers
+    //                 })
+    //             }
+    //         });
+    //         generalChannel.bind('user-invited-to-room', data => {
+    //             if (this.props.user._id === data.user._id) {
+    //                 // Add room to user's rooms
+    //                 var joinedRooms = [...this.state.joinedRooms, data.room]
+    //                 joinedRooms.sort((a, b) => a.name.localeCompare( b.name ))
+    //                 this.setState({
+    //                     joinedRooms: joinedRooms
+    //                 });
+    //                 toast("You have been invited to a private Coven: " + data.room.name + ".", {
+    //                     className: 'green-toast',
+    //                 });
+    //             }
+    //             if (this.state.currentRoom.slug === data.room.slug) {
+    //                 // Add user to members array
+    //                 if (!this.state.currentRoomMembers.some(m => m.user.username === data.user.username)) {
+    //                     var currentRoomMembers = [...this.state.currentRoomMembers, {role: "member", user: data.user}];
+    //                     currentRoomMembers.sort((a, b) => a.user.username.localeCompare( b.user.username ));
+    //                     this.setState({
+    //                         currentRoomMembers: currentRoomMembers
+    //                     })
+    //                 }
+    //                 toast('A new member has joined this Coven.', {
+    //                     className: 'green-toast',
+    //                 });
+    //             }
+    //         });
+    //         generalChannel.bind('direct-message-room-created', data => {
+    //             if (data.sender.username === this.props.user.username || data.recipient.username === this.props.user.username) {
+    //                 fetch('/api/chat/room/fetch/' + data.room.slug)
+    //                 .then(res => res.json())
+    //                 .then(payload => {
+    //                     var directMessages = [...this.state.directMessages, payload.room]
+    //                     directMessages.map(r => {
+    //                         let otherUser = r.members.find(m => m.user.username !== this.props.user.username);
+    //                         r.otherUser = otherUser.user.username;
+    //                         return r;
+    //                     })
+    //                     directMessages.sort((a, b) => a.otherUser.localeCompare( b.otherUser ))
+    //                     this.setState({
+    //                         directMessages: directMessages,
+    //                         messages: payload.messages,
+    //                         currentRoom: payload.room,
+    //                         currentRoomMembers: payload.room.members,
+    //                         currentRoomVisitors: payload.room.visitors,
+    //                     });
+    //                     scrollToBottom();
+    //                 });
+    //             }
+    //         });
+
+    //         // generalChannel.bind('messages-read', data => {
+    //         //     console.log("Clearing unread messages!", data)
+    //         //     console.log(this.state.currentRoom.slug)
+    //         //     if (this.state.currentRoom.slug === data.room) {
+    //         //         console.log("Unread messages being cleared from current room!")
+    //         //
+    //         //     }
+    //         // });
+    //     });
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -738,10 +792,7 @@ class ChatDrawer extends Component {
         e.preventDefault()
         var messageContent = this.state.message.trim();
         if (messageContent !== '' && messageContent !== '/me') {
-            this.sendMessage(messageContent)
-            this.setState({
-                message: ''
-            })
+            this.sendMessage(messageContent);
         }
     }
 
@@ -751,9 +802,6 @@ class ChatDrawer extends Component {
             var messageContent = this.state.message.trim();
             if (messageContent !== '' && messageContent !== '/me') {
                 this.sendMessage(messageContent)
-                this.setState({
-                    message: ''
-                })
             }
         }
     }
@@ -765,9 +813,16 @@ class ChatDrawer extends Component {
     }
 
     sendMessage(text) {
-        socket.emit('sent-chat-message', {
+        socket.emit('send-message', {
             content: text,
-            room: this.state.currentRoom._id
+            room: this.state.currentRoom._id,
+            user: this.props.user._id
+        }, response => {
+            if (response) {
+                this.setState({
+                    message: ''
+                })
+            }
         });
         // fetch('/api/chat/message/new', {
         //     method: 'POST',
@@ -784,41 +839,45 @@ class ChatDrawer extends Component {
     }
 
     switchRoom(roomSlug) {
-        fetch('/api/chat/room/exit/' + this.state.currentRoom.slug, {method: "POST", body: {socketId: this.state.socketId}})
-        .then(res => {
-            if (res.status === 200) {
-                fetch('/api/chat/room/enter/' + roomSlug, {method: "POST", body: {socketId: this.state.socketId}})
-                .then(res => {
-                    console.log(res)
-                    if (res.status === 200) {
-                        this.reloadRoom(roomSlug)
-                        // Clear unread messages from frontend (handled async on backend)
-                        let directMessages = [...this.state.directMessages];
-                        directMessages.forEach(r => {
-                            if (r.slug === roomSlug) {
-                                r.unreadMessages = 0;
-                                this.setState({
-                                    directMessages: directMessages
-                                })
-                            }
-                        })
-                        let joinedRooms = [...this.state.joinedRooms];
-                        joinedRooms.forEach(r => {
-                            if (r.slug === roomSlug) {
-                                r.unreadMessages = 0;
-                                this.setState({
-                                    joinedRooms: joinedRooms
-                                })
-                            }
-                        })
-                    } else {
-                        console.log("Failed to enter room")
-                    }
-                });
-            } else {
-                console.log("Failed to exit room")
-            }
+        socket.emit('enter-room', {oldRoom: this.state.currentRoom.slug, newRoom: roomSlug}, callback => {
+            console.log("Calling back")
+            console.log(callback);
         });
+    //     fetch('/api/chat/room/exit/' + this.state.currentRoom.slug, {method: "POST", body: {socketId: this.state.socketId}})
+    //     .then(res => {
+    //         if (res.status === 200) {
+    //             fetch('/api/chat/room/enter/' + roomSlug, {method: "POST", body: {socketId: this.state.socketId}})
+    //             .then(res => {
+    //                 console.log(res)
+    //                 if (res.status === 200) {
+    //                     this.reloadRoom(roomSlug)
+    //                     // Clear unread messages from frontend (handled async on backend)
+    //                     let directMessages = [...this.state.directMessages];
+    //                     directMessages.forEach(r => {
+    //                         if (r.slug === roomSlug) {
+    //                             r.unreadMessages = 0;
+    //                             this.setState({
+    //                                 directMessages: directMessages
+    //                             })
+    //                         }
+    //                     })
+    //                     let joinedRooms = [...this.state.joinedRooms];
+    //                     joinedRooms.forEach(r => {
+    //                         if (r.slug === roomSlug) {
+    //                             r.unreadMessages = 0;
+    //                             this.setState({
+    //                                 joinedRooms: joinedRooms
+    //                             })
+    //                         }
+    //                     })
+    //                 } else {
+    //                     console.log("Failed to enter room")
+    //                 }
+    //             });
+    //         } else {
+    //             console.log("Failed to exit room")
+    //         }
+    //     });
     }
 
     joinRoom = (room, e) => {

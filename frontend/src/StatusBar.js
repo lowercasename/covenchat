@@ -73,7 +73,7 @@ class StatusBar extends Component {
     getMoonPhase(now) {
         let nextMonth = new Date(moment(now).add(1, 'months'));
         let current_phase = lune.phase(now);
-        let current_illumination = Math.floor(current_phase.illuminated * 100);
+        let currentIllumination = Math.floor(current_phase.illuminated * 100);
         let direction, illumination, minorPhase, majorPhase, nextPhase;
         let phase = current_phase.phase;
         let nextFullMoon = lune.phase_range(
@@ -92,19 +92,19 @@ class StatusBar extends Component {
             if (daysUntilFull < 1) {
                 //hoursToGo = Math.round(moment.duration(daysUntilFull, "days").asHours())
                 //nextPhase = "Full in " + hoursToGo + (hoursToGo <= 1 ? " hour" : " hours");
-                nextPhase = <span> (Full tonight)</span>;
+                nextPhase = <span>Full tonight</span>;
             } else if (Math.floor(daysUntilFull) === 1) {
-                nextPhase = <span> (Full in {Math.floor(daysUntilFull)} day)</span>;
+                nextPhase = <span>Full in {Math.floor(daysUntilFull)} day</span>;
             } else {
-                nextPhase = <span> (Full in {Math.floor(daysUntilFull)} days)</span>;
+                nextPhase = <span>Full in {Math.floor(daysUntilFull)} days</span>;
             }
         } else if (daysUntilNew <= 7) {
             if (daysUntilNew < 1) {
-                nextPhase = <span> (New tonight)</span>;
+                nextPhase = <span>New tonight</span>;
             } else if (Math.floor(daysUntilNew) === 1) {
-                nextPhase = <span> (New in {Math.floor(daysUntilNew)} day)</span>;
+                nextPhase = <span>New in {Math.floor(daysUntilNew)} day</span>;
             } else {
-                nextPhase = <span> (New in {Math.floor(daysUntilNew)} days)</span>;
+                nextPhase = <span>New in {Math.floor(daysUntilNew)} days</span>;
             }
         }
         illumination = Math.round(current_phase.illuminated*1000) / 10
@@ -148,9 +148,11 @@ class StatusBar extends Component {
                 :
                     minorPhase
                 }
-                {!majorPhase &&
-                    nextPhase
-                }&nbsp;({current_illumination}%)
+                {!majorPhase ?
+                    <span>&nbsp;({currentIllumination}%,&nbsp;{nextPhase})</span>
+                :
+                    <span>&nbsp;({currentIllumination}%)</span>
+                }
             </span>
         )
     }
@@ -216,8 +218,42 @@ class StatusBar extends Component {
         }
     }
 
-    getFestival(today) {
-        var festivals = [{
+    getFestival(today, hemisphere) {
+        var southernFestivals = [{
+                name: 'Lughnasadh',
+                date: new Date(today.getFullYear(), 1, 2)
+            },
+            {
+                name: 'Mabon',
+                date: new Date(today.getFullYear(), 2, 21)
+            },
+            {
+                name: 'Samhain',
+                date: new Date(today.getFullYear(), 4, 1)
+            },
+            {
+                name: 'Yule',
+                date: new Date(today.getFullYear(), 5, 21)
+            },
+            {
+                name: 'Imbolc',
+                date: new Date(today.getFullYear(), 7, 1)
+            },
+            {
+                name: 'Ostara',
+                date: new Date(today.getFullYear(), 8, 21)
+            },
+            {
+                name: 'Beltane',
+                date: new Date(today.getFullYear(), 9, 31)
+            },
+            {
+                name: 'Litha',
+                date: new Date(today.getFullYear(), 11, 21)
+            }
+        ];
+
+        var northernFestivals = [{
                 name: 'Imbolc',
                 date: new Date(today.getFullYear(), 1, 2)
             },
@@ -251,6 +287,8 @@ class StatusBar extends Component {
             }
         ];
 
+        var festivals = (hemisphere === "northern" ? northernFestivals : southernFestivals);
+
         var festivalIsToday = festivals.find(e => e.date.getMonth() === today.getMonth() && e.date.getDate() === today.getDate());
         let message;
         if (festivalIsToday) {
@@ -276,9 +314,14 @@ class StatusBar extends Component {
                 this.props.modules.moonPhase.set &&
                 <span className="statusItem">{this.getMoonPhase(today)}</span>
             } {
-                this.props.modules.wheelOfTheYear.set &&
+                this.props.modules.wheelOfTheYearNorthern.set &&
                 <span className="statusItem">
-                    <span className="hermetica-F006-wheel_of_the_year"/>&nbsp;{this.getFestival(today)
+                    <span className="hermetica-F006-wheel_of_the_year"/>&nbsp;{this.getFestival(today, "northern")
+                } </span>
+            } {
+                this.props.modules.wheelOfTheYearSouthern.set &&
+                <span className="statusItem">
+                    <span className="hermetica-F006-wheel_of_the_year"/>&nbsp;{this.getFestival(today, "southern")
                 } </span>
             } {
                 this.props.modules.astrologicalSeason.set &&

@@ -44,13 +44,64 @@ const server = require('http').Server(express);
 const io = require('socket.io')(server);
 server.listen(8899);
 io.on('connection', function(socket){
-  console.log('A user has connected via Socket.IO');
-  socket.on('disconnect', function(){
-    console.log('A user disconnected from Socket.IO');
-  });
-  socket.on('sent-chat-message', function(message){
-    console.log('Message: ' + message.content);
-  });
+	console.log('A user has connected via Socket.IO');
+	socket.on('user-online', payload => {
+		console.log(payload.username, "is online");
+		Room.find({members: {$elemMatch: {user:payload._id}}, hiddenBy: {$ne: payload._id}})
+		.then(joinedRooms => {
+			joinedRooms.forEach(room => {
+				socket.join(room.slug);
+				console.log('Joined', room.slug)
+			})
+		});
+	})
+	socket.on('disconnect', () => {
+		console.log('A user disconnected from Socket.IO');
+	});
+	socket.on('send-message', (message, cb) => {
+		console.log('Message in ' + message.room + ': ' + message.content);
+		var parsedMessage = parser(message.content);
+		if (!parsedMessage.isValid) return cb(false);
+		var message = new Message({
+			user: message.user,
+			timestamp: new Date(),
+			type: parsedMessage.type,
+			room: message.room,
+			content: parsedMessage.content,
+			tarot: parsedMessage.tarot,
+			runes: parsedMessage.runes,
+			mentions: parsedMessage.mentions,
+			readBy: [message.user]
+		});
+		message.save()
+		.then(message => {
+			Message.findById(message._id)
+			.populate('user')
+			.populate('room')
+			.then(retrievedMessage => {
+				if (parsedMessage.mentions) {
+					parsedMessage.mentions.forEach(async (mention) => {
+						let user = await User.find({username: mention})
+						let joinedRooms = await Room.find({members: {$elemMatch: {user:user[0]._id}}, hiddenBy: {$ne: user[0]._id}})
+						if (user && joinedRooms.some(r => r.slug === retrievedMessage.room.slug)) {
+							let roomName = retrievedMessage.room.name || "a private message";
+							sendPush(user[0]._id, retrievedMessage.user.username + " has mentioned you in " + roomName + ".");
+						} else {
+							console.log("No such user:", mention)
+						}
+					})
+				}
+				io.to(retrievedMessage.room.slug).emit('message-sent', retrievedMessage);
+				cb(true);
+			})
+		})
+	});
+	// socket.on('enter-room', (payload) => {
+	// 	socket.leave(payload.oldRoom);
+	// 	console.log('Exited coven: ' + payload.oldRoom);
+	// 	socket.join(payload.newRoom);
+	// 	console.log('Entered coven: ' + payload.newRoom);
+	// });
 });
 
 // // WEBSOCKETS
@@ -210,7 +261,9 @@ router.get('/api/user/checkresetpasswordtoken/:token', function(req, res) {
 	User.findOne({resetPasswordToken: req.params.token, resetPasswordTokenExpiry: { $gt: Date.now()}})
 	.then(user => {
 		if (user) {
-			res.sendStatus(200);
+			res.status(200).json({
+				email: user.email
+			});
 		} else {
 			res.sendStatus(400);
 		}
@@ -325,21 +378,41 @@ router.post('/api/user/resetpassword', async function(req, res) {
 		// Check token again
 		User.findOne({resetPasswordToken: token, resetPasswordTokenExpiry: { $gt: Date.now()}})
 		.then(user => {
+			console.log(user)
 			if (user) {
 				user.password = password;
 				user.resetPasswordToken = '';
 				user.resetPasswordTokenExpiry = '';
 				user.save()
 				.then(result => {
+					console.log(result)
 					if (result) {
-						res.status(200);
+						console.log("Password successfully reset!")
+						let resetEmail = {
+							from: 'support@coven.chat',
+							to: user.email,
+							subject: 'Your password has been changed',
+							html: '<p>Hi ' + user.username + '!</p><p>The password for your account on CovenChat has been sucessfully changed.</p><p>If you didn\'t do this, get in touch with us right away by replying to this email and we\'ll sort it out.</p><p>Love,</p><p>CovenChat Support</p>'
+						};
+						transporter.sendMail(resetEmail, function(err, info) {
+							console.log(info)
+							if (err) {
+								console.log(err)
+								res.status(500)
+								.json({message: "Error resetting password. Please try again."});
+							} else {
+								res.status(200)
+								.json({success: true})
+							}
+						});
 					} else {
 						res.status(500)
 						.json({message: "Error resetting password. Please try again."});
 					}
 				})
 			} else {
-				res.redirect('/forgotpassword');
+				res.status(500)
+				.json({message: "Error resetting password. Please try again."});
 			}
 		})
 	} else {

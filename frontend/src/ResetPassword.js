@@ -8,6 +8,7 @@ export default class ResetPassword extends Component {
             password: '',
             passwordRepeat: '',
             token: '',
+            email: '',
             redirectToLogin: false,
             message: false
         };
@@ -31,14 +32,18 @@ export default class ResetPassword extends Component {
         .then(res => {
             console.log(res)
             if (res.status !== 200) {
+                console.log("Invalid!")
                 this.props.history.push({
                     pathname: '/forgot-password',
                     state: 'The reset password token you provided is invalid or has expired. Please request a new token below.'
                 });
-            } else {
-                // Token is valid
-                this.setState({token: token})
             }
+            return res.json();
+        })
+        .then(json => {
+            // Token is valid
+            console.log(json)
+            this.setState({token: token, email: json.email})
         })
         .catch(err => {
           console.error(err);
@@ -66,10 +71,10 @@ export default class ResetPassword extends Component {
         })
         .then(res => res.json())
         .then(res => {
+            console.log(res)
             if (res.message) {
                 this.setState({message: res.message})
             } else {
-                console.log("Successfully reset password!")
                 this.setState({ redirectToLogin: true });
             }
         })
@@ -89,6 +94,7 @@ export default class ResetPassword extends Component {
             <form onSubmit={this.onSubmit} className="publicForm">
                 <h1>Reset your password</h1>
                 {this.state.message && <div className="formMessage">{this.state.message}</div>}
+                <p style={{marginBottom:'1rem'}}>Enter the new password for the account associated with the email {this.state.email} below.</p>
                 <label htmlFor="password">New password</label>
                 <input
                     type="password"

@@ -41,11 +41,15 @@ var userSchema = new mongoose.Schema({
           prettyName: {type: String, default: 'Moon phase'},
           set: {type: Boolean, default: true}
         },
-        wheelOfTheYear: {
-          slug: {type: String, default: 'wheelOfTheYear'},
-          prettyName: {type: String, default: 'Wheel of the Year'},
+        wheelOfTheYearNorthern: {
+          slug: {type: String, default: 'wheelOfTheYearNorthern'},
+          prettyName: {type: String, default: 'Wheel of the Year (Northern hemisphere)'},
           set: {type: Boolean, default: true}
-
+        },
+        wheelOfTheYearSouthern: {
+          slug: {type: String, default: 'wheelOfTheYearSouthern'},
+          prettyName: {type: String, default: 'Wheel of the Year (Southern hemisphere)'},
+          set: {type: Boolean, default: false}
         },
         astrologicalSeason: {
           slug: {type: String, default: 'astrologicalSeason'},
