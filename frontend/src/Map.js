@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import Pusher from 'pusher-js';
 import { toast } from 'react-toastify';
 import './Map.css';
 
@@ -32,198 +31,185 @@ export default class Map extends Component {
             style: 'mapbox://styles/raphaelkabo/ck1dskh912mlx1cpmjmxp48zr',
             center: [0, 50],
             zoom: 2
-        })});
-
-        const addMarker = (lng, lat, user) => {
-            let otherUser = false;
-            if (user.username !== this.props.user.username) {
-                otherUser = true;
-            }
-            var el = document.createElement('div');
-            el.className = otherUser ? 'other-user-marker' : 'user-marker';
-
-            let html = (
-                <>
-                    <h2>
-                        {user.settings.flair && <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> }{user.username}
-                    </h2>
-                    {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
-                        <div>
-                            <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.sendLinkNotification(user.username)}><FontAwesomeIcon icon="arrows-alt-h"/> Create link</button>
-                            <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
-                        </div>
-                    :
-                        <p>Currently linked</p>
-                    :
-                        <p>It's you!</p>
-                    }
-                </>
-            )
-
-            const placeholder = document.createElement('div');
-            ReactDOM.render(html, placeholder);
-
-            const marker = new mapboxgl.Marker(el, { anchor: 'right' })
-            .setLngLat([lng, lat])
-            .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(placeholder))
-            .addTo(this.state.map);
-
-            return marker;
-        }
-
-        fetch('/api/geolocation/fetch-all')
-        .then(res => res.json())
-        .then(res => {
-            let markersProcessed = 0;
-            res.users.forEach(user => {
-                let userMarkers = [...this.state.userMarkers, addMarker(user.geolocation.longitude, user.geolocation.latitude, user)];
-                userMarkers[userMarkers.length - 1].username = user.username;
-                userMarkers[userMarkers.length - 1].updated = new Date().getTime();
-                this.setState({
-                    usersOnMap: [...this.state.usersOnMap, user.username],
-                    userMarkers: userMarkers
-                }, () => markersProcessed++);
-                // Only make links after userMarkers has been filled
-                if (markersProcessed === res.users.length){
-                    res.links.forEach(link => {
-                        this.createLink(link, this.state.map);
-                    })
+        })}, () => {
+            const addMarker = (lng, lat, user) => {
+                let otherUser = false;
+                if (user.username !== this.props.user.username) {
+                    otherUser = true;
                 }
-            })
-        });
+                var el = document.createElement('div');
+                el.className = otherUser ? 'other-user-marker' : 'user-marker';
 
-        if (this.props.locationPermission) {
-            fetch('api/pusher/getkey')
-                .then(res => res.json())
-                .then(payload => {
-                    var pusher = new Pusher(payload.key, {
-                        cluster: 'eu',
-                        forceTLS: true
-                    });
-                    pusher.connection.bind('connected', () => {
-                        this.setState({ socketId: pusher.connection.socket_id });
-                    });
-                    var geolocationsChannel = pusher.subscribe('geolocations');
-
-                    var positionMarkerRendered = false;
-
-                    const geolocate = new mapboxgl.GeolocateControl({
-                        positionOptions: {
-                            enableHighAccuracy: false
-                        },
-                        fitBoundsOptions: {
-                            maxZoom: 5
-                        },
-                        trackUserLocation: true,
-                        showUserLocation: false,
-                    })
-                    this.state.map.addControl(geolocate)
-                    this.state.map.on('error', function (error) {
-                        console.log(error);
-                    });
-                    this.state.map.on('load', function () {
-                        geolocate.trigger();
-                        // map.resize();
-                    });
-                    geolocate.on('geolocate', (e) => {
-                        var lng = e.coords.longitude;
-                        var lat = e.coords.latitude
-                        this.setState({userPosition: [lng, lat]});
-
-                        if (positionMarkerRendered === false) {
-                            let userMarkers = [...this.state.userMarkers, addMarker(lng, lat, this.props.user)];
-                            userMarkers[userMarkers.length - 1].username = this.props.user.username;
-                            userMarkers[userMarkers.length - 1].updated = new Date().getTime();
-                            this.setState({userMarkers:userMarkers});
-                            positionMarkerRendered = true;
-
+                let html = (
+                    <>
+                        <h2>
+                            {user.settings.flair && <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> }{user.username}
+                        </h2>
+                        {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
+                            <div>
+                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.sendLinkNotification(user.username)}><FontAwesomeIcon icon="arrows-alt-h"/> Create link</button>
+                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
+                            </div>
+                        :
+                            <p>Currently linked</p>
+                        :
+                            <p>It's you!</p>
                         }
-                        fetch('/api/geolocation/update', {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                position: { longitude: lng, latitude: lat },
-                                socketId: this.state.socketId
-                            })
-                        });
-                        // Add links for user once they're geolocated
-                        this.state.linksForUser.forEach(link => {
+                    </>
+                )
+
+                const placeholder = document.createElement('div');
+                ReactDOM.render(html, placeholder);
+
+                const marker = new mapboxgl.Marker(el, { anchor: 'right' })
+                .setLngLat([lng, lat])
+                .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(placeholder))
+                .addTo(this.state.map);
+
+                return marker;
+            }
+
+            fetch('/api/geolocation/fetch-all')
+            .then(res => res.json())
+            .then(res => {
+                let markersProcessed = 0;
+                res.users.forEach(user => {
+                    let userMarkers = [...this.state.userMarkers, addMarker(user.geolocation.longitude, user.geolocation.latitude, user)];
+                    userMarkers[userMarkers.length - 1].username = user.username;
+                    userMarkers[userMarkers.length - 1].updated = new Date().getTime();
+                    this.setState({
+                        usersOnMap: [...this.state.usersOnMap, user.username],
+                        userMarkers: userMarkers
+                    }, () => markersProcessed++);
+                    // Only make links after userMarkers has been filled
+                    if (markersProcessed === res.users.length){
+                        res.links.forEach(link => {
                             this.createLink(link, this.state.map);
-                            // Remove the link from state so it don't bug us again
-                            this.setState({linksForUser: this.state.linksForUser.filter(l => l._id !== link._id)});
+                        })
+                    }
+                })
+            });
+
+            if (this.props.locationPermission) {
+                var positionMarkerRendered = false;
+
+                const geolocate = new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: false
+                    },
+                    fitBoundsOptions: {
+                        maxZoom: 5
+                    },
+                    trackUserLocation: true,
+                    showUserLocation: false,
+                })
+                this.state.map.addControl(geolocate)
+                this.state.map.on('error', function (error) {
+                    console.log(error);
+                });
+                this.state.map.on('load', function () {
+                    geolocate.trigger();
+                    // map.resize();
+                });
+                geolocate.on('geolocate', (e) => {
+                    var lng = e.coords.longitude;
+                    var lat = e.coords.latitude
+                    this.setState({userPosition: [lng, lat]});
+
+                    if (positionMarkerRendered === false) {
+                        let userMarkers = [...this.state.userMarkers, addMarker(lng, lat, this.props.user)];
+                        userMarkers[userMarkers.length - 1].username = this.props.user.username;
+                        userMarkers[userMarkers.length - 1].updated = new Date().getTime();
+                        this.setState({userMarkers:userMarkers});
+                        positionMarkerRendered = true;
+
+                    }
+                    fetch('/api/geolocation/update', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            position: { longitude: lng, latitude: lat },
+                            socketId: this.state.socketId
                         })
                     });
-
-                    geolocationsChannel.bind('geolocation-updated', (data) => {
-                        // Make sure user is sharing their location publicly
-                        if (data.user.settings.shareLocation) {
-                            // Check if this user is already displayed on the map
-                            // console.log(this.state.usersOnMap);
-                            if (this.state.usersOnMap !== null && this.state.usersOnMap.includes(data.user.username)) {
-                                // console.log("User marker already exists")
-                                // Rate limiter - check to see if last geolocation update was
-                                // more than 30 seconds ago
-                                // Just over 30 seconds by default (better to update the location
-                                // if for some reason we can't get their timestamp)
-                                let timeSinceLastUpdate = 30001;
-                                let lastUpdateTimestamp = this.state.userMarkers.find(m => m.username === data.user.username).updated;
-                                timeSinceLastUpdate = data.geolocation.updated - lastUpdateTimestamp;
-                                // console.log("timeSinceLastUpdate",timeSinceLastUpdate);
-                                if (timeSinceLastUpdate > 30000) {
-                                    let userMarkers = this.state.userMarkers;
-                                    userMarkers.forEach(marker => {
-                                        if (marker.username === data.user.username) {
-                                            // console.log("Found marker, updating position")
-                                            marker.setLngLat([data.geolocation.longitude, data.geolocation.latitude]);
-                                            marker.updated = data.geolocation.updated;
-                                            // Check links to see if any are coming from or going to this marker, and update them
-                                            this.state.currentLinks.forEach(link => {
-                                                if (link.fromUsername === data.user.username || link.toUsername === data.user.username) {
-                                                    fetch('/api/link/upsert', {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Accept': 'application/json',
-                                                            'Content-Type': 'application/json',
-                                                        },
-                                                        body: JSON.stringify({
-                                                            fromUsername: link.fromUsername,
-                                                            toUsername: link.toUsername
-                                                        })
-                                                    });
-                                                }
-                                            })
-                                        }
-                                        this.setState({userMarkers:userMarkers});
-                                    })
-                                } else {
-                                    // Updating too quickly
-                                    console.log("Rate limit: waiting 30 seconds between geolocation updates");
-                                }
-                            } else {
-                                // console.log("User not currently on map")
-                                let userMarkers = [...this.state.userMarkers, addMarker(data.geolocation.longitude, data.geolocation.latitude, data.user)];
-                                userMarkers[userMarkers.length - 1].username = data.user.username;
-                                userMarkers[userMarkers.length - 1].updated = data.geolocation.updated;
-                                this.setState({
-                                    usersOnMap: [...this.state.usersOnMap, data.user.username],
-                                    userMarkers: userMarkers
-                                })
-                            }
-                        } else {
-                            // console.log("User not sharing their location")
-                        }
-                    });
-                    geolocationsChannel.bind('link-created', (data) => {
-                        this.createLink(data.link, this.state.map);
-                    })
-                    geolocationsChannel.bind('link-expired', (data) => {
-                        this.removeLink(data.id, this.state.map);
+                    // Add links for user once they're geolocated
+                    this.state.linksForUser.forEach(link => {
+                        this.createLink(link, this.state.map);
+                        // Remove the link from state so it don't bug us again
+                        this.setState({linksForUser: this.state.linksForUser.filter(l => l._id !== link._id)});
                     })
                 });
-        }
+
+                this.props.socket.on('geolocation-updated', payload => {
+                    // Make sure user is sharing their location publicly
+                    if (payload.user.settings.shareLocation) {
+                        // Check if this user is already displayed on the map
+                        // console.log(this.state.usersOnMap);
+                        if (this.state.usersOnMap !== null && this.state.usersOnMap.includes(payload.user.username)) {
+                            // console.log("User marker already exists")
+                            // Rate limiter - check to see if last geolocation update was
+                            // more than 30 seconds ago
+                            // Just over 30 seconds by default (better to update the location
+                            // if for some reason we can't get their timestamp)
+                            let timeSinceLastUpdate = 30001;
+                            let lastUpdateTimestamp = this.state.userMarkers.find(m => m.username === payload.user.username).updated;
+                            timeSinceLastUpdate = payload.geolocation.updated - lastUpdateTimestamp;
+                            // console.log("timeSinceLastUpdate",timeSinceLastUpdate);
+                            if (timeSinceLastUpdate > 30000) {
+                                let userMarkers = this.state.userMarkers;
+                                userMarkers.forEach(marker => {
+                                    if (marker.username === payload.user.username) {
+                                        // console.log("Found marker, updating position")
+                                        marker.setLngLat([payload.geolocation.longitude, payload.geolocation.latitude]);
+                                        marker.updated = payload.geolocation.updated;
+                                        // Check links to see if any are coming from or going to this marker, and update them
+                                        this.state.currentLinks.forEach(link => {
+                                            if (link.fromUsername === payload.user.username || link.toUsername === payload.user.username) {
+                                                fetch('/api/link/upsert', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Accept': 'application/json',
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        fromUsername: link.fromUsername,
+                                                        toUsername: link.toUsername
+                                                    })
+                                                });
+                                            }
+                                        })
+                                    }
+                                    this.setState({userMarkers:userMarkers});
+                                })
+                            } else {
+                                // Updating too quickly
+                                console.log("Rate limit: waiting 30 seconds between geolocation updates");
+                            }
+                        } else {
+                            // console.log("User not currently on map")
+                            let userMarkers = [...this.state.userMarkers, addMarker(payload.geolocation.longitude, payload.geolocation.latitude, payload.user)];
+                            userMarkers[userMarkers.length - 1].username = payload.user.username;
+                            userMarkers[userMarkers.length - 1].updated = payload.geolocation.updated;
+                            this.setState({
+                                usersOnMap: [...this.state.usersOnMap, payload.user.username],
+                                userMarkers: userMarkers
+                            })
+                        }
+                    } else {
+                        // console.log("User not sharing their location")
+                    }
+                });
+                this.props.socket.on('link-created', payload => {
+                    this.createLink(payload.link, this.state.map);
+                })
+                this.props.socket.on('link-expired', payload => {
+                    this.removeLink(payload.id, this.state.map);
+                })
+            }
+        });
     }
 
     resize() {

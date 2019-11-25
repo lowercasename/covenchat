@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
-
 import StatusBar from './StatusBar';
 import Map from './Map';
 import ChatDrawer from './ChatDrawer';
 import Altar from './Altar';
 import Settings from './Settings';
-
 import { toast } from 'react-toastify';
-import Pusher from 'pusher-js';
-
 import openSocket from 'socket.io-client';
-
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile} from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
@@ -39,6 +34,7 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            connected: true,
             visibleModule: 'loader',
             user: this.props.user,
             altarUser: this.props.user,
@@ -53,6 +49,17 @@ class Dashboard extends Component {
     }
 
     componentDidMount() {
+        // Check connection to server every 3 seconds
+        setInterval(() => {
+            if (socket.connected) {
+                this.setState({connected: true});
+            } else {
+                this.setState({connected: false});
+            }
+        }, 3000);
+
+        socket.emit('user-online', this.state.user);
+
         // Module to show a particular user's altar if an /altar/:username URL is supplied
         if (this.props.match.params[0]) {
             if (this.props.match.params[0] === this.props.user.username) {
@@ -91,7 +98,6 @@ class Dashboard extends Component {
         };
         const checkGeolocationPermission = async () => {
             let geolocationPermission = await navigator.permissions.query({name:'geolocation'}).then(result => {return result.state});
-            console.log(geolocationPermission);
             if (this.props.user.geolocationPermissionRequested === false && geolocationPermission !== "granted" && geolocationPermission !== "denied") {
                 this.setState({permissionsModalVisible: true, askForGeolocationNotifications: true})
                 fetch('/api/permission/update/geolocation', { method: 'POST' });
@@ -228,6 +234,7 @@ class Dashboard extends Component {
         .then(res => res.json())
         .then(res => {
             res.notifications.forEach(notification => {
+                console.log("Notification", notification._id)
                 if (notification.buttonText) {
                     // User has to interact with this notification
                     toast(<NotificationToast notification={notification} username={res.username}/>, {
@@ -254,48 +261,35 @@ class Dashboard extends Component {
                 }
             })
         })
-        fetch('api/pusher/getkey')
-        .then(res => res.json())
-        .then(payload => {
-            var pusher = new Pusher(payload.key, {
-                cluster: 'eu',
-                forceTLS: true
-            });
-            pusher.connection.bind('connected', () => {
-                this.setState({socketId: pusher.connection.socket_id});
-            });
-            var notificationsChannel = pusher.subscribe('notifications');
-            notificationsChannel.bind('notification-sent', data => {
-                if (data.username === this.props.user.username) {
-                    if (data.notification.buttonText) {
-                        // User has to interact with this notification
-                        toast(<NotificationToast notification={data.notification} username={this.props.user.username}/>, {
-                            autoClose: false,
-                            className: 'green-toast',
-                            closeButton: <CloseButton notification={data.notification} username={this.props.user.username} />
-                        });
-                    } else {
-                        // Just an update
-                        toast(<NotificationToast notification={data.notification} username={this.props.user.username}/>, {
-                            className: 'green-toast'
-                        });
-                        fetch('/api/user/delete-notification', {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                username: this.props.user.username,
-                                notificationID: data.notification._id
-                            })
+
+        socket.on('notification-sent', payload => {
+            if (payload.username === this.props.user.username) {
+                if (payload.notification.buttonText) {
+                    // User has to interact with this notification
+                    toast(<NotificationToast notification={payload.notification} username={this.props.user.username}/>, {
+                        autoClose: false,
+                        className: 'green-toast',
+                        closeButton: <CloseButton notification={payload.notification} username={this.props.user.username} />
+                    });
+                } else {
+                    // Just an update
+                    toast(<NotificationToast notification={payload.notification} username={this.props.user.username}/>, {
+                        className: 'green-toast'
+                    });
+                    fetch('/api/user/delete-notification', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: this.props.user.username,
+                            notificationID: payload.notification._id
                         })
-                    }
-
+                    })
                 }
-            })
-        });
-
+            }
+        })
     }
 
     toggleView(module) {
@@ -401,6 +395,12 @@ class Dashboard extends Component {
     render() {
         return (
             <div className="App">
+                {!this.state.connected &&
+                    <>
+                        <aside className="disconnectedWarning">You are offline. Attempting to reconnect...</aside>
+                        <div className="errorCover"><div className="lds-dual-ring"></div></div>
+                    </>
+                }
                 <nav className="sideNav">
                     <img alt="CovenChat logo" src="/magic-ball-alt.svg" className="navLogo" />
                     <div className={["navIcon", (this.state.visibleModule === "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
@@ -426,11 +426,13 @@ class Dashboard extends Component {
                         isVisible={this.state.visibleModule === "map" ? true : false}
                         locationPermission={this.state.user.settings.shareLocation}
                         changeAltarUser={this.changeAltarUser}
+                        socket={socket}
                     />
                     <ChatDrawer
                         isVisible={this.state.visibleModule === "chat" ? true : false}
                         user={this.state.user}
                         changeAltarUser={this.changeAltarUser}
+                        socket={socket}
                     />
                     <Altar
                         isVisible={this.state.visibleModule === "altar" ? true : false}

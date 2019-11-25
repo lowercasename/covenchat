@@ -43,10 +43,11 @@ transporter.verify(function(error, success) {
 const server = require('http').Server(express);
 const io = require('socket.io')(server);
 server.listen(8899);
-io.on('connection', function(socket){
-	console.log('A user has connected via Socket.IO');
+io.on('connection', function(socket) {
 	socket.on('user-online', payload => {
-		console.log(payload.username, "is online");
+		console.log(payload.username, "is online")
+		console.log("Socket ID:",socket.id);
+		// Connect socket to all rooms of which user is a member
 		Room.find({members: {$elemMatch: {user:payload._id}}, hiddenBy: {$ne: payload._id}})
 		.then(joinedRooms => {
 			joinedRooms.forEach(room => {
@@ -54,12 +55,18 @@ io.on('connection', function(socket){
 				console.log('Joined', room.slug)
 			})
 		});
+		// Update user's socket ID field to ID of current connection
+		User.update({_id: payload._id}, {socketID: socket.id}).then(update => console.log(update));
 	})
 	socket.on('disconnect', () => {
 		console.log('A user disconnected from Socket.IO');
 	});
+	socket.on('join-socketio-room', room => {
+		socket.join(room);
+		console.log('Joined', room)
+	});
 	socket.on('send-message', (message, cb) => {
-		console.log('Message in ' + message.room + ': ' + message.content);
+		console.log("Here he is a message", message)
 		var parsedMessage = parser(message.content);
 		if (!parsedMessage.isValid) return cb(false);
 		var message = new Message({
@@ -91,17 +98,11 @@ io.on('connection', function(socket){
 						}
 					})
 				}
-				io.to(retrievedMessage.room.slug).emit('message-sent', retrievedMessage);
+				io.in(retrievedMessage.room.slug).emit('message-sent', retrievedMessage);
 				cb(true);
 			})
 		})
 	});
-	// socket.on('enter-room', (payload) => {
-	// 	socket.leave(payload.oldRoom);
-	// 	console.log('Exited coven: ' + payload.oldRoom);
-	// 	socket.join(payload.newRoom);
-	// 	console.log('Entered coven: ' + payload.newRoom);
-	// });
 });
 
 // // WEBSOCKETS
@@ -120,6 +121,20 @@ webpush.setVapidDetails(
   process.env.VAPID_PUBLIC,
   process.env.VAPID_SECRET
 )
+
+const sendNotification = (payload) => {
+	let notificationID = new mongoose.Types.ObjectId();
+	User.findOneAndUpdate({username: payload.user}, {$push: {notifications: {...payload.notification, _id: notificationID, sender: payload.user}}}, {new: true})
+	.then(updatedUser => {
+		io.to(updatedUser.socketID).emit('notification-sent', {username: payload.user, notification: {...payload.notification, _id: notificationID}})
+		return true;
+	})
+	.catch(error => {
+		return false;
+	})
+}
+
+
 router.get('/api/webpush/get-key', function(req, res) {
 	res.send(process.env.VAPID_PUBLIC);
 })
@@ -328,7 +343,7 @@ router.post('/api/user/sendresetpasswordlink', function(req,res) {
 		if (user) {
 			// Create the random token
 			let token = crypto.randomBytes(20).toString('hex');
-	
+
 			User.findByIdAndUpdate(
 				{ _id: user._id },
 				{
@@ -452,14 +467,14 @@ router.get('/api/user/fetch-notifications', authorizeUser, async function(req, r
 })
 
 router.post('/api/user/send-notification', authorizeUser, async function(req, res) {
-	let notificationID = new mongoose.Types.ObjectId();
-	User.update({username: req.body.user}, {$push: {notifications: {...req.body.notification, _id: notificationID, sender: req.user.username}}})
-	.then(response => {
-		if (response.ok){
-			// pusher.trigger('notifications', 'notification-sent', {username: req.body.user, notification: {...req.body.notification, _id: notificationID}}, req.body.socketId)
-			res.sendStatus(200);
-		}
-	})
+	console.log("Creating a notification!",req.body.notification)
+	sendNotification({user: req.body.user, notification: req.body.notification});
+	// if (notification) {
+	// 	res.sendStatus(200);
+	// } else {
+	// 	console.log("Error sending notification");
+	// 	res.sendStatus(500);
+	// }
 })
 
 router.post('/api/user/delete-notification', authorizeUser, function(req, res) {
@@ -501,23 +516,16 @@ router.post('/api/link/upsert', authorizeUser, async function(req, res) {
 				Link.remove({_id: response._id})
 				.then(result => {
 					console.log(result);
-					// pusher.trigger('geolocations', 'link-expired', {id: response._id}, req.body.socketId)
+					io.emit('link-expired', {id: response._id})
 				})
 			}, linkDuration)
-			// pusher.trigger('geolocations', 'link-created', {link: {...response._doc, revision: req.body.revision}}, req.body.socketId)
+			io.emit('link-created', {link: {...response._doc, revision: req.body.revision}})
 		})
 	} else {
 		// No coordinates found
 		console.error("No coordinates found or supplied, exiting.")
 	}
 })
-
-// router.post('/pusher/auth', function(req, res) {
-// 	var socketId = req.body.socket_id;
-// 	var channel = req.body.channel_name;
-// 	var auth = pusher.authenticate(socketId, channel);
-// 	res.send(auth);
-// });
 
 router.post('/api/geolocation/update', authorizeUser, function(req,res) {
 	let now = new Date();
@@ -530,7 +538,7 @@ router.post('/api/geolocation/update', authorizeUser, function(req,res) {
 
 	User.update({_id: req.user._id}, {geolocation: payload})
 	.then(response => {
-		// pusher.trigger('geolocations', 'geolocation-updated', {user: req.user, geolocation: payload}, req.body.socketId)
+		io.emit('geolocation-updated', {user: req.user, geolocation: payload});
 	})
 });
 
@@ -541,60 +549,6 @@ router.get('/api/geolocation/fetch-all', authorizeUser, async function(req,res) 
 	res.status(200).json({
 		users: users,
 		links: links
-	})
-});
-
-router.post('/api/chat/message/new', authorizeUser, async function(req,res) {
-	var parsedMessage = parser(req.body.content);
-	if (!parsedMessage.isValid) return false;
-	var message = new Message({
-		user: req.user._id,
-		timestamp: new Date(),
-		type: parsedMessage.type,
-		room: req.body.room,
-		content: parsedMessage.content,
-		tarot: parsedMessage.tarot,
-		runes: parsedMessage.runes,
-		mentions: parsedMessage.mentions,
-		readBy: [req.user._id]
-	});
-	message.save()
-	.then(message => {
-		Message.findById(message._id)
-		.populate('user')
-		.populate('room')
-		.then(retrievedMessage => {
-			if (parsedMessage.mentions) {
-				parsedMessage.mentions.forEach(async (mention) => {
-					let user = await User.find({username: mention})
-					let joinedRooms = await Room.find({members: {$elemMatch: {user:user[0]._id}}, hiddenBy: {$ne: user[0]._id}})
-					if (user && joinedRooms.some(r => r.slug === retrievedMessage.room.slug)) {
-						let roomName = retrievedMessage.room.name || "a private message";
-						sendPush(user[0]._id, req.user.username + " has mentioned you in " + roomName + ".");
-					} else {
-						console.log("No such user:", mention)
-					}
-				})
-			}
-			// pusher.trigger('messages', 'message-sent', retrievedMessage, req.body.socketId)
-		})
-	})
-});
-
-router.post('/api/chat/message/read/:messageID', authorizeUser, async function(req,res) {
-	Message.findById(req.params.messageID)
-	.then(message => {
-		// Check if user is already marked as having read the message
-		if (!message.readBy.some(u => u.equals(req.user._id))){
-			message.readBy.push(req.user._id)
-			message.save()
-			.then(response => {
-				// pusher.trigger('messages', 'message-read', {user: req.user, message: message});
-				res.sendStatus(200);
-			})
-		} else {
-			res.sendStatus(400);
-		}
 	})
 });
 
@@ -681,8 +635,6 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 	},
 	{ $push: { readBy: req.user._id } }, {multi: true})
 	.then(response => {
-		console.log(response)
-		// pusher.trigger('general', 'messages-read', {user: req.user, room: targetSlug, roomType: room.type})
 		res.status(200)
 		.json({
 			messages: messages,
@@ -730,12 +682,14 @@ router.post('/api/chat/room/create', authorizeUser, function(req,res) {
 	})
 	room.save()
 	.then(room => {
-		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}})
-		.then(response => {
+		User.findOneAndUpdate({_id: req.user._id}, { $set: {'memory.lastRoom': room.slug}}, {new: true})
+		.then((user) => {
 			if (roomType === "direct-message") {
-				// pusher.trigger('general', 'direct-message-room-created', {room: room, sender: req.user, recipient: req.body.recipient});
+				if (user.socketID) {
+					io.emit('direct-message-room-created', {room: room, sender: req.user, recipient: req.body.recipient})
+				}
 			} else {
-				// pusher.trigger('general', 'room-created', {room: room, user: req.user});
+				io.emit('room-created',  {room: room, user: req.user})
 			}
 			res.sendStatus(200);
 		})
@@ -806,7 +760,13 @@ router.post('/api/chat/room/edit', authorizeUser, function(req,res) {
 		.then(response => {
 			User.update({"memory.lastRoom": oldSlug}, { $set: { "memory.lastRoom": roomSlug }})
 			.then(response => {
-				// pusher.trigger('general', 'room-edited', room, req.body.socketId);
+				// Don't spam the socket with private room edits
+				// DEBUG: DOESN'T WORK
+				if (room.public) {
+					io.emit('room-edited', room)
+				} else {
+					io.in(roomSlug).emit('room-edited', room)
+				}
 				res.sendStatus(200);
 			})
 		})
@@ -828,26 +788,28 @@ router.post('/api/chat/room/enter/:room', authorizeUser, async function(req,res)
 		slug: req.params.room
 	})
 	.then(room => {
-		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': req.params.room}});
-		// Check if this user is a member or just visiting
-		if (room.members.some(m => m.user.equals(req.user._id))) {
-			// pusher.trigger('general', 'member-entered-room', {room: room, user: req.user}, req.body.socketId);
-			res.sendStatus(200);
-		} else {
-			// Check if user is already in the visitors array
-			if (!room.visitors.some(v => v.equals(req.user._id))) {
-				room.visitors.push(req.user._id)
-				room.save()
-				.then(room => {
-					// pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
-					res.sendStatus(200);
-				})
-			} else {
-				console.log(req.user.username + " is already a visitor in this room")
-				// pusher.trigger('general', 'visitor-entered-room', {room: room, user: req.user}, req.body.socketId);
+		User.update({_id: req.user._id}, { $set: {'memory.lastRoom': req.params.room}})
+		.then(response => {
+			// Check if this user is a member or just visiting
+			if (room.members.some(m => m.user.equals(req.user._id))) {
 				res.sendStatus(200);
+			} else {
+				// Check if user is already in the visitors array
+				if (!room.visitors.some(v => v.equals(req.user._id))) {
+					room.visitors.push(req.user._id)
+					room.save()
+					.then(room => {
+						io.in(room.slug).emit('visitor-entered-room', {room: room, user: req.user})
+						res.sendStatus(200);
+					})
+				} else {
+					console.log(req.user.username + " is already a visitor in this room")
+					// But do it again just in case I guess
+					io.in(room.slug).emit('visitor-entered-room', {room: room, user: req.user})
+					res.sendStatus(200);
+				}
 			}
-		}
+		})
 	});
 });
 
@@ -858,7 +820,6 @@ router.post('/api/chat/room/exit/:room', authorizeUser, function(req,res) {
 	.then(room => {
 		// Check if this user is a member or just visiting
 		if (room.members.some(m => m.user.equals(req.user._id))) {
-			// pusher.trigger('general', 'member-left-room', {room: room, user: req.user}, req.body.socketId);
 			res.sendStatus(200);
 		} else {
 			// Check if user is in the visitors array
@@ -866,14 +827,14 @@ router.post('/api/chat/room/exit/:room', authorizeUser, function(req,res) {
 				room.visitors = room.visitors.filter(v => !v.equals(req.user._id))
 				room.save()
 				.then(room => {
-					// pusher.trigger('general', 'visitor-left-room', {room: room, user: req.user}, req.body.socketId);
+					io.in(room.slug).emit('visitor-exited-room', {room: room, user: req.user})
 					res.sendStatus(200);
 				})
 			} else {
 				console.log(req.user.username + " wasn't a visitor in this room (apparently)");
-				// pusher.trigger('general', 'visitor-left-room', {room: room, user: req.user}, req.body.socketId);
+				// But remove them anyway...?
+				io.in(room.slug).emit('visitor-exited-room', {room: room, user: req.user})
 				res.sendStatus(200);
-				// Do nothing?
 			}
 		}
 	});
@@ -894,7 +855,7 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
 				room.visitors = room.visitors.filter(v => !v.equals(req.user._id));
 			}
 			// Add user to members array (making them an admin if there's no other members in the room)
-			room.members.push({user: req.user._id, role: (room.members.length == 0 ? 'administrator' : 'member')});
+			room.members.push({user: req.user._id, role: (room.members.length === 0 ? 'administrator' : 'member')});
 			room.save()
 			.then(room => {
 				var message = new Message({
@@ -907,7 +868,7 @@ router.post('/api/chat/room/join/:room', authorizeUser, function(req,res) {
 				})
 				message.save()
 				.then(response => {
-					// pusher.trigger('general', 'user-joined-room', {room: room, user: req.user}, req.body.socketId);
+					io.in(room.slug).emit('user-joined-room', {room: room, user: req.user, message: message})
 					res.sendStatus(200);
 				})
 			});
@@ -953,7 +914,7 @@ router.post('/api/chat/room/leave/:room', authorizeUser, function(req,res) {
 			})
 			message.save()
 			.then(response => {
-				// pusher.trigger('general', 'user-left-room', {room: room, user: req.user}, req.body.socketId);
+				io.in(room.slug).emit('user-left-room', {room: room, user: req.user, message: message})
 				res.sendStatus(200);
 			})
 		});
@@ -994,7 +955,7 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 				});
 				room.save()
 				.then(result => {
-					// pusher.trigger('general', 'user-invited-to-room', {room: room, user: user}, req.body.socketId);
+					io.emit('user-invited-to-room', {room: room, user: user})
 					res.sendStatus(200);
 				})
 			}

@@ -185,7 +185,7 @@ class StatusBar extends Component {
             'virgo': <span> <span className="hermetica-A005-virgo"/>&nbsp;Virgo </span>,
             'libra': <span> <span className="hermetica-A006-libra"/>&nbsp;Libra </span>,
             'scorpio': <span> <span className="hermetica-A007-scorpio"/>&nbsp;Scorpio </span>,
-            'sagittarius': <span> <span className="hermetica-A008-sagittarius"/>&nbsp;Saggitarius </span>,
+            'sagittarius': <span> <span className="hermetica-A008-sagittarius"/>&nbsp;Sagittarius </span>,
         }
 
         var month = today.getMonth() + 1;

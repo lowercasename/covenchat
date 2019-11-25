@@ -500,6 +500,23 @@ class InviteToRoomControls extends Component {
                 })
                 .then(res => {
                     if (res.status === 200) {
+                        // Send the invited person a notification
+                        fetch('/api/user/send-notification', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                user: this.state.username,
+                                notification: {
+                                    sender: this.state.username,
+                                    type: 'added-to-private-room',
+                                    text: "You have been added to the private Coven '" + this.props.currentRoom.name + "'.",
+                                }
+                            })
+                        })
+                        // Clear the form
                         this.setState({
                             modalVisible: false,
                             username: '',

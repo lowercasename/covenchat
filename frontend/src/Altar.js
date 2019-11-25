@@ -306,7 +306,6 @@ export default class Altar extends Component {
     componentDidMount() {
         fetch('/api/altar/fetch/' + this.state.user._id)
             .then(res => {
-                console.log(res);
                 if (res.status === 200) {
                     return res.json();
                 } else {
@@ -315,7 +314,6 @@ export default class Altar extends Component {
                 }
             })
             .then(res => {
-                console.log(res);
                 let journalPosts = res.posts.filter(p => p.category === "journal");
                 let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
                 let lorePosts = res.posts.filter(p => p.category === "lore");
@@ -827,7 +825,7 @@ export default class Altar extends Component {
                     id="journal"
                     className="postViewer"
                 >
-                    {journalPosts.length == 0 ?
+                    {journalPosts.length === 0 ?
                        noPosts
                     :
                         journalPosts.map(post => {
@@ -852,7 +850,7 @@ export default class Altar extends Component {
                     id="spellbook"
                     className="postViewer"
                 >
-                    {spellbookPosts.length == 0 ?
+                    {spellbookPosts.length === 0 ?
                        noPosts
                     :
                         spellbookPosts.map(post => {
@@ -877,7 +875,7 @@ export default class Altar extends Component {
                     id="journal"
                     className="postViewer"
                 >
-                    {lorePosts.length == 0 ?
+                    {lorePosts.length === 0 ?
                        noPosts
                     :
                         lorePosts.map(post => {

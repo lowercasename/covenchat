@@ -30,6 +30,7 @@ var userSchema = new mongoose.Schema({
   webpushSubscription: String,
   webpushPermissionRequested: {type: Boolean, default: false},
   geolocationPermissionRequested: {type: Boolean, default: false},
+  socketID: { type: String },
   settings: {
     status: { type: String, default: 'available' },
     flair: String,
