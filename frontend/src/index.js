@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Redirect, Switch, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-dom';
 import './index.css';
 import withAuth from './withAuth';
 import Login from './Login';
@@ -9,16 +9,6 @@ import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 import Dashboard from './Dashboard';
 import * as serviceWorker from './serviceWorker';
-
-// function spawnNotification(body, icon) {
-//   var options = {
-//       body: body,
-//       icon: icon || 'http://localhost:3000/magic-ball-alt.svg'
-//   };
-//   var n = new Notification('CovenChat', options);
-// }
-//
-// spawnNotification('Test notification yo!');
 
 const PublicRoute = ({ component: Component, layout: Layout, ...rest }) => (
     <Route {...rest} render={props => (
@@ -32,7 +22,7 @@ const PublicLayout = ({ children }) => (
     <div className="publicContainer">
         <nav className="topNav">
             <div>
-                <img src="magic-ball-alt.svg" className="topNavLogo" />
+                <img src="magic-ball-alt.svg" className="topNavLogo" alt="CovenChat"/>
                 <NavLink to="/welcome" exact activeClassName="active"><h1 className="navHeading">CovenChat</h1></NavLink>
             </div>
             <div>
@@ -44,17 +34,11 @@ const PublicLayout = ({ children }) => (
     </div>
 );
 
-const PrivateLayout = ({ children, ...rest }) => (
-    <div>
-        {children}
-    </div>
-)
-
 class LandingPage extends Component {
     render() {
         return (
             <div>
-                Welcome to CovenChat 🔮
+                Welcome to CovenChat!
             </div>
         );
     }

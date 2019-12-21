@@ -13,7 +13,6 @@ const upload = multer({ storage });
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
-const Pusher = require('pusher');
 const parser = require('./parser');
 const jwt = require('jsonwebtoken');
 const secret = process.env.SECRET;
@@ -33,6 +32,7 @@ const transporter = nodemailer.createTransport({
 });
 transporter.verify(function(error, success) {
 	if (error) {
+		console.log("Email server error!")
 		console.log(error);
 	} else {
 		console.log("Email server is ready to take our messages");
@@ -48,7 +48,7 @@ io.on('connection', function(socket) {
 		console.log(payload.username, "is online")
 		console.log("Socket ID:",socket.id);
 		// Connect socket to all rooms of which user is a member
-		Room.find({members: {$elemMatch: {user:payload._id}}, hiddenBy: {$ne: payload._id}})
+		Room.find({members: {$elemMatch: {user:payload._id}}, hiddenBy: {$ne: payload._id},bannedUsers: {$ne: payload._id}})
 		.then(joinedRooms => {
 			joinedRooms.forEach(room => {
 				socket.join(room.slug);
@@ -57,9 +57,12 @@ io.on('connection', function(socket) {
 		});
 		// Update user's socket ID field to ID of current connection
 		User.update({_id: payload._id}, {socketID: socket.id}).then(update => console.log(update));
+		// Send updated user connection to all clients
+		io.emit('user-connection-updated', {user: payload._id, lastOnline: new Date()});
 	})
 	socket.on('disconnect', () => {
 		console.log('A user disconnected from Socket.IO');
+		// io.emit('user-connection-updated', {user: payload._id, lastOnline: new Date()});
 	});
 	socket.on('join-socketio-room', room => {
 		socket.join(room);
@@ -89,7 +92,7 @@ io.on('connection', function(socket) {
 				if (parsedMessage.mentions) {
 					parsedMessage.mentions.forEach(async (mention) => {
 						let user = await User.find({username: mention})
-						let joinedRooms = await Room.find({members: {$elemMatch: {user:user[0]._id}}, hiddenBy: {$ne: user[0]._id}})
+						let joinedRooms = await Room.find({members: {$elemMatch: {user:user[0]._id}}, hiddenBy: {$ne: user[0]._id},bannedUsers: {$ne: user[0]._id}})
 						if (user && joinedRooms.some(r => r.slug === retrievedMessage.room.slug)) {
 							let roomName = retrievedMessage.room.name || "a private message";
 							sendPush(user[0]._id, retrievedMessage.user.username + " has mentioned you in " + roomName + ".");
@@ -445,7 +448,7 @@ router.post('/api/user/settings/update', authorizeUser, async function(req, res)
 		if (response.ok) {
 			User.findById(req.user._id)
 			.then(user => {
-				console.log(user)
+				io.emit('user-setting-updated', {user: user.username, keyToChange: req.body.setting, newValue: req.body.value});
 				res.status(200).json({
 					user: user
 				})
@@ -566,6 +569,9 @@ router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
 			$not: {
 				$elemMatch: {user: req.user._id}
 			}
+		},
+		bannedUsers: {
+			$ne: req.user._id
 		}
 	})
 	.then(rooms => {
@@ -574,7 +580,7 @@ router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
 });
 
 router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res) {
-	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}, hiddenBy: {$ne: req.user._id}}).populate('members.user').sort('name')
+	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}, hiddenBy: {$ne: req.user._id},bannedUsers: {$ne: req.user._id}}).populate('members.user').sort('name')
 	.then(async rooms => {
 		async function getUnreadMessages (rooms) {
 			const promiseArray = rooms.map(async room => {
@@ -959,6 +965,38 @@ router.post('/api/chat/room/invite/:room/:userID', authorizeUser, function(req,r
 					res.sendStatus(200);
 				})
 			}
+		}
+	})
+});
+
+router.post('/api/chat/room/ban/:room/:userID', authorizeUser, function(req,res) {
+	console.log("Banning",req.params.userID,"from",req.params.room)
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(async (room) => {
+		let user = await User.findById(req.params.userID)
+		if (user) {
+			// Remove user from members and visitors arrays
+			if (room.members.some(v => v.user.equals(req.params.userID))) {
+				room.members = room.members.filter(v => !v.user.equals(req.params.userID));
+			}
+			if (room.visitors.some(v => v.equals(req.params.userID))) {
+				room.visitors = room.visitors.filter(v => !v.equals(req.params.userID));
+			}
+			// Add user to banned users array
+			if (!room.bannedUsers.some(b => b.equals(req.params.userID))) {
+				room.bannedUsers.push(req.params.userID);
+			}
+			room.save()
+			.then(result => {
+				user.memory.lastRoom = 'global-coven';
+				user.save()
+				.then(result => {
+					io.emit('user-banned-from-room', {room: room, user: user})
+					res.sendStatus(200);
+				})
+			})
 		}
 	})
 });

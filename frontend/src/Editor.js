@@ -3,7 +3,6 @@ import ReactQuill from 'react-quill';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'react-quill/dist/quill.snow.css';
 import './Editor.css';
-import Dropdown from 'react-dropdown';
 import { toast } from 'react-toastify';
 
 const Modal = ({
@@ -209,7 +208,7 @@ export default class Editor extends Component {
             }
 
     render() {
-                    let postPrivacy, postCategory;
+        // let postPrivacy, postCategory;
         // if (this.props.mode === "edit") {
         //     postPrivacy = this.props.editTarget.public === true ? "public" : "private";
         //     postCategory = this.props.editTarget.category;

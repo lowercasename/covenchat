@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import Modal from './Modal.js';
 import "react-notification-alert/dist/animate.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Textarea from 'react-textarea-autosize';
+import TextareaAutosize from 'react-autosize-textarea';
 import './ReactTags.css';
 const ReactTags = require('react-tag-autocomplete')
-
 
 function slugify(string) {
     const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'
@@ -20,19 +20,6 @@ function slugify(string) {
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
 }
-
-const Modal = ({ handleClose, show, children }) => {
-    var showHideClassName = show ? "modal display-block" : "modal display-none";
-
-    return (
-      <div className={showHideClassName}>
-        <section className="modal-main">
-            <button className="modalClose" onClick={handleClose}><FontAwesomeIcon icon="times" /></button>
-            {children}
-        </section>
-      </div>
-    );
-};
 
 class CreateRoomControls extends Component {
     constructor(props) {
@@ -153,12 +140,12 @@ class CreateRoomControls extends Component {
                             </div>
                         )}
                         <label htmlFor="roomDescription">Coven description and rules</label>
-                        <Textarea
+                        <TextareaAutosize
                             className="full-width"
                             name="roomDescription"
                             value={this.state.roomDescription}
                             onChange={this.handleInputChange}
-                            minRows={2}
+                            rows={2}
                             maxRows={10}
                         />
                         <div className="radioBoxContainer">
@@ -234,12 +221,8 @@ class HideRoomControls extends Component {
                 </button>
                 <Modal show={this.state.modalVisible} handleClose={this.hideModal}>
                     <h1>Hide chat</h1>
-                    <form
-                        onSubmit={this.handleSubmit}
-                    >
-                        <p style={{marginBottom:"1rem"}}>Are you sure you want to hide this chat? You will not be notified of any new messages in it. You can unhide it in your settings.</p>
-                        <button type="submit" className="full-width">Hide chat</button>
-                    </form>
+                    <p style={{marginBottom:"1rem"}}>Are you sure you want to hide this chat? You will not be notified of any new messages in it. You can unhide it in your settings.</p>
+                    <button className="full-width" onClick={this.handleSubmit}>Hide chat</button>
                 </Modal>
             </>
         )
@@ -424,21 +407,22 @@ class EditRoomControls extends Component {
                             </div>
                         )}
                         <label htmlFor="roomDescription">Coven description and rules</label>
-                        <Textarea
+                        <TextareaAutosize
                             className="full-width"
                             name="roomDescription"
                             value={this.state.roomDescription}
                             onChange={this.handleInputChange}
-                            minRows={2}
+                            rows={2}
                             maxRows={10}
                         />
                         <label htmlFor="roomWelcomeMessage">Welcome message</label>
-                        <Textarea
+                        <TextareaAutosize
+                            placeholder="Shown to everyone when updated"
                             className="full-width"
                             name="roomWelcomeMessage"
                             value={this.state.roomWelcomeMessage}
                             onChange={this.handleInputChange}
-                            minRows={2}
+                            rows={2}
                             maxRows={10}
                         />
                         <label htmlFor="roomWelcomeMessage">Administrators</label>

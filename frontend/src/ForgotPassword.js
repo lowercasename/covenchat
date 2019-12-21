@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Redirect } from 'react-router-dom';
 
 export default class ForgotPassword extends Component {
     constructor(props) {

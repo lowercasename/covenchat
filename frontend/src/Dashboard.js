@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
 
-toast.configure()
+toast.configure();
 
 const socket = openSocket('http://localhost:8899');
 
@@ -380,6 +380,8 @@ class Dashboard extends Component {
                 }
             })
             .then(res => {
+                console.log("Changing settings")
+                console.log(res)
                 this.setState({
                     user: res.user,
                     altarUser: res.user
@@ -398,7 +400,11 @@ class Dashboard extends Component {
                 {!this.state.connected &&
                     <>
                         <aside className="disconnectedWarning">You are offline. Attempting to reconnect...</aside>
-                        <div className="errorCover"><div className="lds-dual-ring"></div></div>
+                        <div className="errorCover">
+                            <div className="moon-loader">
+                                <div className="disc"></div>
+                            </div>
+                        </div>
                     </>
                 }
                 <nav className="sideNav">
@@ -418,7 +424,9 @@ class Dashboard extends Component {
                 </nav>
                 <main className="content">
                     <div id="loader" style={{display: (this.state.visibleModule === "loader" ? "flex" : "none")}}>
-                        <div className="lds-dual-ring"></div>
+                        <div className="moon-loader">
+                            <div className="disc"></div>
+                        </div>
                     </div>
                     <Map
                         ref="map"

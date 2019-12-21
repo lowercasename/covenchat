@@ -33,9 +33,12 @@ export default class Map extends Component {
             zoom: 2
         })}, () => {
             const addMarker = (lng, lat, user) => {
-                let otherUser = false;
+                let localUser, otherUser = false;
                 if (user.username !== this.props.user.username) {
                     otherUser = true;
+                    localUser = user;
+                } else {
+                    localUser = this.props.user;
                 }
                 var el = document.createElement('div');
                 el.className = otherUser ? 'other-user-marker' : 'user-marker';
@@ -43,12 +46,12 @@ export default class Map extends Component {
                 let html = (
                     <>
                         <h2>
-                            {user.settings.flair && <img src={user.settings.flair} className="userFlair" alt={"Flair icon for " + user.username}/> }{user.username}
+                            {localUser.settings.flair && <img src={localUser.settings.flair} className="userFlair" alt={"Flair icon for " + localUser.username}/>}{localUser.username}
                         </h2>
-                        {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === user.username || l.toUsername === user.username) ?
+                        {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === localUser.username || l.toUsername === localUser.username) ?
                             <div>
-                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.sendLinkNotification(user.username)}><FontAwesomeIcon icon="arrows-alt-h"/> Create link</button>
-                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
+                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.sendLinkNotification(localUser.username)}><FontAwesomeIcon icon="arrows-alt-h"/> Create link</button>
+                                <button style={{display: "block",margin: '5px',width:'100%'}} type="button" className="small" onClick={() => this.props.changeAltarUser(localUser)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
                             </div>
                         :
                             <p>Currently linked</p>

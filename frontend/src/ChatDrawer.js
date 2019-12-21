@@ -3,13 +3,14 @@ import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 import { Tooltip } from 'react-tippy';
 import 'react-tippy/dist/tippy.css'
-import Textarea from 'react-textarea-autosize';
+import TextareaAutosize from 'react-autosize-textarea';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker } from 'emoji-mart'
 import './ChatDrawer.css';
+import Modal from './components/Modal.js';
 import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
 
 function scrollToBottom() {
@@ -17,11 +18,6 @@ function scrollToBottom() {
 }
 
 class UserFlair extends Component {
-    componentDidUpdate(prevProps) {
-        if(this.props.user.settings.flair !== prevProps.user.settings.flair) {
-            console.log("User flair has changed!")
-        }
-    }
     render() {
         if (this.props.user.settings.flair) {
             return (
@@ -114,7 +110,7 @@ class MessageList extends Component {
                                                 {displayTimestamp(message.timestamp)}
                                             </span>
                                             <span className="messageAuthor">
-                                            <UserFlair user={message.user} />{message.user.username}
+                                            <UserFlair user={(message.user.username === this.props.user.username ? this.props.user : message.user)} />{message.user.username}
                                             </span>
                                         </span>
 
@@ -243,6 +239,7 @@ class RoomList extends Component {
                         {this.props.publicRooms.map(room => {
                             return (
                                 <Tooltip
+                                    key={room._id}
                                     title={"<strong>" + room.name + "</strong><br>" + room.description + "<br><hr>" + room.members.length + " " + (room.members.length > 1 ? "members" : "member")}
                                     position="right"
                                     trigger="mouseenter"
@@ -294,12 +291,16 @@ class RoomList extends Component {
 
 class UserBadge extends Component {
     render() {
-        let user = (this.props.member.user ? this.props.member.user : this.props.member);
-        // const lessThanOneDayAgo = (date) => {
-        //     const oneDay = 1000 * 60 * 60 * 24;
-        //     const aDayAgo = Date.now() - oneDay;
-        //     return date > aDayAgo;
-        // }
+        let user;
+        if (this.props.member.user) {
+            if (this.props.user && (this.props.member.user.username === this.props.user.username)) {
+                user = this.props.user;
+            } else {
+                user = this.props.member.user;
+            }
+        } else {
+            user = this.props.member;
+        }
         let userStatus, userStatusText;
         switch (user.settings.status) {
             case "available":
@@ -340,13 +341,14 @@ class UserBadge extends Component {
         let userTooltip = (
             <div className="userTooltip">
                 <strong><UserFlair user={user} />{user.username} {userBadge}</strong>
-                <br/>
                 {this.props.online && <span style={{marginTop:"0.25rem",fontSize:"0.8rem"}}><FontAwesomeIcon className={userStatus} icon="circle"/> {userStatusText}</span>}
-                <br/>
                 {!this.props.isYou ?
                     <>
                         <button type="button" className="small" onClick={() => this.props.changeAltarUser(user)}><span className="hermetica-F032-pentacle" style={{fontSize:"14px",position:"relative",top:"2px"}}/> Open Altar</button>
                         <button type="button" className="small" onClick={() => this.props.directMessage(user)}><FontAwesomeIcon icon="comment-dots"/> Private message</button>
+                        {this.props.isAdministrator &&
+                            <button type="button" className="small" onClick={() => this.props.ban(user)}><FontAwesomeIcon icon="ban"/> Ban from Coven</button>
+                        }
                     </>
                     :
                     <>
@@ -393,10 +395,13 @@ class UserList extends Component {
                             {onlineMembers.map(member => {
                                 return (
                                     <UserBadge
+                                        user={this.props.user}
                                         online={true}
                                         isYou={member.user._id === this.props.user._id ? true : false}
+                                        isAdministrator={this.props.isAdministrator}
                                         directMessage={this.props.directMessage}
                                         changeAltarUser={this.props.changeAltarUser}
+                                        ban={this.props.ban}
                                         member={member}
                                         role={member.role}
                                         key={member.user._id}/>
@@ -416,8 +421,10 @@ class UserList extends Component {
                                     <UserBadge
                                         online={false}
                                         isYou={member.user._id === this.props.user._id ? true : false}
+                                        isAdministrator={this.props.isAdministrator}
                                         directMessage={this.props.directMessage}
                                         changeAltarUser={this.props.changeAltarUser}
+                                        ban={this.props.ban}
                                         member={member}
                                         role={member.role}
                                         key={member.user._id}/>
@@ -436,8 +443,10 @@ class UserList extends Component {
                                 return (
                                     <UserBadge
                                         isYou={visitor._id === this.props.user._id ? true : false}
+                                        isAdministrator={this.props.isAdministrator}
                                         directMessage={this.props.directMessage}
                                         changeAltarUser={this.props.changeAltarUser}
+                                        ban={this.props.ban}
                                         member={visitor}
                                         key={visitor._id}/>
                                 )
@@ -466,7 +475,9 @@ class ChatDrawer extends Component {
             directMessages: [],
             publicRooms: [],
             joinDisabled: false,
-            leaveDisabled: false
+            leaveDisabled: false,
+            banWarningVisible: false,
+            userToBan: ''
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -708,6 +719,105 @@ class ChatDrawer extends Component {
                 }
             }
         });
+
+        this.props.socket.on('user-banned-from-room', payload => {
+            // If you're the one who's just been banned
+            if (this.props.user._id === payload.user._id) {
+                // Reload the room list and, if they're in the room currently, send the user to Global Coven (easy)
+                this.reloadRoomList();
+                if (this.state.currentRoom.slug === payload.room.slug) {
+                    this.switchRoom('global-coven');
+                }
+                fetch('/api/user/send-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user: payload.user.username,
+                        notification: {
+                            sender: payload.user.username,
+                            type: 'user-banned',
+                            text: 'You have been banned from ' + payload.room.name + '.',
+                        }
+                    })
+                })
+            } else if (this.state.currentRoom.slug === payload.room.slug) { // If someone was just banned from the room you're in
+                // Remove user from members/visitors arrays
+                var currentRoomMembers = this.state.currentRoomMembers.filter(m => m.user._id.toString() !== payload.user._id.toString());
+                var currentRoomVisitors = this.state.currentRoomVisitors.filter(v => v._id !== payload.user._id);
+                this.setState({
+                    currentRoomMembers: currentRoomMembers,
+                    currentRoomVisitors: currentRoomVisitors
+                })
+            }
+        });
+
+        this.props.socket.on('user-setting-updated', payload => {
+            // Update member list
+            let currentRoomMembers = this.state.currentRoomMembers;
+            currentRoomMembers.forEach(m => {
+                if (m.user.username === payload.user) {
+                    Object.keys(m.user.settings).forEach(key => {
+                        if (key === payload.keyToChange) {
+                            m.user.settings[key] = payload.newValue;
+                        }
+                    });
+                }
+            })
+            this.setState({currentRoomMembers: currentRoomMembers});
+            // Update visitor list
+            let currentRoomVisitors = this.state.currentRoomVisitors;
+            currentRoomVisitors.forEach(v => {
+                if (v.username === payload.user) {
+                    Object.keys(v.settings).forEach(key => {
+                        if (key === payload.keyToChange) {
+                            v.settings[key] = payload.newValue;
+                        }
+                    });
+                }
+            })
+            this.setState({currentRoomVisitors: currentRoomVisitors});
+            // Update message list
+            if (payload.keyToChange === "username" || payload.keyToChange === "flair") {
+                let currentMessages = this.state.messages;
+                currentMessages.forEach(m => {
+                    if (m.user.username === payload.user) {
+                        if (payload.keyToChange === "username") {
+                            m.user.username = payload.newValue;
+                        } else if (payload.keyToChange === "flair") {
+                            m.user.settings.flair = payload.newValue;
+                        }
+                    }
+                })
+                this.setState({messages: currentMessages});
+            }
+            // Update direct message rooms
+            if (payload.keyToChange === "username" || payload.keyToChange === "flair") {
+                let directMessages = this.state.directMessages;
+                directMessages.forEach(room => {
+                    let otherUser = room.members.find(m => m.user.username !== this.props.user.username);
+                    if (otherUser.user.username === payload.user) {
+                        if (payload.keyToChange === "username") {
+                            otherUser.user.username = payload.newValue;
+                        } else if (payload.keyToChange === "flair") {
+                            otherUser.user.settings.flair = payload.newValue;
+                        }
+                    }
+                })
+                this.setState({directMessages: directMessages});
+            }
+        });
+        this.props.socket.on('user-connection-updated', payload => {
+            let currentRoomMembers = this.state.currentRoomMembers;
+            currentRoomMembers.forEach(m => {
+                if (m.user._id.toString() === payload.user) {
+                    m.user.lastOnline = payload.lastOnline;
+                }
+            })
+            this.setState({currentRoomMembers: currentRoomMembers})
+        });
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -886,6 +996,28 @@ class ChatDrawer extends Component {
         }
     }
 
+    hideBanWarning = () => {
+        this.setState({banWarningVisible: false})
+    }
+
+    showBanWarning = (user) => {
+        this.setState({banWarningVisible: true, userToBan: user});
+    }
+
+    handleBan = () => {
+        console.log("Banning user")
+        this.setState({banWarningVisible: false});
+        fetch('/api/chat/room/ban/' + this.state.currentRoom.slug + '/' + this.state.userToBan._id, {
+            method: 'POST'
+        })
+        .then(res => {
+            this.setState({userToBan: ''});
+            if (res.status === 200) {
+                console.log("Bin bnd")
+            }
+        })
+    }
+
     infiniteScroll = (lastMessage) => {
         fetch('/api/chat/room/fetch-messages', {
             method: 'POST',
@@ -905,7 +1037,6 @@ class ChatDrawer extends Component {
             this.setState({
                 messages: messages
             });
-            console.log("LOMG:",payload.messages.length)
             if (payload.messages.length !== 0) {
                 document.getElementById(lastMessage).scrollIntoView();
 
@@ -990,15 +1121,14 @@ class ChatDrawer extends Component {
                             className="chatForm"
                             onSubmit={this.handleSubmit}
                         >
-                            <Textarea
-                                inputRef={this.messageInput}
+                            <TextareaAutosize
+                                ref={this.messageInput}
                                 id="message"
                                 autoComplete="off"
                                 placeholder={"Message " + textareaPlaceholder}
                                 onChange={this.handleChange}
                                 onKeyDown={this.onEnterPress}
                                 value={this.state.message}
-                                minRows={1}
                                 maxRows={10}
                             />
                             <Tooltip
@@ -1022,7 +1152,14 @@ class ChatDrawer extends Component {
                     visitors={this.state.currentRoomVisitors}
                     changeAltarUser={this.props.changeAltarUser}
                     directMessage={this.directMessage}
+                    ban={this.showBanWarning}
+                    isAdministrator={isAdministrator}
                 />
+                <Modal show={this.state.banWarningVisible} handleClose={this.hideBanWarning}>
+                    <h1>Ban from Coven</h1>
+                    <p style={{marginBottom:"1rem"}}>Are you sure you want to ban <strong>{this.state.userToBan.username}</strong> from <strong>{this.state.currentRoom.name}</strong>? They will no longer be able to see the Coven or any messages in it. You can unban them in the Coven manager.</p>
+                    <button className="full-width" onClick={this.handleBan}>Ban {this.state.userToBan.username} from {this.state.currentRoom.name}</button>
+                </Modal>
             </main>
         );
     }

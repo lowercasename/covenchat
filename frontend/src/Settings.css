@@ -64,7 +64,7 @@ input[type="checkbox"] {
 
 #flairSelector input[type=radio]:checked + .icon {
     background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.5);
+    border-color: rgba(255,255,255,0.35);
 }
 
 #flairSelector label,
@@ -85,6 +85,7 @@ input[type="checkbox"] {
     border-radius: 4px;
     width: 200px;
     display: block;
+    cursor: pointer;
 }
 
 #statusSelector input[type=radio] + span:hover {
@@ -93,5 +94,5 @@ input[type="checkbox"] {
 
 #statusSelector input[type=radio]:checked + span {
     background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.5);
+    border-color: rgba(255,255,255,0.35);
 }

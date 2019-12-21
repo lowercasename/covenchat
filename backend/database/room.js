@@ -16,6 +16,7 @@ var roomSchema = new mongoose.Schema({
     public: {type: Boolean, default: true},
     members: [roomMemberSchema],
     visitors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    bannedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
     hiddenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 
