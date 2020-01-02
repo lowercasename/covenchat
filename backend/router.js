@@ -9,6 +9,7 @@ const storage = multer.diskStorage({
 		cb(null, shortid.generate() + '.' + extension);
 	},
 });
+const fs = require('fs');
 const upload = multer({ storage });
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -40,7 +41,10 @@ transporter.verify(function(error, success) {
 });
 
 // SOCKET.IO
-const server = require('http').Server(express);
+const server = require('https').createServer({
+	key: fs.readFileSync('./privkey.pem'),
+	cert: fs.readFileSync('./cert.pem'),
+}, express);
 const io = require('socket.io')(server, { origins: '*:*'});
 server.listen(8899);
 io.on('connection', function(socket) {
