@@ -42,7 +42,7 @@ transporter.verify(function(error, success) {
 // SOCKET.IO
 const server = require('https').Server(express);
 const io = require('socket.io')(server, { origins: '*:*'});
-server.listen(8899);
+server.listen(80);
 io.on('connection', function(socket) {
 	socket.on('user-online', payload => {
 		console.log(payload.username, "is online")

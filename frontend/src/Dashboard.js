@@ -15,7 +15,7 @@ library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayi
 
 toast.configure();
 
-const socket = openSocket('https://localhost:8899');
+const socket = openSocket('https://coven.chat');
 
 const Modal = ({ handleClose, show, children }) => {
     var showHideClassName = show ? "modal display-block" : "modal display-none";
