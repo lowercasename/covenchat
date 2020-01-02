@@ -314,13 +314,16 @@ export default class Altar extends Component {
                 }
             })
             .then(res => {
-                let journalPosts = res.posts.filter(p => p.category === "journal");
-                let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
-                let lorePosts = res.posts.filter(p => p.category === "lore");
+                let journalPosts, spellbookPosts, lorePosts;
+                if (res.posts) {
+                    journalPosts = res.posts.filter(p => p.category === "journal");
+                    spellbookPosts = res.posts.filter(p => p.category === "spellbook");
+                    lorePosts = res.posts.filter(p => p.category === "lore");
+                }
                 this.setState({
-                    cells: res.altar.cells,
-                    candles: res.altar.candles,
-                    backgroundColor: res.altar.backgroundColor,
+                    cells: (res.altar ? res.altar.cells : ''),
+                    candles: (res.altar ? res.altar.candles : ''),
+                    backgroundColor: (res.altar ? res.altar.backgroundColor : ''),
                     journalPosts: journalPosts,
                     spellbookPosts: spellbookPosts,
                     lorePosts: lorePosts
@@ -607,7 +610,7 @@ export default class Altar extends Component {
                             oldPost.title = post.title;
                             oldPost.public = post.public;
                             oldPost.content = post.content;
-                            this.setState({spellBookPosts: spellbookPosts});
+                            this.setState({spellbookPosts: spellbookPosts});
                         }
                     })
                     break;
@@ -681,11 +684,10 @@ export default class Altar extends Component {
             display: this.props.isVisible ? 'flex' : 'none',
             backgroundColor: this.state.backgroundColor ? 'rgba(' + this.state.backgroundColor.r + ',' + this.state.backgroundColor.g + ',' + this.state.backgroundColor.b + ',' + this.state.backgroundColor.a + ')' : 'rgba(62,41,72,1)'
         };
-        let journalPosts = this.state.journalPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
-        let spellbookPosts = this.state.spellbookPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
-        let lorePosts = this.state.lorePosts.filter(post => this.props.user === this.state.originalUser ? true : post.public);
-        let noPosts = <article className="post"><main style={{textAlign:"center"}}>No posts.</main>
-    </article>
+        let journalPosts = this.state.journalPosts ? this.state.journalPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public) : '';
+        let spellbookPosts = this.state.spellbookPosts ? this.state.spellbookPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public) : '';
+        let lorePosts = this.state.lorePosts ? this.state.lorePosts.filter(post => this.props.user === this.state.originalUser ? true : post.public) : '';
+        let noPosts = <article className="post"><main style={{textAlign:"center"}}>No posts.</main></article>
         return (
             <div id="altar" style={style}>
                 <nav id="altarNav">

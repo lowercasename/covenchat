@@ -120,41 +120,43 @@ class Dashboard extends Component {
           return outputArray;
         }
 
-        navigator.serviceWorker.register('webpush-service-worker.js');
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.register('webpush-service-worker.js');
 
-        navigator.serviceWorker.ready
-        .then((registration) => {
-
-          return registration.pushManager.getSubscription()
-          .then(async (subscription) => {
-
-            if (subscription) {
-              return subscription;
-            }
-
-            const response = await fetch('/api/webpush/get-key');
-            const vapidPublicKey = await response.text();
-
-            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-
-            return registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: convertedVapidKey
+            navigator.serviceWorker.ready
+            .then((registration) => {
+    
+              return registration.pushManager.getSubscription()
+              .then(async (subscription) => {
+    
+                if (subscription) {
+                  return subscription;
+                }
+    
+                const response = await fetch('/api/webpush/get-key');
+                const vapidPublicKey = await response.text();
+    
+                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+    
+                return registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: convertedVapidKey
+                });
+              });
+          }).then((subscription) => {
+              fetch('/api/webpush/register', {
+                method: 'post',
+                headers: {
+                  'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userID: this.state.user._id,
+                    subscription: subscription
+                }),
+              });
             });
-          });
-      }).then((subscription) => {
-          fetch('/api/webpush/register', {
-            method: 'post',
-            headers: {
-              'Content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                userID: this.state.user._id,
-                subscription: subscription
-            }),
-          });
-        });
-
+        }
+    
         const NotificationToast = ({ notification, username, closeToast }) => {
             function handleClick(){
                 fetch('/api/link/upsert', {

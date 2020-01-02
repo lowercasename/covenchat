@@ -14,7 +14,8 @@ import Modal from './components/Modal.js';
 import { CreateRoomControls, EditRoomControls, JoinLeaveRoomControls, InviteToRoomControls, HideRoomControls } from './components/RoomControls';
 
 function scrollToBottom() {
-    var messages = document.querySelector('#chatWindow .simplebar-content-wrapper'); messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
+    var messages = document.querySelector('#chatWindow .simplebar-content-wrapper');
+    messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
 }
 
 class UserFlair extends Component {
@@ -470,6 +471,7 @@ class ChatDrawer extends Component {
             currentRoom: '',
             currentRoomMembers: [],
             currentRoomVisitors: [],
+            currentRoomBannedUsers: [],
             showWelcomeMessage: true,
             joinedRooms: [],
             directMessages: [],
@@ -477,7 +479,8 @@ class ChatDrawer extends Component {
             joinDisabled: false,
             leaveDisabled: false,
             banWarningVisible: false,
-            userToBan: ''
+            userToBan: '',
+            userToUnban: ''
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -490,11 +493,13 @@ class ChatDrawer extends Component {
             .then(payload => {
                 var currentRoomMembers = payload.room.members.sort((a, b) => a.user.username.localeCompare( b.user.username ));
                 var currentRoomVisitors = payload.room.visitors.sort((a, b) => a.username.localeCompare( b.username ));
+                var currentRoomBannedUsers = payload.room.bannedUsers.sort((a, b) => a.username.localeCompare( b.username ));
                 this.setState({
                     messages: payload.messages,
                     currentRoom: payload.room,
                     currentRoomMembers: currentRoomMembers,
                     currentRoomVisitors: currentRoomVisitors,
+                    currentRoomBannedUsers: currentRoomBannedUsers,
                     showWelcomeMessage: payload.showWelcomeMessage
                 });
                 scrollToBottom();
@@ -751,6 +756,35 @@ class ChatDrawer extends Component {
                     currentRoomMembers: currentRoomMembers,
                     currentRoomVisitors: currentRoomVisitors
                 })
+                // Add user to banned members array
+                if (!this.state.currentRoomBannedUsers.some(v => v._id.toString() === payload.user._id.toString())) {
+                    var currentRoomBannedUsers = [...this.state.currentRoomBannedUsers, payload.user];
+                    currentRoomBannedUsers.sort((a, b) => a.username.localeCompare( b.username ));
+                    this.setState({currentRoomBannedUsers: currentRoomBannedUsers})
+                }
+            }
+        });
+
+        this.props.socket.on('user-unbanned-from-room', payload => {
+            // If you're the one who's just been unbanned
+            if (this.props.user._id === payload.user._id) {
+                // Reload the room list
+                this.reloadRoomList();
+                fetch('/api/user/send-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user: payload.user.username,
+                        notification: {
+                            sender: payload.user.username,
+                            type: 'user-unbanned',
+                            text: 'You have been unbanned from ' + payload.room.name + '.',
+                        }
+                    })
+                })
             }
         });
 
@@ -865,10 +899,10 @@ class ChatDrawer extends Component {
     }
 
     switchRoom(roomSlug) {
-        fetch('/api/chat/room/exit/' + this.state.currentRoom.slug, {method: "POST", body: {socketId: this.state.socketId}})
+        fetch('/api/chat/room/exit/' + this.state.currentRoom.slug, {method: "POST"})
         .then(res => {
             if (res.status === 200) {
-                fetch('/api/chat/room/enter/' + roomSlug, {method: "POST", body: {socketId: this.state.socketId}})
+                fetch('/api/chat/room/enter/' + roomSlug, {method: "POST"})
                 .then(res => {
                     if (res.status === 200) {
                         this.reloadRoom(roomSlug)
@@ -1004,16 +1038,39 @@ class ChatDrawer extends Component {
         this.setState({banWarningVisible: true, userToBan: user});
     }
 
-    handleBan = () => {
+    hideUnbanWarning = () => {
+        this.setState({unbanWarningVisible: false})
+    }
+
+    showUnbanWarning = (user) => {
+        this.setState({unbanWarningVisible: true, userToUnban: user});
+        console.log(user)
+    }
+
+    handleBan = (room, user) => {
         console.log("Banning user")
         this.setState({banWarningVisible: false});
-        fetch('/api/chat/room/ban/' + this.state.currentRoom.slug + '/' + this.state.userToBan._id, {
+        fetch('/api/chat/room/ban/' + room + '/' + user, {
             method: 'POST'
         })
         .then(res => {
             this.setState({userToBan: ''});
             if (res.status === 200) {
                 console.log("Bin bnd")
+            }
+        })
+    }
+
+    handleUnban = (room, user) => {
+        console.log("Unbanning user")
+        this.setState({unbanWarningVisible: false});
+        fetch('/api/chat/room/unban/' + room + '/' + user, {
+            method: 'POST'
+        })
+        .then(res => {
+            this.setState({userToUnban: ''});
+            if (res.status === 200) {
+                console.log("Bin unbnd")
             }
         })
     }
@@ -1075,10 +1132,13 @@ class ChatDrawer extends Component {
                         <EditRoomControls
                             currentRoom={this.state.currentRoom}
                             currentRoomMembers={this.state.currentRoomMembers}
+                            currentRoomBannedUsers={this.state.currentRoomBannedUsers}
                             user={this.props.user}
                             reloadRoom={this.reloadRoom.bind(this)}
                             reloadRoomList={this.reloadRoomList.bind(this)}
-                            socketId={this.state.socketId}
+                            handleBan={this.showBanWarning.bind(this)}
+                            handleUnban={this.showUnbanWarning.bind(this)}
+                            socket={this.props.socket}
                         />
                     }
                     {isPrivateRoom && !isDirectMessage && isAdministrator &&
@@ -1158,7 +1218,12 @@ class ChatDrawer extends Component {
                 <Modal show={this.state.banWarningVisible} handleClose={this.hideBanWarning}>
                     <h1>Ban from Coven</h1>
                     <p style={{marginBottom:"1rem"}}>Are you sure you want to ban <strong>{this.state.userToBan.username}</strong> from <strong>{this.state.currentRoom.name}</strong>? They will no longer be able to see the Coven or any messages in it. You can unban them in the Coven manager.</p>
-                    <button className="full-width" onClick={this.handleBan}>Ban {this.state.userToBan.username} from {this.state.currentRoom.name}</button>
+                    <button className="full-width" onClick={() => this.handleBan(this.state.currentRoom.slug, this.state.userToBan._id)}>Ban {this.state.userToBan.username} from {this.state.currentRoom.name}</button>
+                </Modal>
+                <Modal show={this.state.unbanWarningVisible} handleClose={this.hideUnbanWarning}>
+                    <h1>Unban in Coven</h1>
+                    <p style={{marginBottom:"1rem"}}>Are you sure you want to unban <strong>{this.state.userToUnban.username}</strong> in <strong>{this.state.currentRoom.name}</strong>?</p>
+                    <button className="full-width" onClick={() => this.handleUnban(this.state.currentRoom.slug, this.state.userToUnban._id)}>Unban {this.state.userToUnban.username} in {this.state.currentRoom.name}</button>
                 </Modal>
             </main>
         );

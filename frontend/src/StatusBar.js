@@ -138,9 +138,6 @@ class StatusBar extends Component {
         } else if (illumination >= 99.75 && illumination <= 100) {
             majorPhase = <span><span className="hermetica-B027-moon_phase_new"/>&nbsp;Full Moon</span>
         }
-
-        //console.log((majorPhase ? majorPhase : direction + " " + phaseName) + " (" + illumination + "%" + (majorPhase ? ")" : (nextPhase ? ", "+nextPhase+")" : ")")))
-        // return <span>{(majorPhase ? majorPhase : minorPhase) + (majorPhase ? "" : nextPhase ? " (" + nextPhase + ")" : "")}</span>
         return (
             <span>
                 {majorPhase ?
@@ -148,7 +145,7 @@ class StatusBar extends Component {
                 :
                     minorPhase
                 }
-                {!majorPhase ?
+                {nextPhase ?
                     <span>&nbsp;({currentIllumination}%,&nbsp;{nextPhase})</span>
                 :
                     <span>&nbsp;({currentIllumination}%)</span>
@@ -296,14 +293,23 @@ class StatusBar extends Component {
                 month: 'long'
             }) + ")";
         } else {
-            var nextFestival = festivals.filter(function(f) {
+            var nextFestival = festivals.filter((f,i) => {
                 return f.date - today > 0;
             }).slice(0, 1);
-            var one_day = 1000 * 60 * 60 * 24;
-            var daysUntil = Math.ceil((nextFestival[0].date.getTime() - today.getTime()) / (one_day));
-            message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', {
-                month: 'long'
-            }) + ")";
+            if (nextFestival.length > 0) {
+                var one_day = 1000 * 60 * 60 * 24;
+                var daysUntil = Math.ceil((nextFestival[0].date.getTime() - today.getTime()) / (one_day));
+                message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + nextFestival[0].name + " (" + nextFestival[0].date.getDate() + " " + nextFestival[0].date.toLocaleString('default', {
+                    month: 'long'
+                }) + ")";
+            } else {
+                var one_day = 1000 * 60 * 60 * 24;
+                var nextImbolc = new Date(today.getFullYear()+1, 1, 2);
+                var daysUntil = Math.ceil((nextImbolc.getTime() - today.getTime()) / (one_day));
+                message = daysUntil + (daysUntil > 1 ? " days" : " day") + " to " + festivals[0].name + " (" + nextImbolc.getDate() + " " + nextImbolc.toLocaleString('default', {
+                    month: 'long'
+                }) + ")";
+            }
         }
         return message;
     }

@@ -265,14 +265,19 @@ class JoinLeaveRoomControls extends Component {
 class EditRoomControls extends Component {
     constructor(props) {
         super(props);
-        let roomMembersTags = [], roomAdminsTags = [];
+        let roomMembersTags = [], roomAdminsTags = [], roomBannedUsersTags = [];
         let roomMembers = this.props.currentRoomMembers.filter(m => m.role === "member");
         let roomAdmins = this.props.currentRoomMembers.filter(m => m.role === "administrator");
+        let roomBannedUsers = this.props.currentRoomBannedUsers;
+        console.log("roomBannedUsers", roomBannedUsers)
         roomMembers.forEach((m, index) => {
             roomMembersTags.push({id: m.user._id, name: m.user.username})
         })
         roomAdmins.forEach((m, index) => {
             roomAdminsTags.push({id: m.user._id, name: m.user.username})
+        })
+        roomBannedUsers.forEach((u, index) => {
+            roomBannedUsersTags.push({id: u._id, name: u.username})
         })
         this.state = {
             modalVisible: false,
@@ -285,9 +290,27 @@ class EditRoomControls extends Component {
             submitDisabled: false,
             roomMembers: roomMembersTags,
             roomAdmins: roomAdminsTags,
+            roomBannedUsers: roomBannedUsersTags,
             socketId: this.props.socketId
         }
     }
+
+    componentDidMount() {
+        this.props.socket.on('user-banned-from-room', payload => {
+            let tag = {
+                id: payload.user._id,
+                name: payload.user.username
+            }
+            const roomBannedUsers = [...this.state.roomBannedUsers, tag];
+            this.setState({ roomBannedUsers })
+        });
+        this.props.socket.on('user-unbanned-from-room', payload => {
+            this.setState({
+                roomBannedUsers: this.state.roomBannedUsers.filter(user => user.id !== payload.user._id),
+            });
+        });
+    }
+
     showModal = () => {
         this.setState({modalVisible: true})
     }
@@ -311,6 +334,22 @@ class EditRoomControls extends Component {
             roomAdmins.splice(i, 1);
             this.setState({ roomAdmins });
         }
+    }
+
+    handleBanAddition = (tag) =>  {
+        tag._id = tag.id;
+        tag.username = tag.name;
+        // Can only ban members already in room, and can't ban members twice, and can't ban yourself
+        if (this.state.roomMembers.some(m => m.name === tag.name) && !this.state.roomBannedUsers.some(m => m.name === tag.name) && tag.name !== this.props.user.username){
+            this.props.handleBan(tag)
+        }
+    }
+
+    handleBanDelete(i) {
+        let userToUnban = this.state.roomBannedUsers[i];
+        userToUnban._id = userToUnban.id;
+        userToUnban.username = userToUnban.name;
+        this.props.handleUnban(userToUnban);
     }
 
     handleInputChange = (event) => {
@@ -428,11 +467,21 @@ class EditRoomControls extends Component {
                         <label htmlFor="roomWelcomeMessage">Administrators</label>
                         <p>Start typing a username to add that user to the Coven administrators group.</p>
                         <ReactTags
+                            id="roomAdministrators"
                             tags={this.state.roomAdmins}
                             suggestions={this.state.roomMembers}
                             placeholder="Add new admin"
                             handleDelete={this.handleDelete.bind(this)}
                             handleAddition={this.handleAddition.bind(this)} />
+                        <label htmlFor="roomBannedUsers">Banned Users</label>
+                        <ReactTags
+                            id="roomBannedUsers"
+                            tags={this.state.roomBannedUsers}
+                            suggestions={this.state.roomMembers}
+                            placeholder="Ban a member"
+                            handleDelete={this.handleBanDelete.bind(this)}
+                            handleAddition={this.handleBanAddition.bind(this)}
+                            />
                         <button type="submit" className="full-width" disabled={this.state.submitDisabled}>Update Coven</button>
                     </form>
                 </Modal>

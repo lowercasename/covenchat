@@ -580,7 +580,10 @@ router.get('/api/chat/room/fetch-public', authorizeUser, function(req,res) {
 });
 
 router.get('/api/chat/room/fetch-joined', authorizeUser, async function(req,res) {
-	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}, hiddenBy: {$ne: req.user._id},bannedUsers: {$ne: req.user._id}}).populate('members.user').sort('name')
+	var rooms = Room.find({members: {$elemMatch: {user:req.user._id}}, hiddenBy: {$ne: req.user._id},bannedUsers: {$ne: req.user._id}})
+	.populate('members.user')
+	.populate('bannedUsers')
+	.sort('name')
 	.then(async rooms => {
 		async function getUnreadMessages (rooms) {
 			const promiseArray = rooms.map(async room => {
@@ -617,6 +620,7 @@ router.get('/api/chat/room/fetch/:room', authorizeUser, async function(req,res) 
 		slug: targetSlug
 	})
 	.populate('members.user')
+	.populate('bannedUsers')
 	.populate('visitors');
 
 	// var startOfToday = new Date().setHours(0,0,0,0);
@@ -996,6 +1000,27 @@ router.post('/api/chat/room/ban/:room/:userID', authorizeUser, function(req,res)
 					io.emit('user-banned-from-room', {room: room, user: user})
 					res.sendStatus(200);
 				})
+			})
+		}
+	})
+});
+
+router.post('/api/chat/room/unban/:room/:userID', authorizeUser, function(req,res) {
+	console.log("Unbanning",req.params.userID,"in",req.params.room)
+	Room.findOne({
+		slug: req.params.room
+	})
+	.then(async (room) => {
+		let user = await User.findById(req.params.userID)
+		if (user) {
+			// Remove user from banned users array
+			if (room.bannedUsers.some(v => v.equals(req.params.userID))) {
+				room.bannedUsers = room.bannedUsers.filter(v => !v.equals(req.params.userID));
+			}
+			room.save()
+			.then(result => {
+				io.emit('user-unbanned-from-room', {room: room, user: user})
+				res.sendStatus(200);
 			})
 		}
 	})
