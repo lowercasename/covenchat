@@ -51,9 +51,12 @@ class Dashboard extends Component {
     componentDidMount() {
         // Check connection to server every 3 seconds
         setInterval(() => {
+            console.log(socket)
             if (socket.connected) {
+                console.log("He connected");
                 this.setState({connected: true});
             } else {
+                console.log("He not connected");
                 this.setState({connected: false});
             }
         }, 3000);
