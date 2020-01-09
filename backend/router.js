@@ -41,7 +41,7 @@ transporter.verify(function(error, success) {
 });
 
 // SOCKET.IO
-const server = require('https').createServer(express);
+const server = require('http').createServer(express);
 const io = require('socket.io')(server, { origins: '*:*'});
 server.listen(process.env.SOCKET_PORT);
 io.on('connection', function(socket) {
