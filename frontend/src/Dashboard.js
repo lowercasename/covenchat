@@ -15,7 +15,7 @@ library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayi
 
 toast.configure();
 
-const socket = openSocket('https://' + process.env.REACT_APP_HOST);
+const socket = openSocket('http://' + process.env.REACT_APP_HOST);
 
 const Modal = ({ handleClose, show, children }) => {
     var showHideClassName = show ? "modal display-block" : "modal display-none";
