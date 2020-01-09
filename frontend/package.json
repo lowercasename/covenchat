@@ -64,6 +64,7 @@
     ]
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "riek": "^1.1.0"
   }
 }

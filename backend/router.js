@@ -34,19 +34,16 @@ const transporter = nodemailer.createTransport({
 transporter.verify(function(error, success) {
 	if (error) {
 		console.log("Email server error!")
-		console.log(error);
+		console.log(error); 
 	} else {
 		console.log("Email server is ready to take our messages");
 	}
 });
 
 // SOCKET.IO
-const server = require('https').createServer({
-	key: fs.readFileSync('./privkey.pem'),
-	cert: fs.readFileSync('./cert.pem'),
-}, express);
+const server = require('https').createServer(express);
 const io = require('socket.io')(server, { origins: '*:*'});
-server.listen(8899);
+server.listen(process.env.SOCKET_PORT);
 io.on('connection', function(socket) {
 	socket.on('user-online', payload => {
 		console.log(payload.username, "is online")
