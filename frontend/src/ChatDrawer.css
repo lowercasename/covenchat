@@ -1,32 +1,36 @@
 .chatDrawer {
     display: flex;
     flex-direction: row;
-    background: var(--purple);
+    background: rgba(255, 255, 255, 0.07);
     flex: 1;
     overflow: hidden;
 }
 
 .roomList {
     width: 200px;
-    border-right: 1px solid rgba(0,0,0,0.5);
-    padding: 10px 10px 10px 10px;
+    border-right: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 0 10px 10px 0;
+    background: var(--purple);
+    padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
-.roomList header, .userList header {
+.roomList header,
+.userList header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
 }
 
-.roomList li, .userList li {
+.roomList li,
+.userList li {
     display: flex;
     justify-content: space-between;
     align-items: center;
     list-style-type: none;
-    background: rgba(255,255,255,0.075);
+    background: rgba(255, 255, 255, 0.075);
     border: 1px solid transparent;
     padding: 5px;
     border-radius: 6px;
@@ -36,30 +40,32 @@
     text-overflow: ellipsis;
     cursor: pointer;
     transition: 150ms;
-    color: rgba(255,255,255,0.74)
+    color: rgba(255, 255, 255, 0.74)
 }
 
 .roomList li:hover,
 .userList li:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .roomList li.active {
-    color: rgba(255,255,255);
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255);
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
-.roomList li > div {
+.roomList li>div {
     width: 100%;
 }
 
 .userList {
     width: 200px;
-    border-left: 1px solid rgba(0,0,0,0.5);
+    border-left: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 10px 0 0 10px;
     padding: 10px 10px 10px 10px;
     display: flex;
     flex-direction: column;
+    background: var(--purple);
 }
 
 .userListInner,
@@ -77,7 +83,6 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    background: rgba(255,255,255,0.03);
     width: 100%;
     /* max-width:960px; */
 }
@@ -88,7 +93,7 @@
     z-index: 100;
     max-height: 60px;
     padding: 10px;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
     border-bottom: 1px solid var(--black);
     display: flex;
 }
@@ -103,7 +108,7 @@
     padding: 5px;
     display: flex;
     align-items: flex-start;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     margin: 10px;
 }
@@ -155,6 +160,8 @@
     transition: 300ms;
     margin-bottom: 2px;
 }
+
+
 /*.messageList .messageContainer .message,
 .messageList .messageContainer .tarot,
 .messageList .messageContainer .runes,
@@ -176,35 +183,43 @@
     color: var(--green)
 }
 
-.dateMessage > span{
+.dateMessage>span {
     position: relative;
     display: inline-block;
 }
-.dateMessage > span:before, .dateMessage > span:after{
+
+.dateMessage>span:before,
+.dateMessage>span:after {
     content: '';
     position: absolute;
     top: 50%;
     border-bottom: 1px solid;
-    width: 9999px; /* A hack! A palpable hack! */
+    width: 9999px;
+    /* A hack! A palpable hack! */
     margin: 0 10px;
     opacity: 0.5;
 }
-.dateMessage > span:before{
+
+.dateMessage>span:before {
     right: 100%;
 }
-.dateMessage > span:after{
+
+.dateMessage>span:after {
     left: 100%;
 }
+
 
 /* Silly hack to make sure that a message after a date marker always
 has its date displayed, even when the author is the same as that of
 the previous day's message */
-.dateMessage + .messageContainer .message .messageMetadata,
-.dateMessage + .messageContainer .action .messageMetadata,
-.dateMessage + .messageContainer .tarot .messageMetadata,
-.dateMessage + .messageContainer .runes .messageMetadata {
+
+.dateMessage+.messageContainer .message .messageMetadata,
+.dateMessage+.messageContainer .action .messageMetadata,
+.dateMessage+.messageContainer .tarot .messageMetadata,
+.dateMessage+.messageContainer .runes .messageMetadata {
     display: flex !important;
 }
+
 
 /* Loose message view */
 
@@ -247,6 +262,7 @@ the previous day's message */
 
 /* Compact message view */
 
+
 /* .messageTimestamp {
     font-family: 'Fira Sans Condensed', sans-serif;
     opacity: 0.4;
@@ -265,6 +281,7 @@ the previous day's message */
     user-select: text;
 } */
 
+
 /* .message .hidden {
     opacity: 0;
     transition: 300ms;
@@ -279,14 +296,12 @@ the previous day's message */
 }
 
 .messageContainer.mentionMessage {
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,247,121,0.1) 15%, rgba(255,247,121,0.1) 85%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 247, 121, 0.1) 15%, rgba(255, 247, 121, 0.1) 85%, rgba(255, 255, 255, 0) 100%);
 }
 
 .messageContainer.mentionMessage:hover {
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,247,121,0.15) 15%, rgba(255,247,121,0.15) 85%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 247, 121, 0.15) 15%, rgba(255, 247, 121, 0.15) 85%, rgba(255, 255, 255, 0) 100%);
 }
-
-
 
 .message .messageContent,
 .action .messageContent,
@@ -319,8 +334,7 @@ the previous day's message */
 
 .messageList .alert {
     text-align: center;
-    opacity: 0.7;
-    color: var(--green)
+    color: var(--light-purple);
 }
 
 .spread {
@@ -347,7 +361,7 @@ the previous day's message */
 .tarotCard {
     width: 100px;
     height: 170px;
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.5);
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);
     border-radius: 6px;
     position: relative;
     left: 20px;
@@ -356,12 +370,15 @@ the previous day's message */
 .runestone {
     width: 50px;
     height: 67px;
-    filter: drop-shadow(4px 4px 3px rgba(0,0,0,0.5));
+    filter: drop-shadow(4px 4px 3px rgba(0, 0, 0, 0.5));
     position: relative;
     left: 20px;
 }
 
-.userAvailable, .userAway, .userDnD, .userInvisible {
+.userAvailable,
+.userAway,
+.userDnD,
+.userInvisible {
     font-size: 0.5rem;
     position: relative;
     top: -2px;

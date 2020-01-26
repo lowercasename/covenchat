@@ -9,6 +9,7 @@ import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 import Dashboard from './Dashboard';
 import * as serviceWorker from './serviceWorker';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const PublicRoute = ({ component: Component, layout: Layout, ...rest }) => (
     <Route {...rest} render={props => (
@@ -37,46 +38,40 @@ const PublicLayout = ({ children }) => (
 class LandingPage extends Component {
     render() {
         return (
-            <div>
-                Welcome to CovenChat!
+            <div id="bodyContainer">
+                <h1 style={{textAlign:'center'}}>CovenChat is an online home for witches.</h1>
+                <div id="featuresBox">
+                    <div>
+                        <img src="/homepage-map.svg" className="homepage-icon"></img>
+                        <p className="lead">Map</p>
+                        <p>See the location of other witches and connect to them with sigil lines.</p>
+                    </div>
+                    <div>
+                        <img src="/homepage-chat.svg" className="homepage-icon"></img>
+                        <p className="lead">Chat</p>
+                        <p>Join and create public and private covens, draw Tarot cards and runes, and direct message other witches.</p>
+                    </div>
+                    <div>
+                        <img src="/homepage-candle.svg" className="homepage-icon"></img>
+                        <p className="lead">Altar</p>
+                        <p>Light candles and design your own digital sacred space.</p>
+                    </div>
+                    <div>
+                        <img src="/homepage-spellbook.svg" className="homepage-icon"></img>
+                        <p className="lead">Journal</p>
+                        <p>Write a private journal and grimoire, or share spells and discoveries with others.</p>
+                    </div>
+                </div>
             </div>
         );
     }
 };
 
-// class LoginPage extends Component {
-//     state = {
-//         redirectToReferrer: false
-//     }
-//     login = () => {
-//         fakeAuth.authenticate(() => {
-//             this.setState(() => ({
-//                 redirectToReferrer: true
-//             }))
-//         })
-//     }
-//     render() {
-//         const { from } = this.props.location.state || { from: { pathname: '/' } }
-//         const { redirectToReferrer } = this.state
-//
-//         if (redirectToReferrer === true) {
-//             return <Redirect to={from} />
-//         }
-//
-//         return (
-//             <div>
-//             <p>You must log in to view the page</p>
-//             <button onClick={this.login}>Log in</button>
-//             </div>
-//         )
-//     }
-// }
-
 class NotFound extends Component {
     render() {
         return (
             <div>
-                <h2>404</h2>
+                <h1>404</h1>
                 <span>Page not found!</span>
             </div>
         );

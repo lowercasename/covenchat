@@ -525,7 +525,6 @@ class ChatDrawer extends Component {
     }
 
     componentDidMount() {
-        console.log("lastroom:",this.props.user.memory.lastRoom)
         this.reloadRoom((this.props.user.memory ? this.props.user.memory.lastRoom : 'global-coven'))
 
         fetch('/api/chat/room/fetch-joined/')
@@ -1044,11 +1043,9 @@ class ChatDrawer extends Component {
 
     showUnbanWarning = (user) => {
         this.setState({unbanWarningVisible: true, userToUnban: user});
-        console.log(user)
     }
 
     handleBan = (room, user) => {
-        console.log("Banning user")
         this.setState({banWarningVisible: false});
         fetch('/api/chat/room/ban/' + room + '/' + user, {
             method: 'POST'
@@ -1056,13 +1053,12 @@ class ChatDrawer extends Component {
         .then(res => {
             this.setState({userToBan: ''});
             if (res.status === 200) {
-                console.log("Bin bnd")
+                // console.log("Bin bnd")
             }
         })
     }
 
     handleUnban = (room, user) => {
-        console.log("Unbanning user")
         this.setState({unbanWarningVisible: false});
         fetch('/api/chat/room/unban/' + room + '/' + user, {
             method: 'POST'
@@ -1070,7 +1066,7 @@ class ChatDrawer extends Component {
         .then(res => {
             this.setState({userToUnban: ''});
             if (res.status === 200) {
-                console.log("Bin unbnd")
+                // console.log("Bin unbnd")
             }
         })
     }

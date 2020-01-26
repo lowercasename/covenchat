@@ -236,7 +236,7 @@ class Candle extends Component {
         let now = new Date().getTime();
         let expiryTime = this.state.expiryTime;
         if (expiryTime > now) {
-            console.log("Candle has not yet expired!");
+            // console.log("Candle has not yet expired!");
             let startTime = expiryTime - this.state.duration;
             let timeElapsed = now - startTime;
             let currentHeight = this.state.height - ((timeElapsed / this.state.duration) * this.state.height);
@@ -248,7 +248,7 @@ class Candle extends Component {
             });
             this.burn = setInterval(() => this.burnCandle(), step);
         } else {
-            console.log("Candle has expired, destroying candle", this.props.index);
+            // console.log("Candle has expired, destroying candle", this.props.index);
             clearInterval(this.burn);
             this.props.extinguishCandle(this.props.id, this.props.index);
         }
@@ -260,7 +260,7 @@ class Candle extends Component {
             runtime: prevState.runtime + this.state.step
         }));
         if (this.state.runtime >= this.state.duration) {
-            console.log("Runtime has exceeded duration, destroying candle", this.props.index);
+            // console.log("Runtime has exceeded duration, destroying candle", this.props.index);
             clearInterval(this.burn);
             this.props.extinguishCandle(this.props.id, this.props.index);
         }
@@ -370,7 +370,7 @@ export default class Altar extends Component {
     }
 
     lightCandle = (color = "white", duration = 600000) => {
-        console.log(this.state.candleDuration)
+        // console.log(this.state.candleDuration)
         let candleDuration = this.state.candleDuration * 60 * 1000; // Milliseconds
         let now = new Date().getTime();
         let candle = {
@@ -390,13 +390,13 @@ export default class Altar extends Component {
         })
             .then(res => res.json())
             .then(res => {
-                console.log(res)
+                // console.log(res)
                 this.setState({ candles: [...this.state.candles, res.candle] });
             })
     }
 
     extinguishCandle = (candleID, index) => {
-        console.log("Destroying candle", index)
+        // console.log("Destroying candle", index)
         fetch('/api/altar/candle/delete/' + candleID, {
             method: 'POST'
         })
@@ -405,7 +405,7 @@ export default class Altar extends Component {
                 let remainingCandles = this.state.candles.filter(candle => candle._id !== candleID);
                 this.setState({ candles: remainingCandles });
                 // this.setState({candles: res.candles});
-                console.log("Candle with index", index, "has been destroyed")
+                // console.log("Candle with index", index, "has been destroyed")
             })
             .catch(err => {
                 console.error("Error!", err);
@@ -475,7 +475,6 @@ export default class Altar extends Component {
     // }
 
     editAltarCellContents = (payload) => {
-        console.log(payload)
         fetch('/api/altar/edit-cell/contents', {
             method: 'POST',
             headers: {
@@ -507,7 +506,6 @@ export default class Altar extends Component {
         })
             .then(res => res.json())
             .then(res => {
-                console.log(res);
                 let cells = this.state.cells;
                 cells.forEach((cell, index) => {
                     if (index === res.index) {
@@ -533,7 +531,6 @@ export default class Altar extends Component {
         })
             .then(res => res.json())
             .then(res => {
-                console.log(res);
                 let cells = this.state.cells;
                 cells.forEach((cell, index) => {
                     if (index === res.index) {
@@ -575,7 +572,6 @@ export default class Altar extends Component {
 
     updatePosts = (post) => {
         if (this.state.postMode === 'create') {
-            console.log(post.category)
             switch(post.category) {
                 case 'journal':
                     this.setState({journalPosts: [...this.state.journalPosts, post]});
@@ -590,7 +586,6 @@ export default class Altar extends Component {
                     return false;
             }
         } else if (this.state.postMode === 'edit') {
-            console.log(post)
             switch(post.category) {
                 case 'journal':
                     let journalPosts = this.state.journalPosts;

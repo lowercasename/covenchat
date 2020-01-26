@@ -189,7 +189,7 @@ export default class Map extends Component {
                                 })
                             } else {
                                 // Updating too quickly
-                                console.log("Rate limit: waiting 30 seconds between geolocation updates");
+                                // console.log("Rate limit: waiting 30 seconds between geolocation updates");
                             }
                         } else {
                             // console.log("User not currently on map")
@@ -273,19 +273,23 @@ export default class Map extends Component {
                             }
                         });
                         let currentLinks = this.state.currentLinks;
-                        console.log(currentLinks.some((l,i) => {console.log("Index",i);console.log("l_id",l._id); console.log("link_id",link._id); return l._id === link._id}));
+                        // console.log(currentLinks.some((l,i) => {console.log("Index",i);console.log("l_id",l._id); console.log("link_id",link._id); return l._id === link._id}));
                         if (currentLinks.some(l => l._id === link._id)) {
-                            console.log("Link already exists, updating it")
+                            // console.log("Link already exists, updating it")
                             currentLinks.forEach(existingLink => {
                                 if (existingLink._id === link._id) {
                                     existingLink = {...existingLink, ...link};
-                                    this.setState({currentLinks: currentLinks}, () => {console.log("currentLinks updated", this.state.currentLinks)});
+                                    this.setState({currentLinks: currentLinks}, () => {
+                                        // console.log("currentLinks updated", this.state.currentLinks);
+                                    });
                                 }
                             })
                         } else {
-                            console.log("Link doesn't exist, creating it!")
+                            // console.log("Link doesn't exist, creating it!")
                             currentLinks.push(link);
-                            this.setState({currentLinks: currentLinks}, () => {console.log("currentLink added", this.state.currentLinks)});
+                            this.setState({currentLinks: currentLinks}, () => {
+                                // console.log("currentLink added", this.state.currentLinks)
+                            });
                         }
                         // Let the people know the good news
                         if (link.revision === false) {
@@ -361,7 +365,6 @@ export default class Map extends Component {
         }
     }
     sendLinkNotification = (username) => {
-        console.log(this.state.currentLinks)
         if (this.state.currentLinks.some(l => l.fromUsername === username || l.toUsername === username)) {
             toast("You are already linked to this person! If the link isn't on the map, try refreshing the page.", {
                 className: 'green-toast',

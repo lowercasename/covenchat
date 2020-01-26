@@ -27,7 +27,7 @@ import { Redirect } from 'react-router-dom';
 //     Cookie.remove('__session')
 // }
 
-export default function withAuth(ComponentToProtect) {
+export default function withAuth(ComponentToProtect, module) {
     return class extends Component {
         constructor() {
             super();

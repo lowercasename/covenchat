@@ -15,7 +15,7 @@ library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayi
 
 toast.configure();
 
-const socket = openSocket('http://' + process.env.REACT_APP_HOST);
+const socket = openSocket(process.env.REACT_APP_HOST);
 
 const Modal = ({ handleClose, show, children }) => {
     var showHideClassName = show ? "modal display-block" : "modal display-none";
@@ -51,12 +51,9 @@ class Dashboard extends Component {
     componentDidMount() {
         // Check connection to server every 3 seconds
         setInterval(() => {
-            console.log(socket)
             if (socket.connected) {
-                console.log("He connected");
                 this.setState({connected: true});
             } else {
-                console.log("He not connected");
                 this.setState({connected: false});
             }
         }, 3000);
@@ -65,13 +62,16 @@ class Dashboard extends Component {
 
         // Module to show a particular user's altar if an /altar/:username URL is supplied
         if (this.props.match.params[0]) {
+            console.log("ALTAR FUNCTION: attempting to send to an altar")
             if (this.props.match.params[0] === this.props.user.username) {
+                console.log("ALTAR FUNCTION: altar is user's!");
                 this.setState({
                     visibleModule: 'altar',
                     user: this.props.user,
                     altarUser: this.props.user
                 })
             } else {
+                console.log("ALTAR FUNCTION: altar is someone else's!");
                 fetch('/api/user/fetch-by-username/'+this.props.match.params[0])
                 .then(res => {
                     if (res.status === 200) {
@@ -239,7 +239,7 @@ class Dashboard extends Component {
         .then(res => res.json())
         .then(res => {
             res.notifications.forEach(notification => {
-                console.log("Notification", notification._id)
+                // console.log("Notification", notification._id)
                 if (notification.buttonText) {
                     // User has to interact with this notification
                     toast(<NotificationToast notification={notification} username={res.username}/>, {
@@ -298,6 +298,11 @@ class Dashboard extends Component {
     }
 
     toggleView(module) {
+        if (module === "altar") {
+            this.setState({
+                altarUser: this.props.user
+            })
+        }
         this.setState({
             visibleModule: module
         }, () => {
@@ -385,8 +390,6 @@ class Dashboard extends Component {
                 }
             })
             .then(res => {
-                console.log("Changing settings")
-                console.log(res)
                 this.setState({
                     user: res.user,
                     altarUser: res.user

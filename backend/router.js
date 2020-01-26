@@ -363,7 +363,7 @@ router.post('/api/user/sendresetpasswordlink', function(req,res) {
 						from: 'support@coven.chat',
 						to: user.email,
 						subject: 'We heard you forgot your password',
-						html: '<p>Hi ' + user.username + '!</p><p>Someone (hopefully you!) just requested a password reset link for this account on CovenChat.</p><p>If this was you, follow this link to reset your password: <a href="https://localhost:3000/reset-password?token=' + token + '">https://localhost:3000/reset-password?token=' + token + '</a>.</p><p>If this wasn\'t you, chances are someone put your email in by mistake. Don\'t worry, your account is safe and this link will expire in 24 hours.</p><p>Love,</p><p>CovenChat Support</p>'
+						html: '<p>Hi ' + user.username + '!</p><p>Someone (hopefully you!) just requested a password reset link for this account on CovenChat.</p><p>If this was you, follow this link to reset your password: <a href="https://coven.chat/reset-password?token=' + token + '">https://coven.chat/reset-password?token=' + token + '</a>.</p><p>If this wasn\'t you, chances are someone put your email in by mistake. Don\'t worry, your account is safe and this link will expire in 24 hours.</p><p>Love,</p><p>CovenChat Support</p>'
 					};
 					transporter.sendMail(resetEmail, function(err, info) {
 						console.log(info)
