@@ -688,7 +688,7 @@ export default class Altar extends Component {
                 <nav id="altarNav">
                     <span className="altarUsername">
                         <span>
-                            {this.props.user.settings.flair && <img src={this.props.user.settings.flair} className="altarFlair" alt={"Flair icon for " + this.props.user.username} />} {this.props.user.username}
+                            {this.props.user.settings.flair && this.props.user.settings.flair !== 'none' && <img src={this.props.user.settings.flair} className="altarFlair" alt={"Flair icon for " + this.props.user.username} />} {this.props.user.username}
                         </span>
                         {this.props.user !== this.state.originalUser &&
                             <button

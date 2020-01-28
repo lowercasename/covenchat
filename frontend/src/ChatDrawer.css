@@ -43,6 +43,12 @@
     color: rgba(255, 255, 255, 0.74)
 }
 
+.userList ul li span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .roomList li:hover,
 .userList li:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -296,11 +302,11 @@ the previous day's message */
 }
 
 .messageContainer.mentionMessage {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 247, 121, 0.1) 15%, rgba(255, 247, 121, 0.1) 85%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(90deg, hsla(0, 0%, 100%, 0), rgba(214, 142, 255, 0.1) 15%, rgba(214, 142, 255, 0.1) 85%, hsla(0, 0%, 100%, 0))
 }
 
 .messageContainer.mentionMessage:hover {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 247, 121, 0.15) 15%, rgba(255, 247, 121, 0.15) 85%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(90deg, hsla(0, 0%, 100%, 0), rgba(214, 142, 255, 0.15) 15%, rgba(214, 142, 255, 0.15) 85%, hsla(0, 0%, 100%, 0))
 }
 
 .message .messageContent,
@@ -310,6 +316,8 @@ the previous day's message */
     user-select: text;
     display: block;
     margin-left: 20px;
+    white-space: pre-line;
+    /* This is to display newline characters properly */
 }
 
 .messageList .action .messageContent,

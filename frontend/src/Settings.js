@@ -13,10 +13,11 @@ class FlairSelector extends Component {
     }
 
     icons = [
+        "none",
         "/flair/bat-1.svg",
         "/flair/bat-2.svg",
         "/flair/broom.svg",
-        "/flair/candle-1.svg",
+        // "/flair/candle-1.svg",
         "/flair/candle-2.svg",
         "/flair/candle-3.svg",
         "/flair/candle-4.svg",
@@ -68,10 +69,12 @@ class FlairSelector extends Component {
                                 id={icon}
                                 value={icon}
                                 checked={this.props.user.settings.flair === icon}/>
-                            <img
-                                alt={"Flair icon: " + icon}
-                                className="icon"
-                                src={icon}/>
+                            {icon !== 'none' ? 
+                                <img
+                                    alt={icon}
+                                    className="icon"
+                                    src={icon}/>
+                            : <div className="icon"></div>}
                         </label>
 
                     )

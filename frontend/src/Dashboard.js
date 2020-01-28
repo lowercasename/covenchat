@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { BrowserView, MobileView, isBrowser, isMobile } from "react-device-detect";
+import WindowFocusHandler from './components/WindowFocusHandler';
 import StatusBar from './StatusBar';
 import Map from './Map';
 import ChatDrawer from './ChatDrawer';
@@ -14,6 +16,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
 
 toast.configure();
+
+// toast('🦄 A freshly toasted test toast.', {
+//     className: 'green-toast',
+//     autoClose: false,
+//     closeButton: true
+// });
 
 const socket = openSocket(process.env.REACT_APP_HOST);
 
@@ -38,6 +46,7 @@ class Dashboard extends Component {
             visibleModule: 'loader',
             user: this.props.user,
             altarUser: this.props.user,
+            totalUnreadMessages: 0,
             permissionsModalVisible: false,
             askForWebPushNotifications: false,
             askForGeolocationNotifications: false
@@ -56,6 +65,25 @@ class Dashboard extends Component {
             } else {
                 this.setState({connected: false});
             }
+        }, 3000);
+
+        // Get number of unread messages every 3 seconds
+        this.getUnreadMessages = () => {
+            fetch('/api/chat/room/fetch-joined/')
+            .then(res => res.json())
+            .then(payload => {
+                let totalUnreadMessages = payload.reduce((total, room) => total + room.unreadMessages, 0);
+                if (totalUnreadMessages > 9) {
+                    totalUnreadMessages = '!'
+                }
+                this.setState({
+                    totalUnreadMessages: totalUnreadMessages
+                });
+            });
+        }
+        this.getUnreadMessages();
+        setInterval(() => {
+            this.getUnreadMessages();
         }, 3000);
 
         socket.emit('user-online', this.state.user);
@@ -90,7 +118,9 @@ class Dashboard extends Component {
             }
         } else {
             this.setState({visibleModule: 'map'}, () => {
+                if (this.refs.map) {
                 this.refs.map.resize();
+                }
             });
         }
 
@@ -106,7 +136,9 @@ class Dashboard extends Component {
                 fetch('/api/permission/update/geolocation', { method: 'POST' });
             };
         }
+        if (navigator.permissions) {
         checkGeolocationPermission();
+        }
 
         function urlBase64ToUint8Array(base64String) {
           const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -307,7 +339,9 @@ class Dashboard extends Component {
             visibleModule: module
         }, () => {
             if (module === "map") {
+                if (this.refs.map) {
                 this.refs.map.resize();
+            }
             }
         })
         window.history.replaceState({}, null, '/');
@@ -401,8 +435,23 @@ class Dashboard extends Component {
         this.setState({permissionsModalVisible: false})
     }
 
-
-    render() {
+    renderContent = () => {
+        if (isMobile) {
+            return <div id="mobileError">
+                <p>
+                    CovenChat is not yet available on mobile.
+                </p>
+                <p>
+                    Visit us on a desktop browser and let us know if you'd be interested in a mobile app for iOS and Android.
+                </p>
+                <button
+                    onClick={this.logOut}
+                    style={{marginBottom:"1rem"}}
+                >
+                    Sign out
+                </button>
+            </div>;
+        }
         return (
             <div className="App">
                 {!this.state.connected &&
@@ -415,6 +464,7 @@ class Dashboard extends Component {
                         </div>
                     </>
                 }
+                <WindowFocusHandler/>
                 <nav className="sideNav">
                     <img alt="CovenChat logo" src="/magic-ball-alt.svg" className="navLogo" />
                     <div className={["navIcon", (this.state.visibleModule === "map" ? "active" : "")].join(" ")} onClick={() => this.toggleView('map')}>
@@ -422,6 +472,7 @@ class Dashboard extends Component {
                     </div>
                     <div className={["navIcon", (this.state.visibleModule === "chat" ? "active" : "")].join(" ")} onClick={() => this.toggleView('chat')}>
                         <FontAwesomeIcon icon={['far', 'comments']} />
+                        {this.state.totalUnreadMessages > 0 && (<span className="badge">{this.state.totalUnreadMessages}</span>)}
                     </div>
                     <div className={["navIcon", (this.state.visibleModule === "altar" ? "active" : "")].join(" ")} onClick={() => this.toggleView('altar')}>
                         <span className="hermetica-F032-pentacle" style={{ fontSize: "40px" }} />
@@ -483,6 +534,11 @@ class Dashboard extends Component {
                 </Modal>
             </div>
         );
+    }
+
+
+    render() {
+        return this.renderContent();
     }
 }
 

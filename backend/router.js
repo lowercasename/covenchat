@@ -276,6 +276,24 @@ router.get('/api/user/fetch-by-username/:username', authorizeUser, function(req,
 	})
 });
 
+router.get('/api/user/fetch-online', function(req, res) {
+	let anHourAgo = Date.now() - (1000 * 60 * 60);
+	User.find({
+		lastOnline: {$gte: anHourAgo},
+		'settings.status': {$ne: 'invisible'}
+	})
+	.then(onlineUsers => {
+		console.log('onlineUsers',onlineUsers)
+		if (onlineUsers === undefined || onlineUsers.length == 0) {
+			res.sendStatus(404);
+		} else {
+			res.status(200).json({
+				onlineUsers: onlineUsers.length
+			});
+		}
+	})
+});
+
 router.get('/api/user/checkresetpasswordtoken/:token', function(req, res) {
 	User.findOne({resetPasswordToken: req.params.token, resetPasswordTokenExpiry: { $gt: Date.now()}})
 	.then(user => {

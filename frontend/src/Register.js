@@ -19,26 +19,31 @@ export default class Register extends Component {
     }
     onSubmit = (event) => {
         event.preventDefault();
-        fetch('/api/user/register', {
-            method: 'POST',
-            body: JSON.stringify(this.state),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.message) {
-                this.setState({message: res.message})
-            } else {
-                console.log("Successfully registered!")
-                this.setState({ redirectToLogin: true });
-            }
-        })
-        .catch(err => {
-          console.error(err);
-          this.setState({ message: 'Error registering! Please try again.' });
-        });
+        if (this.state.username.length > 20) {
+            this.setState({ message: 'Your username can be up to 20 characters long. Try something shorter.' });
+        } else {
+            fetch('/api/user/register', {
+                method: 'POST',
+                body: JSON.stringify(this.state),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.message) {
+                    this.setState({message: res.message})
+                } else {
+                    console.log("Successfully registered!")
+                    this.setState({ redirectToLogin: true });
+                }
+            })
+            .catch(err => {
+              console.error(err);
+              this.setState({ message: 'Error registering! Please try again.' });
+            });
+        }
+        
     }
     render() {
         if (this.state.redirectToLogin) {

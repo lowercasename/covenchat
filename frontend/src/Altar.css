@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css?family=Gabriela|IM+Fell+English|Old+Standard+TT&display=swap');
-
 #altar {
     display: flex;
     flex-direction: row;
@@ -8,21 +7,27 @@
 }
 
 #altarNav {
-  font-family: 'Gabriela', sans-serif;
-  font-weight: 700;
-  font-size: 1.3rem;
-  width: 200px;
-  min-width: 200px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid rgba(0,0,0,0.15);
-  background: rgba(0,0,0,0.15);
-  z-index: 400;
+    font-family: 'Gabriela', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    width: 200px;
+    min-width: 200px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 400;
+}
+
+.altarUsername span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .altarNavLinks {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .altarNavLinks li {
@@ -46,27 +51,27 @@
 }
 
 .altarNavLinks li:hover {
-  background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .altarNavLinks li.selected {
-  background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .altarUsername {
-  margin: 0 auto;
-  font-size: 1.3rem;
-  padding: 15px 10px 0 10px;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
+    margin: 0 auto;
+    font-size: 1.3rem;
+    padding: 15px 10px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
 }
 
 .altarFlair {
-  height: 1.3rem;
-  position: relative;
-  top: 3px;
+    height: 1.3rem;
+    position: relative;
+    top: 3px;
 }
 
 #altar h1 {
@@ -86,20 +91,20 @@
 }
 
 #altarControls {
-  margin-top: auto;
-  padding: 0 10px 10px 10px;
+    margin-top: auto;
+    padding: 0 10px 10px 10px;
 }
 
 .candle-dropdown {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0;
-  margin: 2px 0 0 0;
-  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
-  background-color: #ffffff;
-  color: var(--dark-purple);
-  list-style-type: none;
-  min-width: 160px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0;
+    margin: 2px 0 0 0;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    color: var(--dark-purple);
+    list-style-type: none;
+    min-width: 160px;
 }
 
 #altarGrid {
@@ -130,11 +135,12 @@
 }
 
 #altarGrid.editingMode .cell {
-    border-color: rgba(255,255,255,0.1);
+    border-color: rgba(255, 255, 255, 0.1);
     cursor: pointer;
 }
+
 #altarGrid.editingMode .cell:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 #altarGrid textarea {
@@ -165,28 +171,32 @@
     text-align: left;
     transition: 150ms;
 }
+
 .cellEditingTools button {
     margin: 0;
     margin-left: 10px;
 }
 
-
 .rfipbtn--default {
     border: none !important;
     border-radius: 6px !important;
 }
+
 .rfipbtn--default .rfipbtn__button {
     border: none !important;
     border-radius: 0 6px 6px 0 !important;
     background: var(--green) !important;
     color: var(--dark-purple) !important;
 }
+
 .rfipbtn--default .rfipbtn__button:hover {
     background: var(--bright-green) !important;
 }
+
 .rfipdropdown--default {
     border-radius: 6px !important;
 }
+
 .rfipdropdown--default input {
     padding: 5px !important;
 }
@@ -211,69 +221,94 @@
 }
 
 .candle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
 .candle-body {
-  width: 30px;
-  height: 250px;
-  background: white;
-  border-radius: 5px 5px 0 0 ;
-  box-shadow: inset -17px 0px 0px -10px rgba(0,0,0,0.1), -20px 0px 30px rgba(0, 0, 0, 0.3);
+    width: 30px;
+    height: 250px;
+    background: white;
+    border-radius: 5px 5px 0 0;
+    box-shadow: inset -17px 0px 0px -10px rgba(0, 0, 0, 0.1), -20px 0px 30px rgba(0, 0, 0, 0.3);
 }
+
 .candle-wick {
-  height: 10px;
-  width: 4px;
-  background: #AD88A9;
+    height: 10px;
+    width: 4px;
+    background: #AD88A9;
 }
+
 .candle-flame {
-  position: relative;
-  top: 4px;
-  width: 15px;
-  height: 30px;
-  background: #ffa100;
-  border-radius: 8px 8px 8px 8px / 20px 20px 8px 8px;
-  box-shadow: 0 0 20px 0 rgba(255, 202, 0, 0.7);
-  animation: border-radius 8s ease infinite, size 8s ease infinite, flame 2s ease infinite;
-  transform: translateZ(0);
-}
-@keyframes border-radius {
-  0%, 22%, 49%, 62%, 81%, 100% {
-    border-radius: 2px 14px 8px 8px / 20px 20px 8px 8px;
-  }
-  14%, 32%, 56%, 70%, 89% {
-    border-radius: 14px 2px 8px 8px / 20px 20px 8px 8px;
-  }
-}
-@keyframes size {
-  0%, 100% {
-    transform: scale(1);
-  }
-  30%, 60% {
-    transform: scaleY(1.2);
-    transform: scaleX(0.9);
-  }
-  20%, 45%, 80% {
-    transform: scaleX(1.2);
-    transform: scaleY(0.9);
-  }
-}
-@keyframes flame {
-  0%, 30%, 60%, 80%, 100% {
+    position: relative;
+    top: 4px;
+    width: 15px;
+    height: 30px;
+    background: #ffa100;
+    border-radius: 8px 8px 8px 8px / 20px 20px 8px 8px;
     box-shadow: 0 0 20px 0 rgba(255, 202, 0, 0.7);
-  }
-  20%, 50%, 70% {
-    box-shadow: 0 0 22px 0 rgba(255, 202, 0, 0.7);
-  }
+    animation: border-radius 8s ease infinite, size 8s ease infinite, flame 2s ease infinite;
+    transform: translateZ(0);
+}
+
+@keyframes border-radius {
+    0%,
+    22%,
+    49%,
+    62%,
+    81%,
+    100% {
+        border-radius: 2px 14px 8px 8px / 20px 20px 8px 8px;
+    }
+    14%,
+    32%,
+    56%,
+    70%,
+    89% {
+        border-radius: 14px 2px 8px 8px / 20px 20px 8px 8px;
+    }
+}
+
+@keyframes size {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    30%,
+    60% {
+        transform: scaleY(1.2);
+        transform: scaleX(0.9);
+    }
+    20%,
+    45%,
+    80% {
+        transform: scaleX(1.2);
+        transform: scaleY(0.9);
+    }
+}
+
+@keyframes flame {
+    0%,
+    30%,
+    60%,
+    80%,
+    100% {
+        box-shadow: 0 0 20px 0 rgba(255, 202, 0, 0.7);
+    }
+    20%,
+    50%,
+    70% {
+        box-shadow: 0 0 22px 0 rgba(255, 202, 0, 0.7);
+    }
 }
 
 .tippy-tooltip.colorPicker-theme {
-  padding: 0;
+    padding: 0;
 }
 
 .tippy-tooltip.colorPicker-theme .enter[x-circle] {
-  opacity: 0 !important;
+    opacity: 0 !important;
 }
 
 .postViewer {
@@ -295,7 +330,7 @@
 .post {
     max-width: 640px;
     padding: 1rem;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255, 255, 255, 0.9);
     color: var(--black);
     display: block;
     border-radius: 6px;
@@ -308,12 +343,12 @@
     color: var(--black);
     font-size: 1.6rem;
     margin-bottom: 1rem;
-    border-bottom: 2px solid rgba(0,0,0,0.1);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     padding-bottom: 0.5rem;
 }
 
 .post aside {
-    color: rgba(0,0,0,0.5);
+    color: rgba(0, 0, 0, 0.5);
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     display: flex;
@@ -324,17 +359,17 @@
 button.muted {
     background: transparent;
     font-size: small;
-    color: rgba(0,0,0,0.2);
+    color: rgba(0, 0, 0, 0.2);
     margin: 0;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     padding: 2px 4px;
     transition: 150ms;
     margin-left: 5px;
 }
 
 button.muted:hover {
-    border-color: rgba(0,0,0,1);
-    color: rgba(0,0,0,1);
+    border-color: rgba(0, 0, 0, 1);
+    color: rgba(0, 0, 0, 1);
 }
 
 .post main {
@@ -355,6 +390,7 @@ button.muted:hover {
 .post main ul {
     margin-left: 1.5rem;
 }
+
 .post main ul {
     margin-left: 1rem;
 }
@@ -362,124 +398,161 @@ button.muted:hover {
 .post main .ql-indent-1 {
     margin-left: 1rem;
 }
+
 .post main .ql-indent-2 {
     margin-left: 2rem;
 }
+
 .post main .ql-indent-3 {
     margin-left: 3rem;
 }
+
 .post main .ql-indent-4 {
     margin-left: 4rem;
 }
+
 .post main .ql-indent-5 {
     margin-left: 5rem;
 }
+
 .post main .ql-indent-6 {
     margin-left: 6rem;
 }
+
 .post main .ql-indent-7 {
     margin-left: 7rem;
 }
+
 .post main .ql-indent-8 {
     margin-left: 8rem;
 }
+
 .post main .ql-indent-9 {
     margin-left: 9rem;
 }
-.post main ol > li {
-  list-style-type: none;
+
+.post main ol>li {
+    list-style-type: none;
 }
+
 .post main ol li {
-  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
-  counter-increment: list-0;
+    counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+    counter-increment: list-0;
 }
+
 .post main ol li:before {
-  content: counter(list-0, decimal) '. ';
+    content: counter(list-0, decimal) '. ';
 }
+
 .post main ol li.ql-indent-1 {
-  counter-increment: list-1;
+    counter-increment: list-1;
 }
+
 .post main ol li.ql-indent-1:before {
-  content: counter(list-1, lower-alpha) '. ';
+    content: counter(list-1, lower-alpha) '. ';
 }
+
 .post main ol li.ql-indent-1 {
-  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+    counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-2 {
-  counter-increment: list-2;
+    counter-increment: list-2;
 }
+
 .post main ol li.ql-indent-2:before {
-  content: counter(list-2, lower-roman) '. ';
+    content: counter(list-2, lower-roman) '. ';
 }
+
 .post main ol li.ql-indent-2 {
-  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+    counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-3 {
-  counter-increment: list-3;
+    counter-increment: list-3;
 }
+
 .post main ol li.ql-indent-3:before {
-  content: counter(list-3, decimal) '. ';
+    content: counter(list-3, decimal) '. ';
 }
+
 .post main ol li.ql-indent-3 {
-  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;
+    counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-4 {
-  counter-increment: list-4;
+    counter-increment: list-4;
 }
+
 .post main ol li.ql-indent-4:before {
-  content: counter(list-4, lower-alpha) '. ';
+    content: counter(list-4, lower-alpha) '. ';
 }
+
 .post main ol li.ql-indent-4 {
-  counter-reset: list-5 list-6 list-7 list-8 list-9;
+    counter-reset: list-5 list-6 list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-5 {
-  counter-increment: list-5;
+    counter-increment: list-5;
 }
+
 .post main ol li.ql-indent-5:before {
-  content: counter(list-5, lower-roman) '. ';
+    content: counter(list-5, lower-roman) '. ';
 }
+
 .post main ol li.ql-indent-5 {
-  counter-reset: list-6 list-7 list-8 list-9;
+    counter-reset: list-6 list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-6 {
-  counter-increment: list-6;
+    counter-increment: list-6;
 }
+
 .post main ol li.ql-indent-6:before {
-  content: counter(list-6, decimal) '. ';
+    content: counter(list-6, decimal) '. ';
 }
+
 .post main ol li.ql-indent-6 {
-  counter-reset: list-7 list-8 list-9;
+    counter-reset: list-7 list-8 list-9;
 }
+
 .post main ol li.ql-indent-7 {
-  counter-increment: list-7;
+    counter-increment: list-7;
 }
+
 .post main ol li.ql-indent-7:before {
-  content: counter(list-7, lower-alpha) '. ';
+    content: counter(list-7, lower-alpha) '. ';
 }
+
 .post main ol li.ql-indent-7 {
-  counter-reset: list-8 list-9;
+    counter-reset: list-8 list-9;
 }
+
 .post main ol li.ql-indent-8 {
-  counter-increment: list-8;
+    counter-increment: list-8;
 }
+
 .post main ol li.ql-indent-8:before {
-  content: counter(list-8, lower-roman) '. ';
+    content: counter(list-8, lower-roman) '. ';
 }
+
 .post main ol li.ql-indent-8 {
-  counter-reset: list-9;
+    counter-reset: list-9;
 }
+
 .post main ol li.ql-indent-9 {
-  counter-increment: list-9;
+    counter-increment: list-9;
 }
+
 .post main ol li.ql-indent-9:before {
-  content: counter(list-9, decimal) '. ';
+    content: counter(list-9, decimal) '. ';
 }
 
 .post main blockquote {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-    color: rgba(0,0,0,0.5);
-    border-left: 4px solid rgba(0,0,0,0.2);
+    color: rgba(0, 0, 0, 0.5);
+    border-left: 4px solid rgba(0, 0, 0, 0.2);
     padding-left: 0.5rem;
     margin-left: 1rem;
 }

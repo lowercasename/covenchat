@@ -33,7 +33,7 @@ var userSchema = new mongoose.Schema({
   socketID: { type: String },
   settings: {
     status: { type: String, default: 'available' },
-    flair: String,
+    flair: { type: String, default: 'none' },
     shareLocation: {type: Boolean, default: true},
     allowNotifications: {type: Boolean, default: true},
     statusBarModules: {

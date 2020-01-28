@@ -10,6 +10,7 @@ export default class Map extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            usersOnline: 0,
             socketId: '',
             usersOnMap: [],
             userMarkers: [],
@@ -23,6 +24,21 @@ export default class Map extends Component {
     }
 
     componentDidMount() {
+
+        // Get number of online users every minute
+        this.getOnlineUsers = () => {
+            fetch('/api/user/fetch-online/')
+            .then(res => res.json())
+            .then(payload => {
+                this.setState({
+                    usersOnline: payload.onlineUsers
+                });
+            });
+        }
+        this.getOnlineUsers();
+        setInterval(() => {
+            this.getOnlineUsers();
+        }, 60000);
 
         mapboxgl.accessToken = 'pk.eyJ1IjoicmFwaGFlbGthYm8iLCJhIjoiY2swcGhlbjVuMDBseDNibDQ5b25zbHNpcyJ9.ezfbQZXwGDYA6kAGez3v3A';
 
@@ -46,7 +62,7 @@ export default class Map extends Component {
                 let html = (
                     <>
                         <h2>
-                            {localUser.settings.flair && <img src={localUser.settings.flair} className="userFlair" alt={"Flair icon for " + localUser.username}/>}{localUser.username}
+                            {localUser.settings.flair && localUser.settings.flair !== 'none' && <img src={localUser.settings.flair} className="userFlair" alt={"Flair icon for " + localUser.username}/>}{localUser.username}
                         </h2>
                         {otherUser ? !this.state.currentLinks.some(l => l.fromUsername === localUser.username || l.toUsername === localUser.username) ?
                             <div>
@@ -396,10 +412,16 @@ export default class Map extends Component {
             display: this.props.isVisible ? 'flex' : 'none',
         };
         return (
-            <div
-                id="map"
-                style={style}>
-            </div>
+            <>
+                <div
+                    id="map"
+                    style={style}>
+                        {this.state.usersOnline > 0 &&
+                    (<div id="usersOnlineContainer">
+                        <FontAwesomeIcon icon="circle" className="userAvailable"/> {this.state.usersOnline} {this.state.usersOnline > 1 ? 'witches' : 'witch'} online
+                    </div>)}
+                </div>
+            </>
         )
     }
 

@@ -20,7 +20,7 @@ function scrollToBottom() {
 
 class UserFlair extends Component {
     render() {
-        if (this.props.user.settings.flair) {
+        if (this.props.user.settings.flair && this.props.user.settings.flair !== 'none') {
             return (
                 <span className="userFlair"><img src={this.props.user.settings.flair} alt={"Flair icon for " + this.props.user.username} />&nbsp;</span>
             )
@@ -96,7 +96,8 @@ class MessageList extends Component {
         return (
             <div className="chatWindow" id="chatWindow" data-simplebar ref={this.messageList} onScroll={this.onScroll}>
                 <ul className="messageList">
-                    {this.props.messages.map((message, i, arr) => {
+                    {this.props.messages.length ?
+                    this.props.messages.map((message, i, arr) => {
                         let lastTimestamp = arr[i-1] ? arr[i-1].timestamp : false;
                         let lastAuthor = arr[i-1] ? arr[i-1].user.username : false;
                         let lastType = arr[i-1] ? arr[i-1].type : false;
@@ -168,7 +169,13 @@ class MessageList extends Component {
                                 </li>
                             </Fragment>
                         )
-                    })}
+                    }) : 
+                        <li className="messageContainer">
+                            <div className="alert">
+                                <span className="messageContent">No messages yet! Say something magical.</span>
+                            </div>
+                        </li>
+                    }
                 </ul>
             </div>
         )
@@ -191,11 +198,11 @@ class RoomList extends Component {
                 return false;
             } else if (number > 50) {
                 return (
-                    <span className="badge">50+</span>
+                    <span className="badge unread-indicator">50+</span>
                 )
             } else {
                 return (
-                    <span className="badge">{number}</span>
+                    <span className="badge unread-indicator">{number}</span>
                 )
             }
         }
