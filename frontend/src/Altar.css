@@ -143,7 +143,7 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-#altarGrid textarea {
+#altarGrid .cell-contenteditable {
     font-size: 1.5rem;
     font-family: 'Gabriela', serif;
     width: 100%;
@@ -153,8 +153,15 @@
     margin: 0;
 }
 
-#altarGrid textarea:focus {
+
+/* #altarGrid textarea:focus {
     box-shadow: none;
+} */
+
+[contenteditable=true]:empty:before {
+    content: attr(placeholder);
+    display: block;
+    color: var(--white);
 }
 
 .altarIcon {
@@ -170,6 +177,8 @@
     font-family: 'Fira Sans', sans-serif;
     text-align: left;
     transition: 150ms;
+    display: flex;
+    align-items: center;
 }
 
 .cellEditingTools button {
@@ -559,4 +568,21 @@ button.muted:hover {
 
 .post img {
     max-width: 100%;
+}
+
+.modal-main.altar-modal {
+    width: 90%;
+    padding: 0;
+    height: 90%;
+    max-height: 90%;
+    display: flex;
+}
+
+.color-preview {
+    display: inline-block;
+    height: 30px;
+    width: 30px;
+    margin-left: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
 }

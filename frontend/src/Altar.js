@@ -3,9 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { RIETextArea } from 'riek';
 
+import ContentEditable from 'react-contenteditable';
+
 import './Altar.css';
 
-import { ChromePicker } from 'react-color';
+import { SketchPicker } from 'react-color';
 
 import { Tooltip } from 'react-tippy';
 import 'react-tippy/dist/tippy.css'
@@ -166,7 +168,7 @@ class ColorPickerButton extends Component {
                 theme="light"
                 arrow="true"
                 html={(
-                    <ChromePicker
+                    <SketchPicker
                         color={this.props.color}
                         onChangeComplete={(color, event) => this.props.handleChangeComplete(color, event, this.props.cellIndex)} />
                 )}
@@ -176,7 +178,7 @@ class ColorPickerButton extends Component {
                     className={this.props.className}
                     style={{ marginTop: (this.props.backgroundPicker ? "0.5rem" : "0") }}
                 >
-                    <FontAwesomeIcon icon="tint"/> {this.props.backgroundPicker && " Background color"}
+                    <FontAwesomeIcon icon="paint-brush"/> {this.props.backgroundPicker && " Background color"}
                 </button>
             </Tooltip>
         )
@@ -205,15 +207,16 @@ class CellEditingTools extends Component {
                     </div>
                     <input type="checkbox" className="dropdown-input" />
                     <ul className="dropdown-menu">
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type === "empty" && "selected")}><EmptyIcon /> Empty</li>
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type === "image" && "selected")}><FontAwesomeIcon icon="shapes" /> Image</li>
-                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type === "text" && "selected")}><FontAwesomeIcon icon="paragraph" /> Text</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "empty" })} className={(this.props.cell.type === "empty" ? "selected" : undefined)}><EmptyIcon /> Empty</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "image" })} className={(this.props.cell.type === "image" ? "selected" : undefined)}><FontAwesomeIcon icon="shapes" /> Image</li>
+                        <li onClick={() => this.props.editAltarCellType({ [`cell-${this.props.index + 1}`]: "text" })} className={(this.props.cell.type === "text" ? "selected" : undefined)}><FontAwesomeIcon icon="paragraph" /> Text</li>
                     </ul>
                 </label>
                 <ColorPickerButton
                     handleChangeComplete={this.props.handleChangeComplete}
                     cellIndex={this.props.index + 1}
                     color={this.props.cell.color} />
+                <div className="color-preview" style={{backgroundColor: "rgba(" + this.props.cell.color.r + "," + this.props.cell.color.g + "," + this.props.cell.color.b + "," + this.props.cell.color.a + ")"}}></div>
             </div>
         )
     }
@@ -295,16 +298,18 @@ export default class Altar extends Component {
             selectedTab: 'altar',
             editorCategory: 'journal',
             modalVisible: false,
+            loaderVisible: false,
             postMode: 'create',
             editTarget: '',
             journalPosts: [],
             spellbookPosts: [],
             lorePosts: []
         }
+        this.fetchAltarUser = this.fetchAltarUser.bind(this);
     }
 
-    componentDidMount() {
-        fetch('/api/altar/fetch/' + this.state.user._id)
+    fetchAltarUser(user) {
+        fetch('/api/altar/fetch/' + user._id)
             .then(res => {
                 if (res.status === 200) {
                     return res.json();
@@ -326,33 +331,41 @@ export default class Altar extends Component {
                     backgroundColor: (res.altar ? res.altar.backgroundColor : ''),
                     journalPosts: journalPosts,
                     spellbookPosts: spellbookPosts,
-                    lorePosts: lorePosts
+                    lorePosts: lorePosts,
+                    loaderVisible: false
                 });
             })
+    }
 
+    componentDidMount() {
+        this.fetchAltarUser(this.props.user);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.user !== this.props.user) {
-            fetch('/api/altar/fetch/' + this.props.user._id)
-                .then(res => {
-                    if (res.status === 200) return res.json();
-                })
-                .then(res => {
-                    let journalPosts = res.posts.filter(p => p.category === "journal");
-                    let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
-                    let lorePosts = res.posts.filter(p => p.category === "lore");
-                    this.setState({
-                        cells: res.altar.cells,
-                        candles: res.altar.candles,
-                        backgroundColor: res.altar.backgroundColor,
-                        journalPosts: journalPosts,
-                        spellbookPosts: spellbookPosts,
-                        lorePosts: lorePosts
-                    });
-                })
-                window.history.replaceState({}, null, '/altar/'+this.props.user.username);
+        if (this.props.visible === true && prevProps.visible === false) {
+            this.setState({loaderVisible: true})
+            this.fetchAltarUser(this.props.user);
         }
+    //     if (prevProps.user !== this.props.user) {
+    //         fetch('/api/altar/fetch/' + this.props.user._id)
+    //             .then(res => {
+    //                 if (res.status === 200) return res.json();
+    //             })
+    //             .then(res => {
+    //                 let journalPosts = res.posts.filter(p => p.category === "journal");
+    //                 let spellbookPosts = res.posts.filter(p => p.category === "spellbook");
+    //                 let lorePosts = res.posts.filter(p => p.category === "lore");
+    //                 this.setState({
+    //                     cells: res.altar.cells,
+    //                     candles: res.altar.candles,
+    //                     backgroundColor: res.altar.backgroundColor,
+    //                     journalPosts: journalPosts,
+    //                     spellbookPosts: spellbookPosts,
+    //                     lorePosts: lorePosts
+    //                 });
+    //             })
+    //             window.history.replaceState({}, null, '/altar/'+this.props.user.username);
+    //     }
     }
 
     toggleTab(tab) {
@@ -422,13 +435,12 @@ export default class Altar extends Component {
         if (this.state.editingMode) {
             if (cell.type === "text") {
                 return (
-                    <RIETextArea
-                        value={cell.contents}
-                        change={this.editAltarCellContents}
-                        propName={"cell-" + cellNumber}
-                        className="editable"
-                        rows={4}
-                        editProps={{ placeholder: "Click to edit" }} />
+                    <ContentEditable
+                        html={cell.contents}
+                        onChange={(event) => this.editAltarCellText(event, "cell-" + cellNumber)}
+                        className="cell-contenteditable"
+                        placeholder={"Click to edit"}
+                    />
                 )
             } else if (cell.type === "image") {
                 let pickerProps = {
@@ -436,7 +448,7 @@ export default class Altar extends Component {
                     theme: 'default',
                     renderUsing: 'class',
                     value: cell.contents,
-                    onChange: (value) => this.editAltarCellContents({ [`cell-${cellNumber}`]: value }),
+                    onChange: (value) => this.editAltarCellImage({ [`cell-${cellNumber}`]: value }),
                     isMulti: false,
                     iconsPerPage: 10
                 };
@@ -446,7 +458,7 @@ export default class Altar extends Component {
             }
         } else {
             if (cell.type === "text") {
-                return <span className="altarText">{cell.contents}</span>;
+                return <span className="altarText" dangerouslySetInnerHTML={{__html: cell.contents}}></span>;
             }
             if (cell.type === "image") {
                 return <span className={["altarIcon", cell.contents].join(" ")} />
@@ -474,8 +486,32 @@ export default class Altar extends Component {
     //     this.setState({cells: cells})
     // }
 
-    editAltarCellContents = (payload) => {
-        fetch('/api/altar/edit-cell/contents', {
+    editAltarCellText = (event, target) => {
+        fetch('/api/altar/edit-cell/text', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                target: target,
+                value: event.target.value
+             })
+        })
+            .then(res => res.json())
+            .then(res => {
+                let cells = this.state.cells;
+                cells.forEach((cell, index) => {
+                    if (index === res.index) {
+                        cell.contents = res.value;
+                    }
+                })
+                this.setState({ cells: cells })
+            })
+    }
+
+    editAltarCellImage = (payload) => {
+        fetch('/api/altar/edit-cell/image', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -676,7 +712,9 @@ export default class Altar extends Component {
 
     render() {
         let style = {
-            display: this.props.isVisible ? 'flex' : 'none',
+            // If the altar is shown as a modal, display it if loader is not showing (the modal will take care of wider display),
+            // otherwise only show when selected via nav
+            display: this.props.displayAsModal ? (this.state.loaderVisible ? 'none' : 'flex') : (this.props.isVisible ? 'flex' : 'none'),
             backgroundColor: this.state.backgroundColor ? 'rgba(' + this.state.backgroundColor.r + ',' + this.state.backgroundColor.g + ',' + this.state.backgroundColor.b + ',' + this.state.backgroundColor.a + ')' : 'rgba(62,41,72,1)'
         };
         let journalPosts = this.state.journalPosts ? this.state.journalPosts.filter(post => this.props.user === this.state.originalUser ? true : post.public) : '';
@@ -684,232 +722,233 @@ export default class Altar extends Component {
         let lorePosts = this.state.lorePosts ? this.state.lorePosts.filter(post => this.props.user === this.state.originalUser ? true : post.public) : '';
         let noPosts = <article className="post"><main style={{textAlign:"center"}}>No posts.</main></article>
         return (
-            <div id="altar" style={style}>
-                <nav id="altarNav">
-                    <span className="altarUsername">
-                        <span>
-                            {this.props.user.settings.flair && this.props.user.settings.flair !== 'none' && <img src={this.props.user.settings.flair} className="altarFlair" alt={"Flair icon for " + this.props.user.username} />} {this.props.user.username}
+            <>
+                {this.state.loaderVisible &&
+                    <div id="loader">
+                        <div className="moon-loader">
+                            <div className="disc"></div>
+                        </div>
+                    </div>
+                }
+                <div id="altar" style={style}>
+                    <nav id="altarNav">
+                        <span className="altarUsername">
+                            <span>
+                                {this.props.user.settings.flair && this.props.user.settings.flair !== 'none' && <img src={this.props.user.settings.flair} className="altarFlair" alt={"Flair icon for " + this.props.user.username} />} {this.props.user.username}
+                            </span>
                         </span>
-                        {this.props.user !== this.state.originalUser &&
-                            <button
-                                className="small"
-                                onClick={() => this.props.changeAltarUser(this.state.originalUser)}
-                            >
-                                <FontAwesomeIcon icon="times" />
-                            </button>
-                        }
-                    </span>
-                    <ul className="altarNavLinks">
-                        <li
-                            className={["listHeader",(this.state.selectedTab === "altar" ? "selected" : "")].join(" ")}
-                            onClick={() => this.toggleTab("altar")}>
-                            Altar
-                        </li>
-                        <li className="listHeader">
-                            Grimoire
-                        </li>
-                        <li
-                            className={["listSubItem",(this.state.selectedTab === "journal" ? "selected" : "")].join(" ")}
-                            onClick={() => this.toggleTab("journal")}>
-                            <span>Journal</span><span className="badge">{journalPosts.length > 0 && journalPosts.length}</span>
-                        </li>
-                        <li
-                            className={["listSubItem",(this.state.selectedTab === "spellbook" ? "selected" : "")].join(" ")}
-                            onClick={() => this.toggleTab("spellbook")}>
-                            <span>Spells</span><span className="badge">{spellbookPosts.length > 0 && spellbookPosts.length}</span>
-                        </li>
-                        <li
-                            className={["listSubItem",(this.state.selectedTab === "lore" ? "selected" : "")].join(" ")}
-                            onClick={() => this.toggleTab("lore")}>
-                            <span>Notes</span><span className="badge">{lorePosts.length > 0 && lorePosts.length}</span>
-                        </li>
-                    </ul>
-                    {this.props.user === this.state.originalUser && this.state.selectedTab === "altar" &&
-                        <div id="altarControls">
-                            <Tooltip
-                                trigger="click"
-                                interactive
-                                theme="light"
-                                arrow="true"
-                                html={(
-                                    <ul className="candle-dropdown">
-                                        <li>
-                                            <input
-                                                name="candleDuration"
-                                                className="candleDuration"
-                                                type="number"
-                                                value={this.state.candleDuration}
-                                                onChange={this.handleInputChange}
-                                            /> minutes</li>
-                                        <li className="divider"></li>
-                                        <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "white" }} icon="circle" /> White</li>
-                                        <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#111111" }} icon="circle" />Black</li>
-                                        <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#503327" }} icon="circle" />Brown</li>
-                                        <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#d40a0a" }} icon="circle" />Red</li>
-                                        <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FF851B" }} icon="circle" />Orange</li>
-                                        <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FFDC00" }} icon="circle" />Yellow</li>
-                                        <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#2ECC40" }} icon="circle" />Green</li>
-                                        <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#0074D9" }} icon="circle" />Blue</li>
-                                        <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#8d0dc9" }} icon="circle" />Purple</li>
-                                        <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#fa69d9" }} icon="circle" />Pink</li>
-                                    </ul>
-                                )}
-                            >
-                                <button
-                                    type="button"
-                                    className="full-width"
+                        <ul className="altarNavLinks">
+                            <li
+                                className={["listHeader",(this.state.selectedTab === "altar" ? "selected" : "")].join(" ")}
+                                onClick={() => this.toggleTab("altar")}>
+                                Altar
+                            </li>
+                            <li className="listHeader">
+                                Grimoire
+                            </li>
+                            <li
+                                className={["listSubItem",(this.state.selectedTab === "journal" ? "selected" : "")].join(" ")}
+                                onClick={() => this.toggleTab("journal")}>
+                                <span>Journal</span><span className="badge">{journalPosts.length > 0 && journalPosts.length}</span>
+                            </li>
+                            <li
+                                className={["listSubItem",(this.state.selectedTab === "spellbook" ? "selected" : "")].join(" ")}
+                                onClick={() => this.toggleTab("spellbook")}>
+                                <span>Spells</span><span className="badge">{spellbookPosts.length > 0 && spellbookPosts.length}</span>
+                            </li>
+                            <li
+                                className={["listSubItem",(this.state.selectedTab === "lore" ? "selected" : "")].join(" ")}
+                                onClick={() => this.toggleTab("lore")}>
+                                <span>Notes</span><span className="badge">{lorePosts.length > 0 && lorePosts.length}</span>
+                            </li>
+                        </ul>
+                        {this.props.user === this.state.originalUser && this.state.selectedTab === "altar" &&
+                            <div id="altarControls">
+                                <Tooltip
+                                    trigger="click"
+                                    interactive
+                                    theme="light"
+                                    arrow="true"
+                                    html={(
+                                        <ul className="candle-dropdown">
+                                            <li>
+                                                <input
+                                                    name="candleDuration"
+                                                    className="candleDuration"
+                                                    type="number"
+                                                    value={this.state.candleDuration}
+                                                    onChange={this.handleInputChange}
+                                                /> minutes</li>
+                                            <li className="divider"></li>
+                                            <li onClick={() => this.lightCandle("white")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "white" }} icon="circle" /> White</li>
+                                            <li onClick={() => this.lightCandle("#111111")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#111111" }} icon="circle" />Black</li>
+                                            <li onClick={() => this.lightCandle("#503327")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#503327" }} icon="circle" />Brown</li>
+                                            <li onClick={() => this.lightCandle("#d40a0a")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#d40a0a" }} icon="circle" />Red</li>
+                                            <li onClick={() => this.lightCandle("#FF851B")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FF851B" }} icon="circle" />Orange</li>
+                                            <li onClick={() => this.lightCandle("#FFDC00")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#FFDC00" }} icon="circle" />Yellow</li>
+                                            <li onClick={() => this.lightCandle("#2ECC40")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#2ECC40" }} icon="circle" />Green</li>
+                                            <li onClick={() => this.lightCandle("#0074D9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#0074D9" }} icon="circle" />Blue</li>
+                                            <li onClick={() => this.lightCandle("#8d0dc9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#8d0dc9" }} icon="circle" />Purple</li>
+                                            <li onClick={() => this.lightCandle("#fa69d9")}><FontAwesomeIcon className="candleColorCircle" style={{ color: "#fa69d9" }} icon="circle" />Pink</li>
+                                        </ul>
+                                    )}
                                 >
-                                    <FontAwesomeIcon icon="burn" /> Light candle
-                                </button>
-                            </Tooltip>
-                            <button
-                                className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
-                                type="button"
-                                onClick={this.toggleEditingMode}
-                            >
-                                <FontAwesomeIcon icon="th" /> Edit Altar
-                                </button>
-                            <ColorPickerButton
-                                className="full-width"
-                                handleChangeComplete={this.changeBackgroundColor}
-                                color={this.state.backgroundColor}
-                                backgroundPicker={true} />
-                        </div>
-                    }
-                    {this.props.user === this.state.originalUser && this.state.selectedTab !== "altar" &&
-                        <div id="altarControls">
-                            <button
-                                className="full-width"
-                                onClick={this.showModal}
-                            >
-                                <FontAwesomeIcon icon="edit"/> New post
-                            </button>
-                            <Editor
-                                mode={this.state.postMode}
-                                editTarget={this.state.editTarget}
-                                updatePosts={this.updatePosts}
-                                modalVisible={this.state.modalVisible}
-                                category={this.state.editorCategory}
-                                hideModal={this.hideModal}/>
-                        </div>
-                    }
-                </nav>
-                <div
-                    style={{display:(this.state.selectedTab === "altar" ? "flex" : "none")}}
-                    id="altarGrid"
-                    className={this.state.editingMode ? "editingMode" : ""}>
-                    {this.state.cells.map((cell, index) => {
-                        let cellNumber = index + 1;
-                        return (
-                            <div key={"cell-" + cellNumber} className={["cell", "cell-" + cellNumber, "cell-" + cell.type].join(" ")}>
-                                {this.state.editingMode && this.props.user === this.state.originalUser && (
-                                    <CellEditingTools
-                                        cell={cell}
-                                        index={index}
-                                        editAltarCellType={this.editAltarCellType}
-                                        handleChangeComplete={this.handleChangeComplete}
-                                    />
-                                )}
-                                <span style={{ color: (cell.color ? 'rgba(' + cell.color.r + ',' + cell.color.g + ',' + cell.color.b + ',' + cell.color.a + ')' : 'rgba(255,255,255,0.5)') }}>
-                                    {this.parseCellContents(cell, cellNumber)}
-                                </span>
+                                    <button
+                                        type="button"
+                                        className="full-width"
+                                    >
+                                        <FontAwesomeIcon icon="burn" /> Light candle
+                                    </button>
+                                </Tooltip>
+                                <button
+                                    className={["full-width", this.state.editingMode ? "active" : ""].join(" ")}
+                                    type="button"
+                                    onClick={this.toggleEditingMode}
+                                >
+                                    <FontAwesomeIcon icon="th" /> Edit Altar
+                                    </button>
+                                <ColorPickerButton
+                                    className="full-width"
+                                    handleChangeComplete={this.changeBackgroundColor}
+                                    color={this.state.backgroundColor}
+                                    backgroundPicker={true} />
                             </div>
-                        )
-                    })}
-                </div>
-                <div
-                    style={{display:(this.state.selectedTab === "journal" ? "flex" : "none")}}
-                    id="journal"
-                    className="postViewer"
-                >
-                    {journalPosts.length === 0 ?
-                       noPosts
-                    :
-                        journalPosts.map(post => {
+                        }
+                        {this.props.user === this.state.originalUser && this.state.selectedTab !== "altar" &&
+                            <div id="altarControls">
+                                <button
+                                    className="full-width"
+                                    onClick={this.showModal}
+                                >
+                                    <FontAwesomeIcon icon="edit"/> New post
+                                </button>
+                                <Editor
+                                    mode={this.state.postMode}
+                                    editTarget={this.state.editTarget}
+                                    updatePosts={this.updatePosts}
+                                    modalVisible={this.state.modalVisible}
+                                    category={this.state.editorCategory}
+                                    hideModal={this.hideModal}/>
+                            </div>
+                        }
+                    </nav>
+                    <div
+                        style={{display:(this.state.selectedTab === "altar" ? "flex" : "none")}}
+                        id="altarGrid"
+                        className={this.state.editingMode ? "editingMode" : ""}>
+                        {this.state.cells.map((cell, index) => {
+                            let cellNumber = index + 1;
                             return (
-                                <article className="post" key={post._id}>
-                                    {post.title &&
-                                        <header>
-                                            <h2>{post.title}</h2>
-                                        </header>
-                                    }
-                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                    <main>
-                                        { ReactHtmlParser(post.content) }
-                                    </main>
-                                </article>
-                            )
-                        })
-                    }
-                </div>
-                <div
-                    style={{display:(this.state.selectedTab === "spellbook" ? "flex" : "none")}}
-                    id="spellbook"
-                    className="postViewer"
-                >
-                    {spellbookPosts.length === 0 ?
-                       noPosts
-                    :
-                        spellbookPosts.map(post => {
-                            return (
-                                <article className="post" key={post._id}>
-                                    {post.title &&
-                                        <header>
-                                            <h2>{post.title}</h2>
-                                        </header>
-                                    }
-                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                    <main>
-                                        { ReactHtmlParser(post.content) }
-                                    </main>
-                                </article>
-                            )
-                        })
-                    }
-                </div>
-                <div
-                    style={{display:(this.state.selectedTab === "lore" ? "flex" : "none")}}
-                    id="journal"
-                    className="postViewer"
-                >
-                    {lorePosts.length === 0 ?
-                       noPosts
-                    :
-                        lorePosts.map(post => {
-                            return (
-                                <article className="post" key={post._id}>
-                                    {post.title &&
-                                        <header>
-                                            <h2>{post.title}</h2>
-                                        </header>
-                                    }
-                                    <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
-                                    <main>
-                                        { ReactHtmlParser(post.content) }
-                                    </main>
-                                </article>
-                            )
-                        })
-                    }
-                </div>
-                {!this.state.editingMode && this.state.selectedTab === "altar" &&
-                    <div id="candleHolder">
-                        {this.state.candles.map((candle, index) => {
-                            return (
-                                <Candle
-                                    id={candle._id}
-                                    index={index}
-                                    color={candle.color}
-                                    duration={candle.duration}
-                                    expiryTime={candle.expiryTime}
-                                    height={candle.height}
-                                    extinguishCandle={this.extinguishCandle.bind(this)}
-                                />
+                                <div key={"cell-" + cellNumber} className={["cell", "cell-" + cellNumber, "cell-" + cell.type].join(" ")}>
+                                    {this.state.editingMode && this.props.user === this.state.originalUser && (
+                                        <CellEditingTools
+                                            cell={cell}
+                                            index={index}
+                                            editAltarCellType={this.editAltarCellType}
+                                            handleChangeComplete={this.handleChangeComplete}
+                                        />
+                                    )}
+                                    <span style={{ color: (cell.color ? 'rgba(' + cell.color.r + ',' + cell.color.g + ',' + cell.color.b + ',' + cell.color.a + ')' : 'rgba(255,255,255,0.5)') }}>
+                                        {this.parseCellContents(cell, cellNumber)}
+                                    </span>
+                                </div>
                             )
                         })}
                     </div>
-                }
-            </div>
+                    <div
+                        style={{display:(this.state.selectedTab === "journal" ? "flex" : "none")}}
+                        id="journal"
+                        className="postViewer"
+                    >
+                        {journalPosts.length === 0 ?
+                        noPosts
+                        :
+                            journalPosts.map(post => {
+                                return (
+                                    <article className="post" key={post._id}>
+                                        {post.title &&
+                                            <header>
+                                                <h2>{post.title}</h2>
+                                            </header>
+                                        }
+                                        <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                        <main>
+                                            { ReactHtmlParser(post.content) }
+                                        </main>
+                                    </article>
+                                )
+                            })
+                        }
+                    </div>
+                    <div
+                        style={{display:(this.state.selectedTab === "spellbook" ? "flex" : "none")}}
+                        id="spellbook"
+                        className="postViewer"
+                    >
+                        {spellbookPosts.length === 0 ?
+                        noPosts
+                        :
+                            spellbookPosts.map(post => {
+                                return (
+                                    <article className="post" key={post._id}>
+                                        {post.title &&
+                                            <header>
+                                                <h2>{post.title}</h2>
+                                            </header>
+                                        }
+                                        <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                        <main>
+                                            { ReactHtmlParser(post.content) }
+                                        </main>
+                                    </article>
+                                )
+                            })
+                        }
+                    </div>
+                    <div
+                        style={{display:(this.state.selectedTab === "lore" ? "flex" : "none")}}
+                        id="journal"
+                        className="postViewer"
+                    >
+                        {lorePosts.length === 0 ?
+                        noPosts
+                        :
+                            lorePosts.map(post => {
+                                return (
+                                    <article className="post" key={post._id}>
+                                        {post.title &&
+                                            <header>
+                                                <h2>{post.title}</h2>
+                                            </header>
+                                        }
+                                        <aside><span>{new Date(post.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})} &middot; {(post.public ? "Public" : "Private")}</span>{this.props.user === this.state.originalUser && <span><button className="muted" onClick={() => {this.editPost(post)}}>Edit</button><button className="muted" onClick={() => {this.deletePost(post)}}>Delete</button></span>}</aside>
+                                        <main>
+                                            { ReactHtmlParser(post.content) }
+                                        </main>
+                                    </article>
+                                )
+                            })
+                        }
+                    </div>
+                    {!this.state.editingMode && this.state.selectedTab === "altar" &&
+                        <div id="candleHolder" style={this.props.displayAsModal && {bottom: "0"}}>
+                            {this.state.candles.map((candle, index) => {
+                                return (
+                                    <Candle
+                                        id={candle._id}
+                                        index={index}
+                                        color={candle.color}
+                                        duration={candle.duration}
+                                        expiryTime={candle.expiryTime}
+                                        height={candle.height}
+                                        extinguishCandle={this.extinguishCandle.bind(this)}
+                                    />
+                                )
+                            })}
+                        </div>
+                    }
+                </div>
+            </>
         )
     }
 }

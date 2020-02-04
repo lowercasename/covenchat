@@ -6,14 +6,15 @@ import Map from './Map';
 import ChatDrawer from './ChatDrawer';
 import Altar from './Altar';
 import Settings from './Settings';
+import Modal from './components/Modal';
 import { toast } from 'react-toastify';
 import openSocket from 'socket.io-client';
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile} from '@fortawesome/free-solid-svg-icons';
+import { faPaintBrush, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile} from '@fortawesome/free-solid-svg-icons';
 import { faComments, faCompass } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
+library.add(faPaintBrush, faComments, faChevronRight, faTimes, faPlus, faHome, faMoon, faPrayingHands, faSignOutAlt, faCircle, faMinus, faCog, faDoorOpen, faDoorClosed, faUserPlus, faBurn, faTh, faShapes, faParagraph, faBan, faPalette, faTint, faCompass, faCommentDots, faStar, faUsers, faEyeSlash, faEdit, faArrowsAltH, faSmile)
 
 toast.configure();
 
@@ -25,19 +26,6 @@ toast.configure();
 
 const socket = openSocket(process.env.REACT_APP_HOST);
 
-const Modal = ({ handleClose, show, children }) => {
-    var showHideClassName = show ? "modal display-block" : "modal display-none";
-
-    return (
-      <div className={showHideClassName}>
-        <section className="modal-main">
-            <button className="modalClose" onClick={handleClose}><FontAwesomeIcon icon="times" /></button>
-            {children}
-        </section>
-      </div>
-    );
-};
-
 class Dashboard extends Component {
     constructor(props) {
         super(props);
@@ -45,7 +33,8 @@ class Dashboard extends Component {
             connected: true,
             visibleModule: 'loader',
             user: this.props.user,
-            altarUser: this.props.user,
+            altarModalUser: this.props.user,
+            altarModalVisible: false,
             totalUnreadMessages: 0,
             permissionsModalVisible: false,
             askForWebPushNotifications: false,
@@ -61,6 +50,10 @@ class Dashboard extends Component {
         // Check connection to server every 3 seconds
         setInterval(() => {
             if (socket.connected) {
+                // Check if we've been disconnected - if so, update chatrooms
+                if (this.state.connected === false) {
+                    socket.emit('user-reconnected', this.state.user);
+                }
                 this.setState({connected: true});
             } else {
                 this.setState({connected: false});
@@ -89,40 +82,40 @@ class Dashboard extends Component {
         socket.emit('user-online', this.state.user);
 
         // Module to show a particular user's altar if an /altar/:username URL is supplied
-        if (this.props.match.params[0]) {
-            console.log("ALTAR FUNCTION: attempting to send to an altar")
-            if (this.props.match.params[0] === this.props.user.username) {
-                console.log("ALTAR FUNCTION: altar is user's!");
-                this.setState({
-                    visibleModule: 'altar',
-                    user: this.props.user,
-                    altarUser: this.props.user
-                })
-            } else {
-                console.log("ALTAR FUNCTION: altar is someone else's!");
-                fetch('/api/user/fetch-by-username/'+this.props.match.params[0])
-                .then(res => {
-                    if (res.status === 200) {
-                        return res.json();
-                    } else {
-                        this.props.history.push('/');
-                    }
-                })
-                .then(res => {
-                    this.setState({
-                        visibleModule: 'altar',
-                        user: this.props.user,
-                        altarUser: res.user[0]
-                    })
-                })
-            }
-        } else {
+        // if (this.props.match.params[0]) {
+        //     console.log("ALTAR FUNCTION: attempting to send to an altar")
+        //     if (this.props.match.params[0] === this.props.user.username) {
+        //         console.log("ALTAR FUNCTION: altar is user's!");
+        //         this.setState({
+        //             visibleModule: 'altar',
+        //             user: this.props.user,
+        //             altarUser: this.props.user
+        //         })
+        //     } else {
+        //         console.log("ALTAR FUNCTION: altar is someone else's!");
+        //         fetch('/api/user/fetch-by-username/'+this.props.match.params[0])
+        //         .then(res => {
+        //             if (res.status === 200) {
+        //                 return res.json();
+        //             } else {
+        //                 this.props.history.push('/');
+        //             }
+        //         })
+        //         .then(res => {
+        //             this.setState({
+        //                 visibleModule: 'altar',
+        //                 user: this.props.user,
+        //                 altarUser: res.user[0]
+        //             })
+        //         })
+        //     }
+        // } else {
             this.setState({visibleModule: 'map'}, () => {
                 if (this.refs.map) {
-                this.refs.map.resize();
+                    this.refs.map.resize();
                 }
             });
-        }
+        // }
 
         if (this.props.user.webpushPermissionRequested === false && Notification.permission !== "granted" && Notification.permission !== "denied") {
             this.setState({permissionsModalVisible: true, askForWebPushNotifications: true})
@@ -349,9 +342,13 @@ class Dashboard extends Component {
 
     changeAltarUser(user) {
         this.setState({
-            visibleModule: 'altar',
-            altarUser: user
+            altarModalVisible: true,
+            altarModalUser: user
         })
+    }
+
+    hideAltarModal = () => {
+        this.setState({altarModalVisible: false})
     }
 
     logOut() {
@@ -494,17 +491,18 @@ class Dashboard extends Component {
                         locationPermission={this.state.user.settings.shareLocation}
                         changeAltarUser={this.changeAltarUser}
                         socket={socket}
+                        connected={this.state.connected}
                     />
                     <ChatDrawer
                         isVisible={this.state.visibleModule === "chat" ? true : false}
                         user={this.state.user}
                         changeAltarUser={this.changeAltarUser}
                         socket={socket}
+                        connected={this.state.connected}
                     />
                     <Altar
                         isVisible={this.state.visibleModule === "altar" ? true : false}
-                        user={this.state.altarUser}
-                        changeAltarUser={this.changeAltarUser}
+                        user={this.state.user}
                     />
                     <Settings
                         isVisible={this.state.visibleModule === "settings" ? true : false}
@@ -531,6 +529,15 @@ class Dashboard extends Component {
                         </>
                     }
                     <p>You can change these permissions on your Settings page.</p>
+                </Modal>
+                <Modal show={this.state.altarModalVisible} handleClose={this.hideAltarModal} altarModal={true}>
+                    <Altar
+                        visible={this.state.altarModalVisible}
+                        user={this.state.altarModalUser}
+                        changeAltarUser={this.changeAltarUser}
+                        displayAsModal={true}
+                        handleClose={this.hideAltarModal}
+                    />
                 </Modal>
             </div>
         );

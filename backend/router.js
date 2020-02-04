@@ -69,6 +69,10 @@ io.on('connection', function(socket) {
 		socket.join(room);
 		console.log('Joined', room)
 	});
+	socket.on('user-reconnected', user => {
+		console.log("User reconnected");
+		io.emit('user-reconnected', user);
+	});
 	socket.on('send-message', (message, cb) => {
 		console.log("Here he is a message", message)
 		var parsedMessage = parser(message.content);
@@ -1060,9 +1064,30 @@ router.get('/api/altar/fetch/:userID', authorizeUser, async function(req,res) {
 	}
 })
 
-router.post('/api/altar/edit-cell/contents', authorizeUser, function(req,res) {
+router.post('/api/altar/edit-cell/image', authorizeUser, function(req,res) {
 	let targetCell = Object.keys(req.body.payload)[0];
 	let newValue = req.body.payload[targetCell];
+	let cellIndex = parseInt(targetCell.slice(5)) - 1;
+
+	Altar.update({
+		user: req.user._id
+	},
+	{
+		$set: {
+			[`cells.${cellIndex}.contents`]: newValue
+		}
+	})
+	.then(response => {
+		res.status(200).json({
+			index: cellIndex,
+			value: newValue
+		});
+	})
+})
+
+router.post('/api/altar/edit-cell/text', authorizeUser, function(req,res) {
+	let targetCell = req.body.target;
+	let newValue = req.body.value;
 	let cellIndex = parseInt(targetCell.slice(5)) - 1;
 
 	Altar.update({
@@ -1106,6 +1131,7 @@ router.post('/api/altar/edit-cell/color', authorizeUser, function(req,res) {
 	let targetCell = Object.keys(req.body.payload)[0];
 	let newColor = req.body.payload[targetCell];
 	let cellIndex = parseInt(targetCell.slice(5)) - 1;
+	console.log("Changing color for",targetCell,newColor);
 	Altar.update({
 		user: req.user._id
 	},

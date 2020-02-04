@@ -548,6 +548,13 @@ class ChatDrawer extends Component {
                 this.setState({ publicRooms: payload });
         });
 
+        this.props.socket.on('user-reconnected', payload => {
+            if (payload.username === this.props.user.username) {
+                this.reloadRoom(this.state.currentRoom.slug);
+                this.reloadRoomList();
+            }
+        })
+
         this.props.socket.on('message-sent', payload => {
             if (this.state.currentRoom.slug === payload.room.slug) {
                 if (payload.type === "tarot") {
